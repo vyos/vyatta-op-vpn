@@ -1,0 +1,7 @@
+The Debian Package vyatta-op-vpn
+-------------------------------------
+
+This package has the CLI template for the vpn commands
+
+
+ -- Marat Nepomnyashy <marat@vyatta.com> Wed 02 Jan 2008

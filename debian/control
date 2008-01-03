@@ -1,0 +1,19 @@
+Source: vyatta-op-vpn
+Section: contrib/net
+Priority: extra
+Maintainer: Marat Nepomnyashy <marat@vyatta.com>
+Build-Depends: debhelper (>= 5), autotools-dev
+Standards-Version: 3.7.2
+
+Package: vyatta-op-vpn
+Architecture: all
+Depends: bash (>= 3.1),
+ vyatta-op,
+ vyatta-cfg-vpn
+Suggests: util-linux (>= 2.13-5),
+ net-tools,
+ ethtool,
+ ncurses-bin (>= 5.5-5),
+ ntpdate
+Description: Vyatta operational commands for VPN.
+ Vyatta operational commands for VPN.
