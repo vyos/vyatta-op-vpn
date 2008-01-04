@@ -31,8 +31,8 @@ command_proc_show_vpn_LDADD = -lsablot
 cpiop = find  . ! -regex '\(.*~\|.*\.bak\|.*\.swp\|.*\#.*\#\)' -print0 | \
 	cpio -0pd
 
-install-exec-hook:
-	mkdir -p $(DESTDIR)$(opdir)
-	cd templates; $(cpiop) $(DESTDIR)$(opdir)
+#install-exec-hook:
+#	mkdir -p $(DESTDIR)$(opdir)
+#	cd templates; $(cpiop) $(DESTDIR)$(opdir)
 
 
