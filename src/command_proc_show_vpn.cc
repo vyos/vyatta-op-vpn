@@ -128,6 +128,7 @@ CommandProcShowVPN::~CommandProcShowVPN()
   while (i != iEnd) {
     delete *i;
     *i = NULL;
+    i++;
   }
 }
 
