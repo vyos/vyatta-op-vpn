@@ -62,7 +62,7 @@ int main(int argc, char ** argv) {
 	}
 
 	if (xml_out.empty() == true) {
-		cout << "no xml  reason: " << reason << endl;
+		cout << reason << endl;
 		exit(0);
 	}
 
