@@ -144,7 +144,7 @@ CommandProcShowVPN::process(const string &cmd, bool debug, string &reason)
   FILE *f;
   StrProc proc_str(cmd, " ");
 
-  _xsl = XSLDIR "/" + proc_str.get(1);
+  _xsl = XSLDIR "/" + proc_str.get(0);
 
 
   _xml_out << "<opcommand name='vpn'><format type='row'>";
