@@ -1,2 +1,2 @@
 help: Generate local RSA key with default bits=2192 device=/dev/random
-run: /opt/vyatta/sbin/gen_local_rsa_key.pl 2192 /dev/random
+run: sudo /opt/vyatta/sbin/gen_local_rsa_key.pl 2192 /dev/random

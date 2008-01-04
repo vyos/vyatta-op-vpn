@@ -1,2 +1,2 @@
 help: Generate local RSA key with number of bits [16-4096]
-run: /opt/vyatta/sbin/gen_local_rsa_key.pl "$*" /dev/random
+run: sudo /opt/vyatta/sbin/gen_local_rsa_key.pl "$*" /dev/random

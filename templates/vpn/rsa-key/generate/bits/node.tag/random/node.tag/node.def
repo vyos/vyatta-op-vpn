@@ -1,2 +1,2 @@
 help: Generate local RSA key with number of bits and random device
-run: /opt/vyatta/sbin/gen_local_rsa_key.pl "$*" "$*" 
+run: sudo /opt/vyatta/sbin/gen_local_rsa_key.pl "$*" "$*" 
