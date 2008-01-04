@@ -1,0 +1,94 @@
+#!/usr/bin/perl -w
+#
+# Module: show_vpn.pl
+# 
+# **** License ****
+# Version: VPL 1.0
+# 
+# The contents of this file are subject to the Vyatta Public License
+# Version 1.0 ("License"); you may not use this file except in
+# compliance with the License. You may obtain a copy of the License at
+# http://www.vyatta.com/vpl
+# 
+# Software distributed under the License is distributed on an "AS IS"
+# basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See
+# the License for the specific language governing rights and limitations
+# under the License.
+# 
+# This code was originally developed by Vyatta, Inc.
+# Portions created by Vyatta are Copyright (C) 2006, 2007 Vyatta, Inc.
+# All Rights Reserved.
+# 
+# Author: Stig Thormodsrud
+# Date: 2007
+# Description: Utility to show various vpn values
+# 
+# **** End License ****
+# 
+
+use strict;
+use warnings;
+
+use lib "/opt/vyatta/share/perl5/";
+
+my $arg0 = $ARGV[0];
+if (!defined($arg0)) {
+    die "Please specify either 'secrets' or 'rsa-keys'.\n";
+}
+
+if ($arg0 eq 'secrets') {
+    my $secret_file = '/etc/ipsec.secrets';
+    unless ( -r $secret_file) {
+	die "No secrets file $secret_file\n";
+    }
+    open(DAT, $secret_file);
+    my @raw_data=<DAT>;
+    close(DAT);
+    print "Local IP          Peer IP           Secret\n";
+    print "--------          -------           ------\n";
+    foreach my $line (@raw_data) {
+	if ($line =~ /PSK/) {
+	    my ($lip, $pip, $secret) = $line =~ /^(\d+\.\d+\.\d+\.\d+)\s+(\d+\.\d+\.\d+\.\d+)\s+\:\s+PSK\s+(\"\w+\")/;
+	    printf "%-15s   %-15s   %s\n", $lip, $pip, $secret;
+	}
+    }
+    exit 0;
+}
+
+
+
+if ($arg0 eq 'rsa-keys') {
+    use VyattaVPNUtil;
+    my $key_file = VyattaVPNUtil::rsa_get_local_key_file();
+    unless ( -r $key_file) {
+        die "No key file $key_file found.\n";
+    }
+    my $pubkey = VyattaVPNUtil::rsa_get_local_pubkey($key_file);
+    if ($pubkey eq 0) {
+	die "No local pubkey found.\n";
+    }
+    print "\nLocal public key ($key_file):\n\n$pubkey\n\n";
+
+    use VyattaConfig;
+    my $vc = new VyattaConfig();
+    $vc->setLevel('vpn');
+
+    my @peers = $vc->listNodes('ipsec site-to-site peer');
+    foreach my $peer (@peers) {
+        my $mode = $vc->returnValue("ipsec site-to-site peer $peer authentication mode");
+        if ($mode eq 'rsa') {
+            my $rsa_key_name = $vc->returnValue("ipsec site-to-site peer $peer authentication rsa-key-name");
+            my $remote_key = $vc->returnValue("rsa-keys rsa-key-name $rsa_key_name rsa-key");
+            print "=" x 80, "\n";
+            print "Peer IP: $peer";
+            if (defined($rsa_key_name)) {
+                print "  ($rsa_key_name)";
+            }
+            print "\n\n";
+            if (defined($remote_key)) {
+                print "$remote_key\n";
+            }
+        }
+    }
+}
+

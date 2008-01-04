@@ -1,0 +1,2 @@
+help: Restart VPN
+run: sudo ipsec setup restart

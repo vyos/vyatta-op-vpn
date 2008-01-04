@@ -17,6 +17,7 @@ xsl_DATA	+= src/xsl/show_vpn_ipsec_status.xsl
 
 sbin_PROGRAMS	= command_proc_show_vpn
 
+sbin_SCRIPTS	= scripts/gen_local_rsa_key.pl scripts/show_vpn.pl
 
 command_proc_show_vpn_SOURCES = src/command_proc_base.hh
 command_proc_show_vpn_SOURCES += src/command_proc_show_vpn.cc

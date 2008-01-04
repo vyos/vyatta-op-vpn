@@ -1,0 +1,2 @@
+help: Show detailed VPN debugging information
+run: sudo ipsec barf

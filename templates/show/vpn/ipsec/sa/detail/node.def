@@ -1,0 +1,2 @@
+help: Show details of all active IPsec Security Associations (SA).
+run: /opt/vyatta/sbin/command_proc_show_vpn show_vpn_ipsec_sa.xsl --pname detail --pval y

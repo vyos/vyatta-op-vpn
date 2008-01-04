@@ -1,0 +1,2 @@
+help: Show VPN debugging information
+run: sudo ipsec auto --status
