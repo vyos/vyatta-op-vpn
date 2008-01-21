@@ -68,7 +68,7 @@
 <xsl:for-each select="opcommand/format/peer/setkey">
   <xsl:choose>
     <xsl:when test="string-length($conn) > 0">
-      <xsl:if test="contains(conn_name, $conn)">
+      <xsl:if test="$conn = conn_name">
         <xsl:call-template name="show_ipsec_sa">
           <xsl:with-param name="row" select="." />
         </xsl:call-template>
