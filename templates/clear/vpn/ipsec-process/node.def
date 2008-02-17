@@ -1,2 +1,6 @@
-help: Restart VPN
-run: sudo ipsec setup restart
+help: Restart VPN ipsec process
+run: if [ -f /etc/ipsec.conf ] && grep -q 'vyatta' /etc/ipsec.conf; then
+        sudo ipsec setup restart
+     else
+        echo VPN ipsec not configured
+     fi
