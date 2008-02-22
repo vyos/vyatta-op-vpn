@@ -1,2 +1,2 @@
 help: Show VPN debugging information
-run: sudo ipsec auto --status
+run: sudo /opt/vyatta/bin/sudo-users/vyatta-show-vpn-debug.pl

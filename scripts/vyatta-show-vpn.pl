@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# Module: show_vpn.pl
+# Module: vyatta_show_vpn.pl
 # 
 # **** License ****
 # Version: VPL 1.0

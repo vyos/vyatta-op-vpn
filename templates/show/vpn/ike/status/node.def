@@ -1,2 +1,2 @@
 help: Show summary information about the IKE process.
-run: sudo /opt/vyatta/sbin/command_proc_show_vpn show_vpn_ike_status.xsl
+run: sudo /opt/vyatta/bin/sudo-users/command_proc_show_vpn show_vpn_ike_status.xsl

@@ -1,2 +1,2 @@
 help: Show all currently active IKE Security Associations (SA) that are using NAT Traversal.
-run: sudo /opt/vyatta/sbin/command_proc_show_vpn show_vpn_ike_sa.xsl --pname nat --pval enabled
+run: sudo /opt/vyatta/bin/sudo-users/command_proc_show_vpn show_vpn_ike_sa.xsl --pname nat --pval enabled
