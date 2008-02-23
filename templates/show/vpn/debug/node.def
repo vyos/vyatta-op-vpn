@@ -1,2 +1,2 @@
 help: Show VPN debugging information
-run: sudo /opt/vyatta/bin/sudo-users/vyatta-show-vpn-debug.pl
+run: sudo /opt/vyatta/bin/sudo-users/vyatta-vpn-op.pl --op=show-vpn-debug

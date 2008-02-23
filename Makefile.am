@@ -17,7 +17,7 @@ xsl_DATA	+= src/xsl/show_vpn_ipsec_status.xsl
 
 bin_sudo_users_PROGRAMS	= command_proc_show_vpn
 
-bin_sudo_users_SCRIPTS	= scripts/gen_local_rsa_key.pl scripts/vyatta-show-vpn.pl scripts/vyatta-show-vpn-debug.pl
+bin_sudo_users_SCRIPTS	= scripts/gen_local_rsa_key.pl scripts/vyatta-show-vpn.pl scripts/vyatta-vpn-op.pl
 
 command_proc_show_vpn_SOURCES = src/command_proc_base.hh
 command_proc_show_vpn_SOURCES += src/command_proc_show_vpn.cc

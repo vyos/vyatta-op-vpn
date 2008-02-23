@@ -1,2 +1,2 @@
 help: Show detailed VPN debugging information
-run: sudo ipsec barf
+run: sudo /opt/vyatta/bin/sudo-users/vyatta-vpn-op.pl --op=show-vpn-debug-detail
