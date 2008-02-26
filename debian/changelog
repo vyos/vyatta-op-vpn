@@ -1,3 +1,25 @@
+vyatta-op-vpn (0.2) unstable; urgency=low
+
+  vc4.0.0
+  [ Mark O'Brien ]
+
+
+  [ Marat Nepomnyashy ]
+  * Moved execution of 'show vpn' commands to '/opt/vyatta/bin/sudo-
+    users' so that operator users can execute them.  Bug 2865 fix.
+  * Fixed-up operator commands 'clear vpn ipsec-process' and 'show vpn
+    debug detail' so that they no longer require sudo password.
+  * Initialize variable and check for invalid args.
+  * Call 'gen_local_rsa_key.pl' from '/opt/vyatta/bin/sudo-users/'
+    rather than '/opt/vyatta/sbin/'.  Bug 2883 fix.
+
+  [ Stig Thormodsrud ]
+  * Fix 2838 Clearing VPN process starts VPN, even if not configured
+
+  [ Mark O'Brien ]
+
+ -- Mark O'Brien <mobrien@vyatta.com>  Mon, 25 Feb 2008 17:39:21 -0800
+
 vyatta-op-vpn (0.1) unstable; urgency=low
 
   * Initial Release.
