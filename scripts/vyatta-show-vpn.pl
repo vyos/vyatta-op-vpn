@@ -73,12 +73,12 @@ if ($arg0 eq 'rsa-keys') {
     my $vc = new VyattaConfig();
     $vc->setLevel('vpn');
 
-    my @peers = $vc->listNodes('ipsec site-to-site peer');
+    my @peers = $vc->listOrigNodes('ipsec site-to-site peer');
     foreach my $peer (@peers) {
-        my $mode = $vc->returnValue("ipsec site-to-site peer $peer authentication mode");
+        my $mode = $vc->returnOrigValue("ipsec site-to-site peer $peer authentication mode");
         if ($mode eq 'rsa') {
-            my $rsa_key_name = $vc->returnValue("ipsec site-to-site peer $peer authentication rsa-key-name");
-            my $remote_key = $vc->returnValue("rsa-keys rsa-key-name $rsa_key_name rsa-key");
+            my $rsa_key_name = $vc->returnOrigValue("ipsec site-to-site peer $peer authentication rsa-key-name");
+            my $remote_key = $vc->returnOrigValue("rsa-keys rsa-key-name $rsa_key_name rsa-key");
             print "=" x 80, "\n";
             print "Peer IP: $peer";
             if (defined($rsa_key_name)) {
