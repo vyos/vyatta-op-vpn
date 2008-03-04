@@ -2,14 +2,15 @@ Source: vyatta-op-vpn
 Section: contrib/net
 Priority: extra
 Maintainer: Marat Nepomnyashy <marat@vyatta.com>
-Build-Depends: debhelper (>= 5), autotools-dev
+Build-Depends: debhelper (>= 5), autotools-dev, libsablot0-dev (>= 1.0.3-1)
 Standards-Version: 3.7.2
 
 Package: vyatta-op-vpn
 Architecture: all
 Depends: bash (>= 3.1),
  vyatta-op,
- vyatta-cfg-vpn
+ vyatta-cfg-vpn,
+ libsablot0 (>= 1.0.3-1)
 Suggests: util-linux (>= 2.13-5),
  net-tools,
  ethtool,
