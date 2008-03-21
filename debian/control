@@ -6,15 +6,17 @@ Build-Depends: debhelper (>= 5), autotools-dev, libsablot0-dev (>= 1.0.3-1)
 Standards-Version: 3.7.2
 
 Package: vyatta-op-vpn
-Architecture: all
+Architecture: i386
 Depends: bash (>= 3.1),
  vyatta-op,
  vyatta-cfg-vpn,
+ libc6,
+ openswan,
  libsablot0 (>= 1.0.3-1)
 Suggests: util-linux (>= 2.13-5),
  net-tools,
  ethtool,
  ncurses-bin (>= 5.5-5),
  ntpdate
-Description: Vyatta operational commands for VPN.
- Vyatta operational commands for VPN.
+Description: Vyatta operational commands for VPN
+ Vyatta commands to operate openswan VPN.
