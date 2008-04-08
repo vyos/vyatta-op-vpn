@@ -1,2 +1,2 @@
-help: Show the status of the IPsec process.
+help: Show status of IPsec process
 run: sudo /opt/vyatta/bin/sudo-users/command_proc_show_vpn show_vpn_ipsec_status.xsl

@@ -1,1 +1,1 @@
-help: Generate local RSA key with number of bits and random device
+help: Generate local RSA key with specified number of bits and random device

@@ -1,2 +1,2 @@
-help: Show all active IPsec Security Associations (SA).
+help: Show all active IPsec Security Associations (SA)
 run: sudo /opt/vyatta/bin/sudo-users/command_proc_show_vpn show_vpn_ipsec_sa.xsl
