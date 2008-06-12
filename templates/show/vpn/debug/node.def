@@ -1,5 +1,5 @@
 help: Show VPN debugging information
-run: if [ -d $VYATTA_ACTIVE_CONFIGURATION_DIR/vpn/ipsec/site-to-site/peer ] && [ -n `ls $VYATTA_ACTIVE_CONFIGURATION_DIR/vpn/ipsec/site-to-site/peer/` ] ; then
+run: if [ -d $VYATTA_ACTIVE_CONFIGURATION_DIR/vpn/ipsec/site-to-site/peer ] && [ -n "`ls $VYATTA_ACTIVE_CONFIGURATION_DIR/vpn/ipsec/site-to-site/peer/`" ] ; then
         sudo /opt/vyatta/bin/sudo-users/vyatta-vpn-op.pl --op=show-vpn-debug
      else
         echo VPN ipsec not configured
