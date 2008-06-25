@@ -27,6 +27,8 @@
 #include <list>
 #include <string>
 #include <dirent.h>
+#include <string.h>
+#include <stdlib.h>
 //#include "config.h"
 #include "rl_str_proc.hh"
 //#include <librl_common/rl_interface.hh>
@@ -41,7 +43,7 @@ int main(int argc, char ** argv) {
 	string request;
 	bool debug = false;
 	for (int i = 1; i < argc; ++i) {
-		if (strcmp(argv[i], "--debug") == 0) {
+		if (strcmp((const char *)argv[i], "--debug") == 0) {
 			debug = true;
 		} else {
 			request += string(argv[i]) + string(" ");
