@@ -45,7 +45,7 @@ if ($arg0 eq 'secrets') {
     print "--------          -------           ------\n";
     foreach my $line (@raw_data) {
 	if ($line =~ /PSK/) {
-	    my ($lip, $pip, $secret) = $line =~ /^(\d+\.\d+\.\d+\.\d+)\s+(\d+\.\d+\.\d+\.\d+)\s+\:\s+PSK\s+(\"\w+\")/;
+	    my ($lip, $pip, $secret) = $line =~ /^(\d+\.\d+\.\d+\.\d+)\s+(\d+\.\d+\.\d+\.\d+)\s+\:\s+PSK\s+(\"\S+\")/;
 	    printf "%-15s   %-15s   %s\n", $lip, $pip, $secret;
 	}
     }
