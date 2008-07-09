@@ -42,7 +42,7 @@
 
 <xsl:template match="/">
 <xsl:text>&newln;</xsl:text>
-<xsl:text>Peer IP         Dir SRC Network        DST Network        Bytes</xsl:text>
+<xsl:text>Peer            Dir SRC Network        DST Network        Bytes</xsl:text>
 <xsl:text>&newln;</xsl:text>
 <xsl:text>-------         --- -----------        -----------        -----</xsl:text>
 <xsl:text>&newln;</xsl:text>

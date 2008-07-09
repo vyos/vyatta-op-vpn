@@ -38,7 +38,7 @@
 
 <xsl:template match="/">
 <xsl:text>&newln;</xsl:text>
-<xsl:text>Local IP        Peer IP         Secret</xsl:text>
+<xsl:text>Local           Peer            Secret</xsl:text>
 <xsl:text>&newln;</xsl:text>
 <xsl:text>--------        -------         ------</xsl:text>
 <xsl:text>&newln;</xsl:text>

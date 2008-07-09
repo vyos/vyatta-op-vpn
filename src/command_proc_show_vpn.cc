@@ -560,11 +560,17 @@ CommandProcShowVPN::process_conf(bool debug)
 	  src = "0.0.0.0";
 	}
       }
+      else if (line.find("leftid=") != string::npos) {
+	src = line.substr(pos + 1, line.length() - pos - 2);
+      }
       else if (line.find("right=") != string::npos) {
 	dst=line.substr(pos+1,line.length()-pos-2);
 	if (dst == "%any") {
 	  dst = "0.0.0.0";
 	}
+      }
+      else if (line.find("rightid=") != string::npos) {
+	dst = line.substr(pos + 1, line.length() - pos - 2);
       }
       else if (line.find("rightsubnet=") != string::npos) {
 	rightnet=line.substr(pos+1,line.length()-pos-2);

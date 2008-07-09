@@ -41,11 +41,11 @@ if ($arg0 eq 'secrets') {
     open(DAT, $secret_file);
     my @raw_data=<DAT>;
     close(DAT);
-    print "Local IP          Peer IP           Secret\n";
+    print "Local             Peer              Secret\n";
     print "--------          -------           ------\n";
     foreach my $line (@raw_data) {
 	if ($line =~ /PSK/) {
-	    my ($lip, $pip, $secret) = $line =~ /^(\d+\.\d+\.\d+\.\d+)\s+(\d+\.\d+\.\d+\.\d+)\s+\:\s+PSK\s+(\"\w+\")/;
+	    my ($lip, $pip, $secret) = $line =~ /^(\S+)\s+(\S+)\s+\:\s+PSK\s+(\"\S+\")/;
 	    printf "%-15s   %-15s   %s\n", $lip, $pip, $secret;
 	}
     }
@@ -77,7 +77,7 @@ if ($arg0 eq 'rsa-keys') {
             my $rsa_key_name = $vc->returnOrigValue("ipsec site-to-site peer $peer authentication rsa-key-name");
             my $remote_key = $vc->returnOrigValue("rsa-keys rsa-key-name $rsa_key_name rsa-key");
             print "=" x 80, "\n";
-            print "Peer IP: $peer";
+            print "Peer: $peer";
             if (defined($rsa_key_name)) {
                 print "  ($rsa_key_name)";
             }

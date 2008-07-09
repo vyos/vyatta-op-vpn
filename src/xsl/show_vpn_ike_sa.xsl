@@ -47,7 +47,7 @@
 
 <xsl:template match="/">
   <xsl:text>&newln;</xsl:text>
-  <xsl:text>Local IP        Peer IP         State     Encrypt   Hash     NAT-T A-Time L-Time</xsl:text>
+  <xsl:text>Local           Peer            State     Encrypt   Hash     NAT-T A-Time L-Time</xsl:text>
   <xsl:text>&newln;</xsl:text>
   <xsl:text>--------        -------         -----     -------   ----     ----- ------ ------</xsl:text>
   <xsl:text>&newln;</xsl:text>

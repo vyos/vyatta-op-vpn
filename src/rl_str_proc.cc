@@ -25,6 +25,14 @@ StrProc::StrProc(const string &in_str, const string &token)
     pos += tabtospace.length();
   }
   
+  // convert & to &amp;
+  string amp = "&amp;";
+  pos = 0;
+  while ((pos = tmp.find("&", pos)) != string::npos) {
+    tmp.replace(pos, 1, amp);
+    pos += amp.length();
+  }
+  
   //remove the cr
   pos = tmp.find("\n");
   if (pos != string::npos) {

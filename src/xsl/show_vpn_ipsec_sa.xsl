@@ -59,7 +59,7 @@
 <xsl:text>&newln;</xsl:text>
 
 <xsl:if test="$detail != 'y'">
-  <xsl:text>Peer IP         Tunnel# Dir SPI      Encrypt    Hash       NAT-T A-Time L-Time</xsl:text>
+  <xsl:text>Peer            Tunnel# Dir SPI      Encrypt    Hash       NAT-T A-Time L-Time</xsl:text>
   <xsl:text>&newln;</xsl:text>
   <xsl:text>-------         ------- --- ---      -------    ----       ----- ------ ------</xsl:text>
   <xsl:text>&newln;</xsl:text>
@@ -107,7 +107,7 @@
 	</xsl:if>
         <xsl:text>Conn Name:            </xsl:text><xsl:value-of select="conn_name"/><xsl:text>&newln;</xsl:text>
 	<xsl:text>State:                </xsl:text><xsl:value-of select="../ike_state"/><xsl:text>&newln;</xsl:text>
-        <xsl:text>Peer IP:              </xsl:text><xsl:value-of select="../peer_ip"/><xsl:text>&newln;</xsl:text>
+        <xsl:text>Peer:                 </xsl:text><xsl:value-of select="../peer_ip"/><xsl:text>&newln;</xsl:text>
         <xsl:text>Direction:            </xsl:text><xsl:value-of select="dir"/><xsl:text>&newln;</xsl:text>
         <!--<xsl:text>Outbound interface: !!</xsl:text>  <xsl:text>&newln;</xsl:text>-->
         <xsl:text>Source Net:           </xsl:text><xsl:value-of select="left"/><xsl:text>&newln;</xsl:text>
