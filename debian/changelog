@@ -1,3 +1,23 @@
+vyatta-op-vpn (0.12) unstable; urgency=low
+
+	  3.1.2
+  [ Mark O'Brien ]
+
+
+  [ Stig Thormodsrud ]
+  * Fix permission on call to ipsec.
+
+  [ An-Cheng Huang ]
+  * partial fix for bugs 3044, 3047, 3048: minor show command output
+    header
+
+  [ Stig Thormodsrud ]
+  * Fix 3194: VPN: xml error in "show vpn ike" command output
+
+  [ Mark O'Brien ]
+
+ -- Mark O'Brien <mobrien@firebolt.vyatta.com>  Wed, 23 Jul 2008 21:36:08 -0700
+
 vyatta-op-vpn (0.11) unstable; urgency=low
 
 	  3.1.1
