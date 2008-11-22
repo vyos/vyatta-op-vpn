@@ -55,19 +55,19 @@ if ($arg0 eq 'secrets') {
 
 
 if ($arg0 eq 'rsa-keys') {
-    use VyattaVPNUtil;
-    my $key_file = VyattaVPNUtil::rsa_get_local_key_file();
+    use Vyatta::VPNUtil;
+    my $key_file = Vyatta::VPNUtil::rsa_get_local_key_file();
     unless ( -r $key_file) {
         die "No key file $key_file found.\n";
     }
-    my $pubkey = VyattaVPNUtil::rsa_get_local_pubkey($key_file);
+    my $pubkey = Vyatta::VPNUtil::rsa_get_local_pubkey($key_file);
     if ($pubkey eq 0) {
 	die "No local pubkey found.\n";
     }
     print "\nLocal public key ($key_file):\n\n$pubkey\n\n";
 
-    use VyattaConfig;
-    my $vc = new VyattaConfig();
+    use Vyatta::Config;
+    my $vc = new Vyatta::Config();
     $vc->setLevel('vpn');
 
     my @peers = $vc->listOrigNodes('ipsec site-to-site peer');
