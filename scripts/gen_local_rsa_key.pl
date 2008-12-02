@@ -24,10 +24,10 @@
 # 
 
 use strict;
-#use warnings;
+use warnings;
 use lib "/opt/vyatta/share/perl5/";
 
-use VyattaVPNUtil;
+use Vyatta::VPN::Util;
 
 
 # Defaults
@@ -62,7 +62,7 @@ unless (-r $device) {
     die "invalid random number device $device\n";
 }
 
-my $local_key_file = VyattaVPNUtil::rsa_get_local_key_file();
+my $local_key_file = rsa_get_local_key_file();
 
 my ($cmd, $rc);
 
@@ -95,18 +95,18 @@ $cmd = "/usr/sbin/ipsec newhostkey --output $local_key_file --bits $bits";
 $cmd .= " --random $device";
 
 print "Generating rsa-key to $local_key_file\n";
-VyattaVPNUtil::vpn_debug $cmd;
+vpn_debug $cmd;
 $rc = system($cmd);
 if ($rc != 0) {
     die "Can not generate RSA key: $!\n";
 }
 
-my $file_pubkey = VyattaVPNUtil::rsa_get_local_pubkey($local_key_file);
+my $file_pubkey = rsa_get_local_pubkey($local_key_file);
 if ($file_pubkey ne 0) {
     print "\nYour new local RSA key has been generated\n";
     print "The public portion of the key is:\n\n$file_pubkey\n\n";
     $cmd = "ipsec auto --rereadall 2> /dev/null";
-    VyattaVPNUtil::vpn_debug $cmd;
+    vpn_debug $cmd;
     system $cmd;
     exit 0;
 }
