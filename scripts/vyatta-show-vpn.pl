@@ -55,12 +55,12 @@ if ($arg0 eq 'secrets') {
 
 
 if ($arg0 eq 'rsa-keys') {
-    use Vyatta::VPNUtil;
-    my $key_file = Vyatta::VPNUtil::rsa_get_local_key_file();
+    use Vyatta::VPN::Util;
+    my $key_file = rsa_get_local_key_file();
     unless ( -r $key_file) {
         die "No key file $key_file found.\n";
     }
-    my $pubkey = Vyatta::VPNUtil::rsa_get_local_pubkey($key_file);
+    my $pubkey = rsa_get_local_pubkey($key_file);
     if ($pubkey eq 0) {
 	die "No local pubkey found.\n";
     }
