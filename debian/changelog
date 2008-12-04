@@ -1,3 +1,16 @@
+vyatta-op-vpn (0.13) unstable; urgency=low
+
+	  3.2.0
+  [ Mark O'Brien ]
+
+
+  [ An-Cheng Huang ]
+  * allow multi-arch build
+
+  [ Mark O'Brien ]
+
+ -- Mark O'Brien <mobrien@firebolt.vyatta.com>  Tue, 25 Nov 2008 19:10:05 -0800
+
 vyatta-op-vpn (0.12) unstable; urgency=low
 
 	  3.1.2
