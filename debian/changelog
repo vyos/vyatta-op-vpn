@@ -1,3 +1,23 @@
+vyatta-op-vpn (0.13.1) unstable; urgency=low
+
+  [ An-Cheng Huang ]
+  * add support for development build
+
+  [ Stephen Hemminger ]
+  * Convert to Vyatta::
+
+  [ Stig Thormodsrud ]
+  * "vpn rsa-key generate" command broken - use new perl hierarchy.
+
+  [ Stephen Hemminger ]
+  * Fix reference to Vyatta::VPNUtil
+
+  [ An-Cheng Huang ]
+  * update maintainer information
+  * "files" file should be removed before package build
+
+ -- An-Cheng Huang <ancheng@vyatta.com>  Thu, 08 Jan 2009 09:40:45 -0800
+
 vyatta-op-vpn (0.13) unstable; urgency=low
 
 	  3.2.0
