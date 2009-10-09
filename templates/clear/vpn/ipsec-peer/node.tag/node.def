@@ -1,0 +1,6 @@
+help: Clear all tunnels for given peer
+
+allowed: /opt/vyatta/bin/sudo-users/vyatta-vpn-op.pl --op=get-all-peers
+
+run:  /opt/vyatta/bin/sudo-users/vyatta-vpn-op.pl \
+      --op=clear-tunnels-for-peer --peer="$4"
