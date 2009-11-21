@@ -1,3 +1,9 @@
+vyatta-op-vpn (0.13.5) unstable; urgency=low
+
+  * vyatta-op-vpn depends on vyatta-ipsec provided by vyatta-strongswan
+
+ -- Mohit Mehta <mohit.mehta@vyatta.com>  Fri, 20 Nov 2009 17:53:29 -0800
+
 vyatta-op-vpn (0.13.4) unstable; urgency=low
 
   * use vyatta openswan
