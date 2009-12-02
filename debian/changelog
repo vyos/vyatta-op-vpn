@@ -1,3 +1,9 @@
+vyatta-op-vpn (0.13.7) unstable; urgency=low
+
+  * skip used tags
+
+ -- An-Cheng Huang <ancheng@vyatta.com>  Wed, 02 Dec 2009 10:46:17 -0800
+
 vyatta-op-vpn (0.13.4) unstable; urgency=low
 
   * use vyatta openswan
