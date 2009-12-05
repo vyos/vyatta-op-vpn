@@ -85,7 +85,7 @@ if (-r $local_key_file) {
     }
 }
 
-$cmd = "/usr/sbin/ipsec newhostkey --output $local_key_file --bits $bits";
+$cmd = "/usr/lib/ipsec/newhostkey --output $local_key_file --bits $bits";
 #
 # The default random number generator is /dev/random, but it will block 
 # if there isn't enough system activity to provide enough "good" random
