@@ -40,8 +40,8 @@
 <xsl:variable name="pluto_pid" select="opcommand/format/pluto_pid" />
 <xsl:choose>
 <xsl:when test="string($pluto_pid)">
-IPSec Process Running  PID: <xsl:value-of select="$pluto_pid" /><xsl:text>&newln;</xsl:text><xsl:text>&newln;</xsl:text>
-<xsl:value-of select="//opcommand/format/setup_status_tunnels" /> Active IPsec Tunnels<xsl:text>&newln;</xsl:text>
+IPSec Process Running  <xsl:text>&newln;</xsl:text><xsl:text>&newln;</xsl:text>
+PID: <xsl:value-of select="$pluto_pid" /><xsl:text>&newln;</xsl:text><xsl:text>&newln;</xsl:text>
 IPsec Interfaces:
 <xsl:for-each select="opcommand/format/auto_status_interface">
 <xsl:value-of select="$pad2"/>

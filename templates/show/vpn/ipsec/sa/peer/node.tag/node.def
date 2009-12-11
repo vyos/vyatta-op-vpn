@@ -1,2 +1,3 @@
 help: Show all active IPsec Security Associations (SA) for a specific peer
+allowed: /opt/vyatta/bin/sudo-users/vyatta-vpn-op.pl --op=get-all-peers
 run: sudo /opt/vyatta/bin/sudo-users/command_proc_show_vpn show_vpn_ipsec_sa.xsl --pname peer --pval "$6"

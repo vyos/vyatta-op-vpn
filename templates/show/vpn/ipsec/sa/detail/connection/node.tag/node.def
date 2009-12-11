@@ -2,4 +2,4 @@ help: Show detailed all active IPsec Security Associations (SA) for a specific c
 
 run: sudo /opt/vyatta/bin/sudo-users/command_proc_show_vpn show_vpn_ipsec_sa.xsl --pname detail --pval y --pname conn --pval "$7"
 
-allowed: sudo /usr/sbin/ipsec auto --status | grep '000 "peer-' | perl -p -e 's/^000 "([^"]*)":\s.*/\1/' | sort -u
+allowed: sudo /usr/sbin/ipsec status | grep '000 "peer-' | perl -p -e 's/^000 "([^"]*)":\s.*/\1/' | sort -u
