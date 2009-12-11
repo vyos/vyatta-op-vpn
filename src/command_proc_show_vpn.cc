@@ -158,7 +158,7 @@ CommandProcShowVPN::process(const string &cmd, bool debug, string &reason)
 //  ipsec spigrp
 //  ipsec spi status
 //  ipsec setup --status
-//  ipsec auto --status
+//  ipsec statusall
  
   ipsec_cmd = "cat /etc/ipsec.secrets";
   f = popen(ipsec_cmd.c_str(), "r");
@@ -172,7 +172,7 @@ CommandProcShowVPN::process(const string &cmd, bool debug, string &reason)
     }
   }
 
-  ipsec_cmd = "cat /var/run/pluto/pluto.pid 2>/dev/null";
+  ipsec_cmd = "cat /var/run/pluto.pid 2>/dev/null";
   f = popen(ipsec_cmd.c_str(), "r");
   if (f) {
     while(fgets(buf, 2047, f) != NULL) { 
@@ -187,7 +187,7 @@ CommandProcShowVPN::process(const string &cmd, bool debug, string &reason)
 
   process_conf(debug);
 
-  ipsec_cmd = "ipsec auto --status";
+  ipsec_cmd = "ipsec statusall";
   f = popen(ipsec_cmd.c_str(), "r");
   if (f) {
     while(fgets(buf, 2047, f) != NULL) { 
@@ -200,18 +200,6 @@ CommandProcShowVPN::process(const string &cmd, bool debug, string &reason)
   }
 
   convert_to_xml_setkey_d(debug);
-
-  ipsec_cmd = "ipsec setup --status";
-  f = popen(ipsec_cmd.c_str(), "r");
-  if (f) {
-    while(fgets(buf, 2047, f) != NULL) { 
-      string line(buf);
-      convert_to_xml_setup_status(line, debug);
-    } 
-    if (pclose(f) != 0) {
-      return string("");
-    }
-  }
 
   std::list<Peer*>::const_iterator i = _peers.begin();
   const std::list<Peer*>::const_iterator iEnd = _peers.end();
@@ -320,7 +308,7 @@ CommandProcShowVPN::convert_to_xml_secrets(const string &line, bool debug)
 
 /**
  *
-mercury:~# cat /var/run/pluto/pluto.pid
+mercury:~# cat /var/run/pluto.pid
 3688
  **/
 void 
@@ -616,33 +604,6 @@ CommandProcShowVPN::process_conf(bool debug)
 
 /**
  *
- >ipsec eroute
-[root@localhost etc]# ipsec setup --status
-IPsec running  - pluto pid: 31272
-pluto pid 31272
-No tunnels up
-
- **/
-void 
-CommandProcShowVPN::convert_to_xml_setup_status(const string &line, bool debug)
-{
-  if (debug) {
-    cout << "processing: convert_to_xml_setup_status" << endl;
-  }
-  StrProc proc_str(line, " ");
-  if (line.find("- pluto pid") != string::npos) {
-      _xml_out << "<setup_status_pid>" << proc_str.get(5) << "</setup_status_pid>";
-  }
-  else if (line.find("tunnels") != string::npos) {
-    _xml_out << "<setup_status_tunnels>" << proc_str.get(0) << "</setup_status_tunnels>";
-  }
-  return;
-}
-
-
-
-/**
- *
  *
  **/
 void 
@@ -695,7 +656,7 @@ CommandProcShowVPN::convert_to_xml_auto_status(const string &line, bool debug)
   if (p_tunnel == NULL) return;
 
   //now retrieve ike and esp encryption and hash
-  if (line.find(" algorithm newest:") != string::npos) { //look up encryption/hash
+  if (line.find(" proposal: ") != string::npos) { //look up encryption/hash
     //strip out the tunnel
 
     //  000 "peer-10.6.0.57-tunnel-1":   IKE algorithm newest: 3DES_CBC_192-MD5-MODP1536
@@ -704,9 +665,9 @@ CommandProcShowVPN::convert_to_xml_auto_status(const string &line, bool debug)
     //  need to parse lifetime from setup output
     //  000 "peer-10.6.0.57-tunnel-50":   ike_life: 3600s; ipsec_life: 28800s; rekey_margin: 540s; rekey_fuzz: 100%; keyingtries: 00
 
-    string eh = proc_str.get(5);
+    string eh = proc_str.get(4);
 
-    StrProc tmp(eh, "-");
+    StrProc tmp(eh, "/");
 
     //allowed e values: aes128, aes256, 3des
     //allowed h values: md5, sha1, sha2_256, sha2_384, sha2_512
@@ -733,26 +694,26 @@ CommandProcShowVPN::convert_to_xml_auto_status(const string &line, bool debug)
     } else if (h.find("_512") != string::npos) {
       h = "sha2_512";
     }
+    
+    if (m.find("1024") != string::npos) {
+    	m = "2";
+    } else if (m.find("1536") != string::npos) {
+    	m = "5";
+    } else if (m.find("Phase1") != string::npos) {
+    	m = "Phase1";
+    }
 
     //assign encryption and hash
     if (proc_str.get(2) == "IKE") {
       p_tunnel->getPeer()._ike_encrypt = e;
       p_tunnel->getPeer()._ike_hash = h;
+      p_tunnel->getPeer()._ike_dh = m;
     } else { //ESP
       p_tunnel->_esp_encrypt = e;
       p_tunnel->_esp_hash = h;
+      p_tunnel->_pfs_group = m;
     }
-
-    if (m == "MOD1024") {
-      p_tunnel->getPeer()._ike_dh = "2";
-    } else if (m == "MODP1536") {
-      p_tunnel->getPeer()._ike_dh = "5";
-    }
-
-    string pfsgroup_token = proc_str.get(6);
-    if (pfsgroup_token.length() > 11) {
-      p_tunnel->_pfs_group = pfsgroup_token.substr(10, pfsgroup_token.length() - 11);
-    }
+    
   } else if (line.find("ike_life:") != string::npos) {
     p_tunnel->getPeer()._ike_seconds_lifetime = atoi(proc_str.get(3).substr(0,proc_str.get(3).length()-1).c_str());
     p_tunnel->_keylife = atoi(proc_str.get(5).c_str());
@@ -803,7 +764,7 @@ CommandProcShowVPN::convert_to_xml_auto_status(const string &line, bool debug)
     //  000 #2: "peer-10.6.0.57-tunnel-1" esp.d54ce9b0@10.6.0.57 esp.225ad1e@10.6.0.55 tun.0@10.6.0.57 tun.0@10.6.0.55
     
     if (debug) {
-      cout << "ipsec auto --status: found esp: " << line << ", " << strTunnelName << endl;
+      cout << "ipsec statusall: found esp: " << line << ", " << strTunnelName << endl;
     }
     
     StrProc ps(line, "@");

@@ -1,2 +1,7 @@
 help: Show status of IPsec process
-run: sudo /opt/vyatta/bin/sudo-users/command_proc_show_vpn show_vpn_ipsec_status.xsl
+run:	sudo /opt/vyatta/bin/sudo-users/command_proc_show_vpn show_vpn_ipsec_status.xsl
+			if pgrep pluto >&/dev/null; then
+				active_tunnels=`ipsec status 2> /dev/null | grep -i "ipsec sa established" | wc -l | sed s/\ //g`
+				echo "$active_tunnels Active IPsec Tunnels"
+				echo
+			fi

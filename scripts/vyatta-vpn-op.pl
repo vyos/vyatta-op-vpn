@@ -62,13 +62,14 @@ if ($op eq '') {
 }
 
 if ($op eq 'clear-vpn-ipsec-process') {
-	system 'sudo /usr/sbin/ipsec restart';
+	print "Clearing IPsec process...\n";
+	system 'sudo /usr/sbin/ipsec restart >&/dev/null';
 
 } elsif ($op eq 'show-vpn-debug') {
-	system 'sudo /usr/sbin/ipsec status';
+	system 'sudo /usr/sbin/ipsec statusall';
 
 } elsif ($op eq 'show-vpn-debug-detail') {
-	system 'sudo /usr/sbin/ipsec statusall';
+	system 'sudo /usr/lib/ipsec/barf';
 
 } elsif ($op eq 'get-all-peers') {
   # get all site-to-site peers

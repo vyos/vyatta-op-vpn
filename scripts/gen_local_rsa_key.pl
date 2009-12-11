@@ -104,7 +104,7 @@ my $file_pubkey = rsa_get_local_pubkey($local_key_file);
 if ($file_pubkey ne 0) {
     print "\nYour new local RSA key has been generated\n";
     print "The public portion of the key is:\n\n$file_pubkey\n\n";
-    $cmd = "ipsec auto --rereadall 2> /dev/null";
+    $cmd = "ipsec rereadall 2> /dev/null";
     vpn_debug $cmd;
     system $cmd;
     exit 0;
