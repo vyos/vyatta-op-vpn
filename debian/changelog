@@ -1,3 +1,12 @@
+vyatta-op-vpn (0.13.8) unstable; urgency=low
+
+  * vyatta-op-vpn depends on vyatta-ipsec provided by vyatta-strongswan
+  * fix op-mode commands for migration to strongswan
+  * use correct path for ported newhostkey command
+  * fix show vpn commands to work with strongswan
+
+ -- Mohit Mehta <mohit.mehta@vyatta.com>  Tue, 12 Jan 2010 17:20:32 -0800
+
 vyatta-op-vpn (0.13.7) unstable; urgency=low
 
   * skip used tags
