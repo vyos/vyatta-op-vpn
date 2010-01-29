@@ -1,0 +1,2 @@
+help: Show IP routes for VPN remote-subnets
+run: ip route list table 220
