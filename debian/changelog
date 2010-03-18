@@ -1,3 +1,9 @@
+vyatta-op-vpn (0.13.12) unstable; urgency=low
+
+  * Part of fix for Bug 5067 to add PFS group support
+
+ -- Mohit Mehta <mohit.mehta@vyatta.com>  Thu, 18 Mar 2010 14:55:51 -0700
+
 vyatta-op-vpn (0.13.11) unstable; urgency=low
 
   * Fix Bug 5464 "show vpn ipsec status" returns no interface and active
