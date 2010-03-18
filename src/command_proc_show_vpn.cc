@@ -701,6 +701,8 @@ CommandProcShowVPN::convert_to_xml_auto_status(const string &line, bool debug)
     	m = "5";
     } else if (m.find("Phase1") != string::npos) {
     	m = "Phase1";
+    } else {
+	m = "Disabled";
     }
 
     //assign encryption and hash
