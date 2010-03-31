@@ -44,10 +44,14 @@ if ($arg0 eq 'secrets') {
     print "Local             Peer              Secret\n";
     print "--------          -------           ------\n";
     foreach my $line (@raw_data) {
-	if ($line =~ /PSK/) {
-	    my ($lip, $pip, $secret) = $line =~ /^(\S+)\s+(\S+)\s+\:\s+PSK\s+(\"\S+\")/;
-	    printf "%-15s   %-15s   %s\n", $lip, $pip, $secret;
-	}
+	    if ($line =~ /PSK/) {
+	      my ($lip, $pip, $secret) = ('', '', '');
+	      ($secret) = $line =~ /.*:\s+PSK\s+(\"\S+\")/;
+	      ($lip, $pip) = $line =~ /^(\S+)\s+(\S+)\s+\:\s+PSK\s+\"\S+\"/;
+	      $lip = '0.0.0.0' if ! defined $lip;
+	      $pip = '0.0.0.0' if ! defined $pip;
+	      printf "%-15s   %-15s   %s\n", $lip, $pip, $secret;
+	    }
     }
     exit 0;
 }

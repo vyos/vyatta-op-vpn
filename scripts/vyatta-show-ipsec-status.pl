@@ -72,7 +72,7 @@ sub relate_intfs_with_localips {
           }
         }
         if ($ip_found == 0) {
-          print "(no IP on interface used as local-ip for any VPN peer)";
+          print "(no IP on interface statically configured as local-ip for any VPN peer)";
         }
         print "\n";
       }
