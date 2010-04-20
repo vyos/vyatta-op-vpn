@@ -1,6 +1,11 @@
 help: Restart VPN ipsec process
-run: if [ -d $VYATTA_ACTIVE_CONFIGURATION_DIR/vpn/ipsec/site-to-site/peer ] && [ -n "`ls $VYATTA_ACTIVE_CONFIGURATION_DIR/vpn/ipsec/site-to-site/peer/`" ] ; then
-        /opt/vyatta/bin/sudo-users/vyatta-vpn-op.pl --op=clear-vpn-ipsec-process
+run: if [ -n "`ls $VYATTA_ACTIVE_CONFIGURATION_DIR/vpn/ipsec/ipsec-interfaces/interface 2>/dev/null`" ] ; then
+       if pgrep pluto > /dev/null
+       then
+	/opt/vyatta/bin/sudo-users/vyatta-vpn-op.pl --op=clear-vpn-ipsec-process
+       else
+         echo IPsec process not running
+       fi
      else
         echo VPN ipsec not configured
      fi
