@@ -1,3 +1,9 @@
+vyatta-op-vpn (0.13.9+kenwood5) unstable; urgency=low
+
+  * Part of fix for Bug 5067 to add PFS group support
+
+ -- Mohit Mehta <mohit.mehta@vyatta.com>  Wed, 12 May 2010 17:26:47 -0700
+
 vyatta-op-vpn (0.13.9+kenwood4) unstable; urgency=low
 
   * Fix Bug 5542
