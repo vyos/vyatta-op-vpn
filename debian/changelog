@@ -1,3 +1,9 @@
+vyatta-op-vpn (0.13.16+larkspur2) unstable; urgency=low
+
+  * fix incorrect types to work with 64-bit
+
+ -- An-Cheng Huang <ancheng@vyatta.com>  Tue, 27 Jul 2010 12:01:34 -0700
+
 vyatta-op-vpn (0.13.16+larkspur1) unstable; urgency=low
 
   * UNRELEASED
