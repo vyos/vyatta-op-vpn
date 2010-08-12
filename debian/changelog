@@ -1,3 +1,9 @@
+vyatta-op-vpn (0.13.19) unstable; urgency=low
+
+  * remove CLI backend env variables usage
+
+ -- An-Cheng Huang <ancheng@vyatta.com>  Wed, 11 Aug 2010 17:18:44 -0700
+
 vyatta-op-vpn (0.13.18) unstable; urgency=low
 
   * fix incorrect types to work with 64-bit
