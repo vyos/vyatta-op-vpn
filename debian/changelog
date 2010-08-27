@@ -1,3 +1,9 @@
+vyatta-op-vpn (0.13.20) unstable; urgency=low
+
+  * fix squeeze build issues
+
+ -- An-Cheng Huang <ancheng@vyatta.com>  Fri, 27 Aug 2010 16:02:21 -0700
+
 vyatta-op-vpn (0.13.19) unstable; urgency=low
 
   * remove CLI backend env variables usage
