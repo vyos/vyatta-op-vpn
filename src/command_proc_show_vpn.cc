@@ -23,6 +23,7 @@
  *    Copyright 2008, Vyatta, Inc.
  */
 
+#include <stdio.h>
 #include <iostream>
 #include <list>
 #include <string>

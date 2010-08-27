@@ -20,6 +20,7 @@ libtool
 /debian/vyatta-op-vpn
 /debian/vyatta-op-vpn.postinst
 /debian/vyatta-op-vpn.debhelper.log
+/debian/vyatta-op-vpn.substvars
 /INSTALL
 /Makefile.in
 /Makefile
