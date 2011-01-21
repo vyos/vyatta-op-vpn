@@ -41,16 +41,33 @@ if ($arg0 eq 'secrets') {
     open(DAT, $secret_file);
     my @raw_data=<DAT>;
     close(DAT);
-    print "Local             Peer              Secret\n";
-    print "--------          -------           ------\n";
+    print "Local           Peer            Local ID      Peer ID       Secret\n";
+    print "--------        -------         --------      -------       ------\n";
     foreach my $line (@raw_data) {
 	    if ($line =~ /PSK/) {
-	      my ($lip, $pip, $secret) = ('', '', '');
+	      my ($lip, $pip, $lid, $pid, $secret) = ('', '', 'N/A', 'N/A', '');
 	      ($secret) = $line =~ /.*:\s+PSK\s+(\"\S+\")/;
 	      ($lip, $pip) = $line =~ /^(\S+)\s+(\S+)\s+\:\s+PSK\s+\"\S+\"/;
+        # This processing with depend heavily on the way we write ipsec.secrets
+        # lines with 3 entries are tagged by the config module so that we can tell
+        # if the 3rd entry is a localid or peerid (left or right)
+        if (! defined($lip)){
+          if ($line =~ /^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+\:\s+PSK\s+\"\S+\"/){
+            $lip = $1;
+            $pip = $2;
+            $lid = $3;
+            $pid = $4;
+          } elsif ($line =~ /^(\S+)\s+(\S+)\s+(\S+)\s+\:\s+PSK\s+\"\S+\".*\#(.*)\#/){
+            $lip = $1;
+            $pip = $2;
+            if ($4 eq 'RIGHT'){
+              $pid = $3
+            } else {$lid = $3}
+          }
+        }
 	      $lip = '0.0.0.0' if ! defined $lip;
 	      $pip = '0.0.0.0' if ! defined $pip;
-	      printf "%-15s   %-15s   %s\n", $lip, $pip, $secret;
+	      printf "%-15s %-15s %-13s %-13s %s\n", $lip, $pip, substr($lid,0,12), substr($pid,0,12), $secret;
 	    }
     }
     exit 0;
