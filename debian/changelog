@@ -1,3 +1,9 @@
+vyatta-op-vpn (0.13.21+mendocino2) unstable; urgency=low
+
+  * Make adjustment so OP mode can deal with new secrets file format
+
+ -- John Southworth <john.southworth@vyatta.com>  Thu, 20 Jan 2011 19:12:36 -0600
+
 vyatta-op-vpn (0.13.21+mendocino1) unstable; urgency=low
 
   * new branch
