@@ -18,6 +18,7 @@ bin_sudo_users_PROGRAMS	= command_proc_show_vpn
 bin_sudo_users_SCRIPTS = scripts/gen_local_rsa_key.pl
 bin_sudo_users_SCRIPTS += scripts/vyatta-show-vpn.pl
 bin_sudo_users_SCRIPTS += scripts/vyatta-vpn-op.pl
+bin_sudo_users_SCRIPTS += scripts/vyatta-op-vpn.pl
 bin_sudo_users_SCRIPTS += scripts/vyatta-show-ipsec-status.pl
 
 command_proc_show_vpn_SOURCES = src/command_proc_base.hh
