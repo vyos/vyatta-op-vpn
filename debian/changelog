@@ -1,3 +1,10 @@
+vyatta-op-vpn (0.13.25) unstable; urgency=low
+
+  * Add new operational mode script, doesn't replace current programs
+    yet but included in package; Related to bugs: 5305 and 6228
+
+ -- John Southworth <john.southworth@vyatta.com>  Mon, 24 Jan 2011 11:10:20 -0600
+
 vyatta-op-vpn (0.13.24) unstable; urgency=low
 
   * Bugfix 2837: Change vpn rsa-key generate to generate vpn rsa-key to
