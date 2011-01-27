@@ -131,12 +131,31 @@ sub get_tunnel_info {
   for my $connectid ( keys %tunnel_hash) {
     (my $peer, my $tunid) = ($connectid =~ /peer-(.*)-tunnel-(.*)/);
     my $config = new Vyatta::Config;
+    my $peerip = $peer;
     $config->setLevel('vpn ipsec site-to-site');
     $tunnel_hash{$connectid}->{_leftid}  = $config->returnValue("peer $peer authentication id");
     $tunnel_hash{$connectid}->{_rightid} = $config->returnValue("peer $peer authentication remote-id");
     $tunnel_hash{$connectid}->{_leftip}  = $config->returnValue("peer $peer local-ip");
     $tunnel_hash{$connectid}->{_srcnet}  = $config->returnValue("peer $peer tunnel $tunid local-subnet");
     $tunnel_hash{$connectid}->{_dstnet}  = $config->returnValue("peer $peer tunnel $tunid remote-subnet");
+    if ($peerip =~ /\@.*/){
+      $peerip = "0.0.0.0";
+    } elsif ($peerip =~ /"any"/){
+      $peerip = "0.0.0.0";
+    }
+    my $cmd = "sudo setkey -D |";
+    open(SETKEY, $cmd);
+    my @setkey = [];
+    while(<SETKEY>){
+      push (@setkey, $_);
+    }
+    foreach my $line (@setkey){
+      if ($line =~ /$tunnel_hash{$connectid}->{_leftip}\[(.*?)\].*?$peerip\[(.*?)\]/){
+        $tunnel_hash{$connectid}->{_natt} = 1;
+        $tunnel_hash{$connectid}->{_natsrc} = $1;
+        $tunnel_hash{$connectid}->{_natdst} = $2;
+      }
+    }
   }
   for my $peer ( keys %tunnel_hash ) {
     for my $key ( keys %{$tunnel_hash{$peer}} ) {
