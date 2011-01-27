@@ -22,14 +22,16 @@
 #
 # **** End License ****
 #
+use lib "/opt/vyatta/share/perl5";
 use Data::Dumper;
+use Vyatta::Config;
 use Getopt::Long;
 
 use strict;
 
 my $statusall = $ARGV[0];
 sub get_tunnel_info {
-  my $cmd = "cat $statusall |";
+  my $cmd = "sudo ipsec statusall |";
   open(IPSECSTATUS, $cmd);
   my @ipsecstatus = [];
   while(<IPSECSTATUS>){
@@ -89,74 +91,6 @@ sub get_tunnel_info {
         $tunnel_hash{$connectid}->{_ikehash} = $2;
         $tunnel_hash{$connectid}->{_dhgrp} = $3;
       }
-      elsif ($line =~ /:.(.*?)===(.*?)\.\.\.(.*?)===(.*?);/){
-        $tunnel_hash{$connectid}->{_srcnet} = $1;
-        $tunnel_hash{$connectid}->{_dstnet} = $4;
-        my $leftid = $2;
-        my $rightid = $3;
-        if ($leftid =~ /(.*?)\[(.*?)\]/){
-          my $leftip = $1;
-          my $leftid = $2;
-          if ($leftip =~ /(.*):4500/){
-            $leftip =~ $1;
-            $tunnel_hash{$connectid}->{_natt} = 1;
-            $tunnel_hash{$connectid}->{_natsrc} = "4500";
-          }
-          $tunnel_hash{$connectid}->{_leftip} = $leftip;
-          $tunnel_hash{$connectid}->{_leftid} = $leftid;
-        } elsif ($leftid =~ /(.*):4500/){
-          $tunnel_hash{$connectid}->{_leftip} = $1;
-          $tunnel_hash{$connectid}->{_leftid} = $1;
-          $tunnel_hash{$connectid}->{_natt} = 1;
-          $tunnel_hash{$connectid}->{_natsrc} = "4500";
-        } else {
-          $tunnel_hash{$connectid}->{_leftip} = $leftid;
-          $tunnel_hash{$connectid}->{_leftid} = $leftid;
-        }
-        if ($rightid =~ /(.*?)\[(.*?)\]/){
-          my $rightip = $1;
-          my $rightid = $2;
-          if ($rightip =~ /(.*):4500/){
-            $rightip =~ $1;
-            $tunnel_hash{$connectid}->{_natt} = 1;
-            $tunnel_hash{$connectid}->{_natdst} = "4500";
-          }
-          $tunnel_hash{$connectid}->{_rightip} = $rightip;
-          $tunnel_hash{$connectid}->{_rightid} = $rightid;
-        } elsif ($rightid =~ /(.*):4500/){
-          $tunnel_hash{$connectid}->{_rightip} = $1;
-          $tunnel_hash{$connectid}->{_rightid} = $1;
-          $tunnel_hash{$connectid}->{_natt} = 1;
-          $tunnel_hash{$connectid}->{_natdst} = "4500";
-        } else {
-          $tunnel_hash{$connectid}->{_rightip} = $rightid;
-          $tunnel_hash{$connectid}->{_rightid} = $rightid;
-        }
-
-      } 
-      elsif ($line =~ /:.(.*)---(.*)\.\.\.(.*?);/){
-        #$tunnel_hash{$connectid}->{_natt} = 1;
-        my $natleft = $1;
-        my $natright = $3;
-        if ($natleft =~ /(.*):(.*?)\[(.*)\]/){
-          if ($1 =~ /(.*?)===(.*?)/){
-            $tunnel_hash{$connectid}->{_srcnet} = $1;
-            $tunnel_hash{$connectid}->{_leftip} = $2;
-          } else {
-            $tunnel_hash{$connectid}->{_leftip} = $1;
-          }
-          $tunnel_hash{$connectid}->{_leftid} = $3;
-          $tunnel_hash{$connectid}->{_natsrc} = $2;
-          $tunnel_hash{$connectid}->{_natt} = 1;
-        }
-        if ($natright =~ /(.*):(.*?)\[(.*)\]===(.*)/){
-          $tunnel_hash{$connectid}->{_righip} = $1;
-          $tunnel_hash{$connectid}->{_natdst} = $2;
-          $tunnel_hash{$connectid}->{_dstnet} = $4;
-          $tunnel_hash{$connectid}->{_rightid} = $3;
-          $tunnel_hash{$connectid}->{_natt} = 1;
-        }
-      }
       elsif ($line =~ /newest ISAKMP SA: (.*); newest IPsec SA: (.*);/){
         $tunnel_hash{$connectid}->{_newestike} = $1;
         $tunnel_hash{$connectid}->{_newestspi} = $2;
@@ -193,6 +127,16 @@ sub get_tunnel_info {
         }
       }
     }
+  }
+  for my $connectid ( keys %tunnel_hash) {
+    (my $peer, my $tunid) = ($connectid =~ /peer-(.*)-tunnel-(.*)/);
+    my $config = new Vyatta::Config;
+    $config->setLevel('vpn ipsec site-to-site');
+    $tunnel_hash{$connectid}->{_leftid}  = $config->returnValue("peer $peer authentication id");
+    $tunnel_hash{$connectid}->{_rightid} = $config->returnValue("peer $peer authentication remote-id");
+    $tunnel_hash{$connectid}->{_leftip}  = $config->returnValue("peer $peer local-ip");
+    $tunnel_hash{$connectid}->{_srcnet}  = $config->returnValue("peer $peer tunnel $tunid local-subnet");
+    $tunnel_hash{$connectid}->{_dstnet}  = $config->returnValue("peer $peer tunnel $tunid remote-subnet");
   }
   for my $peer ( keys %tunnel_hash ) {
     for my $key ( keys %{$tunnel_hash{$peer}} ) {
@@ -363,7 +307,7 @@ Peer            Tunnel# Dir SPI       Encrypt   Hash      NAT-T A-Time L-Time
 EOH
     for my $peer ( keys %tunnel_hash){
       my $peerid = "";
-      if (defined($tunnel_hash{$peer}->{_rightid})){
+      if ($tunnel_hash{$peer}->{_rightid} ne "N/A"){
         $peerid = $tunnel_hash{$peer}->{_rightid};
       } else {
         $peerid = $tunnel_hash{$peer}->{_peerid};
@@ -372,8 +316,8 @@ EOH
       my $io =  "in";
       my $inspi = $tunnel_hash{$peer}->{_inspi};
       my $outspi = $tunnel_hash{$peer}->{_outspi};
-      my $enc = "";
-      my $hash = "";
+      my $enc = "N/A";
+      my $hash = "N/A";
       my $natt = "";
       if ($tunnel_hash{$peer}->{_encryption} =~ /(.*?)_.*?_(.*)/){
         $enc = lc($1).$2;
@@ -404,13 +348,13 @@ sub display_ipsec_sa_detail
     for my $peer ( keys %tunnel_hash){
       print "----------\n";
       my $peerid = "";
-      if (defined($tunnel_hash{$peer}->{_rightid})){
+      if ($tunnel_hash{$peer}->{_rightid} ne "N/A"){
         $peerid = $tunnel_hash{$peer}->{_rightid};
       } else {
         $peerid = $tunnel_hash{$peer}->{_peerid};
       }
-      my $enc = "";
-      my $hash = "";
+      my $enc = "N/A";
+      my $hash = "N/A";
       my $natt = "";
       if ($tunnel_hash{$peer}->{_encryption} =~ /(.*?)_.*?_(.*)/){
         $enc = lc($1).$2;
@@ -520,7 +464,7 @@ EOH
       my $inbytes = "";
       my $outbytes = "";
       my $io = "in";
-      if (defined($tunnel_hash{$peer}->{_rightid})){
+      if ($tunnel_hash{$peer}->{_rightid} ne "N/A"){
         $peerid = $tunnel_hash{$peer}->{_rightid};
       } else {
         $peerid = $tunnel_hash{$peer}->{_peerid};
@@ -548,12 +492,12 @@ EOH
     for my $peer ( keys %tunnel_hash){
       my $peerid = "";
       my $myid = "";
-      if (defined($tunnel_hash{$peer}->{_rightid})){
+      if ($tunnel_hash{$peer}->{_rightid} ne "N/A"){
         $peerid = $tunnel_hash{$peer}->{_rightid};
       } else {
         $peerid = $tunnel_hash{$peer}->{_peerid};
       }
-      if (defined($tunnel_hash{$peer}->{_leftid})){
+      if ($tunnel_hash{$peer}->{_leftid} ne "N/A"){
         $myid = $tunnel_hash{$peer}->{_leftid};
       } else {
         $myid = $tunnel_hash{$peer}->{_leftip};
@@ -562,8 +506,8 @@ EOH
       my $inspi = $tunnel_hash{$peer}->{_inspi};
       my $outspi = $tunnel_hash{$peer}->{_outspi};
       my $state = $tunnel_hash{$peer}->{_state};
-      my $enc = "";
-      my $hash = "";
+      my $enc = "N/A";
+      my $hash = "N/A";
       my $natt = "";
       if ($tunnel_hash{$peer}->{_ikeencrypt} =~ /(.*?)_.*?_(.*)/){
         $enc = lc($1).$2;
