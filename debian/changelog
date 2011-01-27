@@ -1,3 +1,10 @@
+vyatta-op-vpn (0.13.26) unstable; urgency=low
+
+  * Work on new IPsec operational mode script. Still needs a way to
+    detect NAT-T
+
+ -- John Southworth <john.southworth@vyatta.com>  Thu, 27 Jan 2011 17:23:03 -0600
+
 vyatta-op-vpn (0.13.25) unstable; urgency=low
 
   * Add new operational mode script, doesn't replace current programs
