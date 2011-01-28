@@ -22,13 +22,15 @@
 #
 # **** End License ****
 #
-use lib "/opt/vyatta/share/perl5";
-use Vyatta::Config;
 use Getopt::Long;
 
 use strict;
 
-my $statusall = $ARGV[0];
+sub process_shell_api {
+  my $path = pop(@_);
+  my $output =  `cli-shell-api returnActiveValue $path`;
+  return $output;
+}
 sub get_tunnel_info {
   my $cmd = "sudo ipsec statusall |";
   open(IPSECSTATUS, $cmd);
@@ -130,14 +132,17 @@ sub get_tunnel_info {
   for my $connectid ( keys %tunnel_hash) {
     # Get the static information from the Vyatta Configuration
     (my $peer, my $tunid) = ($connectid =~ /peer-(.*)-tunnel-(.*)/);
-    my $config = new Vyatta::Config;
     my $peerip = $peer;
-    $config->setLevel('vpn ipsec site-to-site');
-    $tunnel_hash{$connectid}->{_leftid}  = $config->returnValue("peer $peer authentication id");
-    $tunnel_hash{$connectid}->{_rightid} = $config->returnValue("peer $peer authentication remote-id");
-    $tunnel_hash{$connectid}->{_leftip}  = $config->returnValue("peer $peer local-ip");
-    $tunnel_hash{$connectid}->{_srcnet}  = $config->returnValue("peer $peer tunnel $tunid local-subnet");
-    $tunnel_hash{$connectid}->{_dstnet}  = $config->returnValue("peer $peer tunnel $tunid remote-subnet");
+    $tunnel_hash{$connectid}->{_leftid}  = process_shell_api(
+        "vpn ipsec site-to-site peer $peer authentication id");
+    $tunnel_hash{$connectid}->{_rightid} = process_shell_api(
+        "vpn ipsec site-to-site peer $peer authentication remote-id");
+    $tunnel_hash{$connectid}->{_leftip}  = process_shell_api(
+        "vpn ipsec site-to-site peer $peer local-ip");
+    $tunnel_hash{$connectid}->{_srcnet}  = process_shell_api(
+        "vpn ipsec site-to-site peer $peer tunnel $tunid local-subnet");
+    $tunnel_hash{$connectid}->{_dstnet}  = process_shell_api(
+        "vpn ipsec site-to-site peer $peer tunnel $tunid remote-subnet");
     if ($peerip =~ /\@.*/){
       $peerip = "0.0.0.0";
     } elsif ($peerip =~ /"any"/){
