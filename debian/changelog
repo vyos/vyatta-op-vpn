@@ -1,3 +1,10 @@
+vyatta-op-vpn (0.13.30) unstable; urgency=low
+
+  * Work on new IPsec operational mode script. Fixed script to work when
+    not in configure mode
+
+ -- John Southworth <john.southworth@vyatta.com>  Fri, 28 Jan 2011 11:42:21 -0600
+
 vyatta-op-vpn (0.13.29) unstable; urgency=low
 
   * Work on new IPsec operational mode script. setkey is deprecated so
