@@ -36,12 +36,6 @@ sub get_tunnel_info {
   while(<IPSECSTATUS>){
     push (@ipsecstatus, $_);
   }
-  my $cmd = "sudo setkey -D |";
-  open(SETKEY, $cmd);
-  my @setkey = [];
-  while(<SETKEY>){
-    push (@setkey, $_);
-  }
   my %tunnel_hash = ();
   foreach my $line (@ipsecstatus) {
     if (($line =~ /\"(peer-.*-tunnel-.*?)\"/)){
@@ -150,27 +144,22 @@ sub get_tunnel_info {
       $peerip = "0.0.0.0";
     }
 
-    # Detect if we are using NAT-T, and get the port numbers if we are
-    my $natsrc = undef;
-    my $natdst = undef;
-    foreach my $line (@setkey){
-      if ($line =~ /$tunnel_hash{$connectid}->{_leftip}\[(.*?)\].*?$peerip\[(.*?)\]/){
-        $natsrc = $1;
-        $natdst = $2;
-        next;
-      }
-      if ($line =~ /spi=.*?\((.*?)\)/){
-        if (hex($tunnel_hash{$connectid}->{_outspi}) eq hex($1)){
-          if (defined($natsrc)){
-            $tunnel_hash{$connectid}->{_natt} = 1;
-            $tunnel_hash{$connectid}->{_natsrc} = $natsrc;
-            $tunnel_hash{$connectid}->{_natdst} = $natdst;
-            last;
-          } 
-        } else {
-	        $natsrc = undef;
-	        $natdst = undef;
-        } 
+    # Detect NAT
+    my $cmd = "sudo ip xfrm state get "
+             ."src $tunnel_hash{$connectid}->{_leftip} "
+             ."dst $peerip "
+             ."proto esp "
+             ."spi 0x$tunnel_hash{$connectid}->{_outspi} |";
+    open(XFRM, $cmd);
+    my @xfrm = [];
+    while(<XFRM>){
+      push (@xfrm, $_);
+    }
+    for my $line (@xfrm){
+      if ($line =~ /type espinudp sport (.*?) dport (.*?) addr/){
+        $tunnel_hash{$connectid}->{_natt} = 1;
+        $tunnel_hash{$connectid}->{_natsrc} = $1;
+        $tunnel_hash{$connectid}->{_natdst} = $2;
       }
     }
   }
