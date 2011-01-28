@@ -1,3 +1,10 @@
+vyatta-op-vpn (0.13.29) unstable; urgency=low
+
+  * Work on new IPsec operational mode script. setkey is deprecated so
+    switched NAT-T detection to 'ip xfrm'
+
+ -- John Southworth <john.southworth@vyatta.com>  Thu, 27 Jan 2011 20:03:01 -0600
+
 vyatta-op-vpn (0.13.28) unstable; urgency=low
 
   * Work on new IPsec operational mode script. Made processing of NAT-T
