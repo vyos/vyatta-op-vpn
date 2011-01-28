@@ -160,7 +160,6 @@ sub get_tunnel_info {
       }
       if ($line =~ /spi=.*?\((.*?)\)/){
         if (hex($tunnel_hash{$connectid}->{_outspi}) eq hex($1)){
-          print "$natsrc \n";
           if (defined($natsrc)){
             $tunnel_hash{$connectid}->{_natt} = 1;
             $tunnel_hash{$connectid}->{_natsrc} = $natsrc;
@@ -187,14 +186,8 @@ sub get_tunnel_info {
 sub get_peers_for_cli
 {
     my %tunnel_hash = get_tunnel_info();
-    my %tmphash = ();
-    my $peerid = pop(@_);
     for my $peer ( keys %tunnel_hash ) {
-      for my $key ( keys %{$tunnel_hash{$peer}} ) {
-        if ($key eq "_rightid"){
-          print %{$tunnel_hash{$peer}}->{$key}."\n"
-        }
-      }
+      print %{$tunnel_hash{$peer}}->{_rightid}."\n"
     }
 }
 
