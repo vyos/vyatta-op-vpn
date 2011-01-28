@@ -1,3 +1,10 @@
+vyatta-op-vpn (0.13.28) unstable; urgency=low
+
+  * Work on new IPsec operational mode script. Made processing of NAT-T
+    information more efficient
+
+ -- John Southworth <john.southworth@vyatta.com>  Thu, 27 Jan 2011 19:22:48 -0600
+
 vyatta-op-vpn (0.13.27) unstable; urgency=low
 
   * Work on new IPsec operational mode script. Initial NAT-T detection
