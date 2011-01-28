@@ -23,7 +23,6 @@
 # **** End License ****
 #
 use lib "/opt/vyatta/share/perl5";
-use Data::Dumper;
 use Vyatta::Config;
 use Getopt::Long;
 
@@ -129,6 +128,7 @@ sub get_tunnel_info {
     }
   }
   for my $connectid ( keys %tunnel_hash) {
+    # Get the static information from the Vyatta Configuration
     (my $peer, my $tunid) = ($connectid =~ /peer-(.*)-tunnel-(.*)/);
     my $config = new Vyatta::Config;
     my $peerip = $peer;
@@ -143,20 +143,37 @@ sub get_tunnel_info {
     } elsif ($peerip =~ /"any"/){
       $peerip = "0.0.0.0";
     }
+
+    # Detect if we are using NAT-T, and get the port numbers if we are
     my $cmd = "sudo setkey -D |";
     open(SETKEY, $cmd);
     my @setkey = [];
     while(<SETKEY>){
       push (@setkey, $_);
     }
+    my $natsrc = undef;
+    my $natdst = undef;
     foreach my $line (@setkey){
       if ($line =~ /$tunnel_hash{$connectid}->{_leftip}\[(.*?)\].*?$peerip\[(.*?)\]/){
-        $tunnel_hash{$connectid}->{_natt} = 1;
-        $tunnel_hash{$connectid}->{_natsrc} = $1;
-        $tunnel_hash{$connectid}->{_natdst} = $2;
+        $natsrc = $1;
+        $natdst = $2;
+      }
+      if ($line =~ /spi=.*?\((.*?)\)/){
+        if (hex($tunnel_hash{$connectid}->{_outspi}) eq hex($1)){
+          print "$natsrc \n";
+          if (defined($natsrc)){
+            $tunnel_hash{$connectid}->{_natt} = 1;
+            $tunnel_hash{$connectid}->{_natsrc} = $natsrc;
+            $tunnel_hash{$connectid}->{_natdst} = $natdst;
+          } 
+        } else {
+	        $natsrc = undef;
+	        $natdst = undef;
+        } 
       }
     }
   }
+  # Set undefined vars to "N/A" so the display will be nice
   for my $peer ( keys %tunnel_hash ) {
     for my $key ( keys %{$tunnel_hash{$peer}} ) {
       if (!defined %{$tunnel_hash{$peer}}->{$key}){
@@ -166,7 +183,6 @@ sub get_tunnel_info {
   }
   return %tunnel_hash;
 }
-#print Dumper \%tunnel_hash;
 
 sub get_peers_for_cli
 {
