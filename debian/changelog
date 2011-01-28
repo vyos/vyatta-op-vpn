@@ -1,3 +1,10 @@
+vyatta-op-vpn (0.13.32) unstable; urgency=low
+
+  * Work on new IPsec operational mode script. Integrated with the
+    vyatta-cli
+
+ -- John Southworth <john.southworth@vyatta.com>  Fri, 28 Jan 2011 13:59:08 -0600
+
 vyatta-op-vpn (0.13.31) unstable; urgency=low
 
   * Work on new IPsec operational mode script. Fixed some output bugs
