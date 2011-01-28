@@ -113,10 +113,10 @@ sub get_tunnel_info {
       if (defined($spi)){
         if ($line =~ /$spi:.*esp.(.*)\@.*\((.*bytes).*esp.(.*)\@.*\((.*bytes)/)
         {
-          $tunnel_hash{$connectid}->{_inspi} = $1;
-          $tunnel_hash{$connectid}->{_inbytes} = $2;
-          $tunnel_hash{$connectid}->{_outspi} = $3;
-          $tunnel_hash{$connectid}->{_outbytes} = $4;
+          $tunnel_hash{$connectid}->{_outspi} = $1;
+          $tunnel_hash{$connectid}->{_outbytes} = $2;
+          $tunnel_hash{$connectid}->{_inspi} = $3;
+          $tunnel_hash{$connectid}->{_inbytes} = $4;
         }
         if ($line =~ /$spi:.*?EVENT_SA_REPLACE in (.*?)s;/){
           $tunnel_hash{$connectid}->{_expire} = $1;
