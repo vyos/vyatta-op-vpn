@@ -29,6 +29,8 @@ use strict;
 sub process_shell_api {
   my $path = pop(@_);
   my $output =  `cli-shell-api returnActiveValue $path`;
+  return undef
+    if $output == "";
   return $output;
 }
 sub get_tunnel_info {
@@ -62,6 +64,7 @@ sub get_tunnel_info {
                   _pfsgrp      => undef,
                   _ikeencrypt  => undef,
                   _ikehash     => undef,
+		  _ikestate    => "down",
                   _dhgrp       => undef,
                   _state       => "down",
                   _inbytes     => undef,
@@ -87,10 +90,8 @@ sub get_tunnel_info {
           $tunnel_hash{$connectid}->{_pfsgrp} = $tunnel_hash{$connectid}->{_dhgrp};
         }
       }
-      elsif ($line =~ /IKE.proposal:(.*)\/(.*)\/(.*)/){
-        $tunnel_hash{$connectid}->{_ikeencrypt} = $1;
-        $tunnel_hash{$connectid}->{_ikehash} = $2;
-        $tunnel_hash{$connectid}->{_dhgrp} = $3;
+      elsif ($line =~ /STATE_MAIN_I1/){
+        $tunnel_hash{$connectid}->{_ikestate} = "init";
       }
       elsif ($line =~ /newest ISAKMP SA: (.*); newest IPsec SA: (.*);/){
         $tunnel_hash{$connectid}->{_newestike} = $1;
@@ -106,7 +107,7 @@ sub get_tunnel_info {
           $tunnel_hash{$connectid}->{_ikeexpire} = $1;
           my $atime = $tunnel_hash{$connectid}->{_ikelife} - $tunnel_hash{$connectid}->{_ikeexpire};
           if ($atime >= 0){
-            $tunnel_hash{$connectid}->{_state} = "up";
+            $tunnel_hash{$connectid}->{_ikestate} = "up";
           }
         }
       }
@@ -154,7 +155,7 @@ sub get_tunnel_info {
              ."src $tunnel_hash{$connectid}->{_leftip} "
              ."dst $peerip "
              ."proto esp "
-             ."spi 0x$tunnel_hash{$connectid}->{_outspi} |";
+             ."spi 0x$tunnel_hash{$connectid}->{_outspi} 2>/dev/null |";
     open(XFRM, $cmd);
     my @xfrm = [];
     while(<XFRM>){
@@ -358,6 +359,7 @@ EOH
       my $lifetime = $tunnel_hash{$peer}->{_lifetime};
       my $expire = $tunnel_hash{$peer}->{_expire};
       my $atime = $lifetime - $expire;
+      $atime = 0 if ($atime == $lifetime);
       printf "%-15s %-7s %-3s %-9s %-9s %-9s %-5s %-6s %-6s\n",
               substr($peerid,0,14), $tunnum, $io, $inspi, $enc, $hash, $natt, $atime, $lifetime;
       $io = "out";
@@ -433,6 +435,7 @@ sub display_ipsec_sa_detail
       my $lifetime = $tunnel_hash{$peer}->{_lifetime};
       my $expire = $tunnel_hash{$peer}->{_expire};
       my $atime = $lifetime - $expire;
+      $atime = 0 if ($atime == $lifetime);
 
       print "Conn Name:\t\t$peer\n";
       print "State:\t\t\t$tunnel_hash{$peer}->{_state}\n";
@@ -529,7 +532,7 @@ EOH
       my $io =  "in";
       my $inspi = $tunnel_hash{$peer}->{_inspi};
       my $outspi = $tunnel_hash{$peer}->{_outspi};
-      my $state = $tunnel_hash{$peer}->{_state};
+      my $state = $tunnel_hash{$peer}->{_ikestate};
       my $enc = "N/A";
       my $hash = "N/A";
       my $natt = "";
@@ -548,6 +551,8 @@ EOH
       my $lifetime = $tunnel_hash{$peer}->{_ikelife};
       my $expire = $tunnel_hash{$peer}->{_ikeexpire};
       my $atime = $lifetime - $expire;
+      $atime = 0 if ($atime == $lifetime);
+
       printf "%-15s %-15s %-9s %-9s %-8s %-5s %-6s %-6s\n",
               substr($myid,0,14), substr($peerid,0,14), $state, $enc, $hash, $natt, $atime, $lifetime;
 
