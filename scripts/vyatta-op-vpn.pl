@@ -36,6 +36,12 @@ sub get_tunnel_info {
   while(<IPSECSTATUS>){
     push (@ipsecstatus, $_);
   }
+  my $cmd = "sudo setkey -D |";
+  open(SETKEY, $cmd);
+  my @setkey = [];
+  while(<SETKEY>){
+    push (@setkey, $_);
+  }
   my %tunnel_hash = ();
   foreach my $line (@ipsecstatus) {
     if (($line =~ /\"(peer-.*-tunnel-.*?)\"/)){
@@ -145,18 +151,13 @@ sub get_tunnel_info {
     }
 
     # Detect if we are using NAT-T, and get the port numbers if we are
-    my $cmd = "sudo setkey -D |";
-    open(SETKEY, $cmd);
-    my @setkey = [];
-    while(<SETKEY>){
-      push (@setkey, $_);
-    }
     my $natsrc = undef;
     my $natdst = undef;
     foreach my $line (@setkey){
       if ($line =~ /$tunnel_hash{$connectid}->{_leftip}\[(.*?)\].*?$peerip\[(.*?)\]/){
         $natsrc = $1;
         $natdst = $2;
+        next;
       }
       if ($line =~ /spi=.*?\((.*?)\)/){
         if (hex($tunnel_hash{$connectid}->{_outspi}) eq hex($1)){
@@ -164,6 +165,7 @@ sub get_tunnel_info {
             $tunnel_hash{$connectid}->{_natt} = 1;
             $tunnel_hash{$connectid}->{_natsrc} = $natsrc;
             $tunnel_hash{$connectid}->{_natdst} = $natdst;
+            last;
           } 
         } else {
 	        $natsrc = undef;
