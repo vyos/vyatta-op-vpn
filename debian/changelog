@@ -1,3 +1,10 @@
+vyatta-op-vpn (0.13.36) unstable; urgency=low
+
+  * Work on new IPsec operational mode script. Fix some syntax; make
+    show based on peer better; Add show ike secrets
+
+ -- John Southworth <john.southworth@vyatta.com>  Mon, 31 Jan 2011 13:02:09 -0600
+
 vyatta-op-vpn (0.13.35) unstable; urgency=low
 
   * Work on new IPsec operational mode script. Integrate with more CLI
