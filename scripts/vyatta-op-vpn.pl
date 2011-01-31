@@ -23,6 +23,7 @@
 # **** End License ****
 #
 use Getopt::Long;
+use Data::Dumper;
 
 use strict;
 
@@ -30,7 +31,7 @@ sub process_shell_api {
   my $path = pop(@_);
   my $output =  `cli-shell-api returnActiveValue $path`;
   return undef
-    if $output == "";
+    if $output eq "";
   return $output;
 }
 sub get_tunnel_info {
@@ -178,6 +179,7 @@ sub get_tunnel_info {
       }
     }
   }
+  #print Dumper \%tunnel_hash;
   return %tunnel_hash;
 }
 
@@ -331,12 +333,12 @@ sub display_ipsec_sa_brief
     my $peerid = undef;
     for my $connectid (keys %th){  
       if ($th{$connectid}->{_rightid} ne "n/a"){
-        $peerid = $th{$connectid}->{_rightid};
+        $peerid = "$th{$connectid}->{_rightid}";
       } else {
         $peerid = $th{$connectid}->{_peerid};
       }
       if ($th{$connectid}->{_leftid} ne "n/a"){
-        $myid = $th{$connectid}->{_leftid};
+        $myid = "$th{$connectid}->{_leftid}";
       } else {
         $myid = $th{$connectid}->{_leftip};
       }
@@ -360,7 +362,7 @@ sub display_ipsec_sa_brief
     }
     for my $connid (keys %tunhash){
     print <<EOH;
-Peer ID                                 Local ID                         
+Peer ID / IP                            Local ID / IP               
 --------------------------------------- ----------------------------------------
 EOH
       (my $peerid, my $myid) = $connid =~ /(.*?)-(.*)/;
@@ -372,7 +374,7 @@ EOH
 EOH
       for my $tunnel (@{$tunhash{$connid}}){
         (my $tunnum, my $state, my $inspi, my $outspi, 
-         my $enc, my $hash, my $natt, my $life, my $expire) = @{$tunnel};
+	 my $enc, my $hash, my $natt, my $life, my $expire) = @{$tunnel};
         my $encp = "n/a";
         my $hashp = "n/a";
         my $nattp = "";
@@ -390,57 +392,13 @@ EOH
         }
         my $atime = $life - $expire;
         $atime = 0 if ($atime == $life);
-        printf "    %-7s %-6s %-9s %-9s %-8s %-5s %-6s %-7s %-7s\n",
-	      $tunnum, $state, $inspi, $outspi, $encp, $hashp, $nattp, $atime, $life;
+	printf "    %-7s %-6s %-9s %-9s %-8s %-5s %-6s %-7s %-7s\n",
+	$tunnum, $state, $inspi, $outspi, $encp, $hashp, $nattp, $atime, $life;
       }
       print <<EOH;
 --------------------------------------------------------------------------------
 
 EOH
-    }
-}
-sub display_ipsec_sa_brief_old
-{
-    my %tunnel_hash = %{pop(@_)};
-    print <<EOH;
-Peer            Tunnel# Dir SPI       Encrypt   Hash      NAT-T A-Time L-Time
--------         ------- --- --------  -------   ----      ----- ------ ------
-EOH
-    for my $peer ( keys %tunnel_hash){
-      my $peerid = "";
-      if ($tunnel_hash{$peer}->{_rightid} ne "n/a"){
-        $peerid = $tunnel_hash{$peer}->{_rightid};
-      } else {
-        $peerid = $tunnel_hash{$peer}->{_peerid};
-      }
-      my $tunnum = $tunnel_hash{$peer}->{_tunnelnum};
-      my $io =  "in";
-      my $inspi = $tunnel_hash{$peer}->{_inspi};
-      my $outspi = $tunnel_hash{$peer}->{_outspi};
-      my $enc = "n/a";
-      my $hash = "n/a";
-      my $natt = "";
-      if ($tunnel_hash{$peer}->{_encryption} =~ /(.*?)_.*?_(.*)/){
-        $enc = lc($1).$2;
-        $enc =~ s/^ //g;
-      }
-      if ($tunnel_hash{$peer}->{_hash} =~ /.*_(.*)/){
-        $hash = lc($1);
-      }
-      if ($tunnel_hash{$peer}->{_natt} == 0){
-        $natt = "no";
-      } else {
-        $natt = "yes";
-      }
-      my $lifetime = $tunnel_hash{$peer}->{_lifetime};
-      my $expire = $tunnel_hash{$peer}->{_expire};
-      my $atime = $lifetime - $expire;
-      $atime = 0 if ($atime == $lifetime);
-      printf "%-15s %-7s %-3s %-9s %-9s %-9s %-5s %-6s %-6s\n",
-              substr($peerid,0,14), $tunnum, $io, $inspi, $enc, $hash, $natt, $atime, $lifetime;
-      $io = "out";
-      printf "%-15s %-7s %-3s %-9s %-9s %-9s %-5s %-6s %-6s\n",
-              substr($peerid,0,14), $tunnum, $io, $outspi, $enc, $hash, $natt, $atime, $lifetime;
     }
 }
 
@@ -515,38 +473,23 @@ sub display_ipsec_sa_detail
 
       print "Conn Name:\t\t$peer\n";
       print "State:\t\t\t$tunnel_hash{$peer}->{_state}\n";
-      print "Peer:\t\t\t$peerid\n";
-      print "Direction:\t\tin\n";
-      print "Source Net:\t\t$tunnel_hash{$peer}->{_dstnet}\n";
-      print "Dest Net:\t\t$tunnel_hash{$peer}->{_srcnet}\n";
-      print "SPI:\t\t\t$tunnel_hash{$peer}->{_inspi}\n";
+      print "Peer IP:\t\t$tunnel_hash{$peer}->{_rightip}\n";
+      print "Peer ID:\t\t$tunnel_hash{$peer}->{_rightid}\n";
+      print "Local IP:\t\t$tunnel_hash{$peer}->{_leftip}\n";
+      print "Local ID:\t\t$tunnel_hash{$peer}->{_leftid}\n";
+      print "Local Net:\t\t$tunnel_hash{$peer}->{_srcnet}\n";
+      print "Remote Net:\t\t$tunnel_hash{$peer}->{_dstnet}\n";
+      print "Inbound SPI:\t\t$tunnel_hash{$peer}->{_inspi}\n";
+      print "Outbound SPI:\t\t$tunnel_hash{$peer}->{_outspi}\n";
       print "Encryption:\t\t$enc\n";
       print "Hash:\t\t\t$hash\n";
       print "PFS Group:\t\t$pfs_group\n";
       print "DH Group:\t\t$dh_group\n";
       print "NAT Traversal:\t\t$natt\n";
       print "NAT Source Port:\t$tunnel_hash{$peer}->{_natsrc}\n";
-      print "Nat Dest Port:\t\t$tunnel_hash{$peer}->{_natdst}\n";
-      print "Bytes:\t\t\t$tunnel_hash{$peer}->{_inbytes}\n";
-      print "Active Time (s):\t$atime\n";
-      print "Lifetime (s):\t\t$tunnel_hash{$peer}->{_lifetime}\n";
-      print "\n";
-
-      print "Conn Name:\t\t$peer\n";
-      print "State:\t\t\t$tunnel_hash{$peer}->{_state}\n";
-      print "Peer:\t\t\t$peerid\n";
-      print "Direction:\t\tout\n";
-      print "Source Net:\t\t$tunnel_hash{$peer}->{_srcnet}\n";
-      print "Dest Net:\t\t$tunnel_hash{$peer}->{_dstnet}\n";
-      print "SPI:\t\t\t$tunnel_hash{$peer}->{_outspi}\n";
-      print "Encryption:\t\t$enc\n";
-      print "Hash:\t\t\t$hash\n";
-      print "PFS Group:\t\t$pfs_group\n";
-      print "DH Group:\t\t$dh_group\n";
-      print "NAT Traversal:\t\t$natt\n";
-      print "NAT Source Port:\t$tunnel_hash{$peer}->{_natsrc}\n";
-      print "Nat Dest Port:\t\t$tunnel_hash{$peer}->{_natdst}\n";
-      print "Bytes:\t\t\t$tunnel_hash{$peer}->{_outbytes}\n";
+      print "NAT Dest Port:\t\t$tunnel_hash{$peer}->{_natdst}\n";
+      print "Inbound Bytes:\t\t$tunnel_hash{$peer}->{_inbytes}\n";
+      print "Outbound Bytes:\t\t$tunnel_hash{$peer}->{_outbytes}\n";
       print "Active Time (s):\t$atime\n";
       print "Lifetime (s):\t\t$tunnel_hash{$peer}->{_lifetime}\n";
       print "\n";
@@ -555,85 +498,137 @@ sub display_ipsec_sa_detail
 
 sub display_ipsec_sa_stats
 {
-    print <<EOH;
-Peer            Dir SRC Network        DST Network        Bytes
--------         --- -----------        -----------        -----
-EOH
-    my %tunnel_hash = %{pop(@_)};
-    for my $peer ( keys %tunnel_hash){
-      my $peerid = "";
-      my $srcnet = "";
-      my $dstnet = "";
-      my $inbytes = "";
-      my $outbytes = "";
-      my $io = "in";
-      if ($tunnel_hash{$peer}->{_rightid} ne "n/a"){
-        $peerid = $tunnel_hash{$peer}->{_rightid};
+    my %th = %{pop(@_)};
+    my $listref = [];
+    my %tunhash = ();
+    my $myid = undef;
+    my $peerid = undef;
+    for my $connectid (keys %th){  
+      if ($th{$connectid}->{_rightid} ne "n/a"){
+        $peerid = "$th{$connectid}->{_rightid}";
       } else {
-        $peerid = $tunnel_hash{$peer}->{_peerid};
+        $peerid = $th{$connectid}->{_peerid};
       }
-      $srcnet = $tunnel_hash{$peer}->{_srcnet};
-      $dstnet = $tunnel_hash{$peer}->{_dstnet};
-      $inbytes = $tunnel_hash{$peer}->{_inbytes};
-      $outbytes = $tunnel_hash{$peer}->{_outbytes};
+      if ($th{$connectid}->{_leftid} ne "n/a"){
+        $myid = "$th{$connectid}->{_leftid}";
+      } else {
+        $myid = $th{$connectid}->{_leftip};
+      }
 
-      printf "%-15s %-3s %-18s %-18s %-5s\n",
-            substr($peerid,0,14), $io, $dstnet, $srcnet, $inbytes;
-      $io = "out";
-      printf "%-15s %-3s %-18s %-18s %-5s\n",
-            substr($peerid,0,14), $io, $srcnet, $dstnet, $outbytes;
-  }
+      my $tunnel = "$peerid-$myid";
+      
+      if (not exists $tunhash{$tunnel}) {
+        $tunhash{$tunnel}=[];
+      }
+        my @tmp = ( $th{$connectid}->{_tunnelnum},
+               $th{$connectid}->{_srcnet},
+               $th{$connectid}->{_dstnet},
+               $th{$connectid}->{_inbytes},
+               $th{$connectid}->{_outbytes} );
+        push (@{$tunhash{$tunnel}}, [ @tmp ]);
+      
+    }
+    for my $connid (keys %tunhash){
+    print <<EOH;
+Peer ID / IP                            Local ID / IP               
+--------------------------------------- ----------------------------------------
+EOH
+      (my $peerid, my $myid) = $connid =~ /(.*?)-(.*)/;
+      printf "%-39s %-39s\n", $peerid, $myid;
+      print <<EOH;
+--------------------------------------- ----------------------------------------
+  Tunnel Dir Source Network               Destination Network          Bytes
+  ------ --- ---------------------------- ---------------------------- ---------
+EOH
+      for my $tunnel (@{$tunhash{$connid}}){
+        (my $tunnum, my $srcnet, my $dstnet, 
+         my $inbytes, my $outbytes) = @{$tunnel};
+        printf "  %-6s %-3s %-28s %-28s %-8s\n",
+	      $tunnum, 'in', $dstnet, $srcnet, $inbytes;
+        printf "  %-6s %-3s %-28s %-28s %-8s\n",
+	      $tunnum, 'out', $srcnet, $dstnet, $outbytes;
+      }
+      print <<EOH;
+--------------------------------------------------------------------------------
+
+EOH
+    }
 }
 
-sub display_ike_sa_brief
-{
-    my %tunnel_hash = %{pop(@_)};
-    print <<EOH;
-Local           Peer            State     Encrypt   Hash     NAT-T A-Time L-Time
---------        -------         -----     -------   ----     ----- ------ ------
-EOH
-    for my $peer ( keys %tunnel_hash){
-      my $peerid = "";
-      my $myid = "";
-      if ($tunnel_hash{$peer}->{_rightid} ne "n/a"){
-        $peerid = $tunnel_hash{$peer}->{_rightid};
+sub display_ike_sa_brief {
+    my %th = %{pop(@_)};
+    my $listref = [];
+    my %tunhash = ();
+    my $myid = undef;
+    my $peerid = undef;
+    for my $connectid (keys %th){  
+      if ($th{$connectid}->{_rightid} ne "n/a"){
+        $peerid = "$th{$connectid}->{_rightid}";
       } else {
-        $peerid = $tunnel_hash{$peer}->{_peerid};
+        $peerid = $th{$connectid}->{_peerid};
       }
-      if ($tunnel_hash{$peer}->{_leftid} ne "n/a"){
-        $myid = $tunnel_hash{$peer}->{_leftid};
+      if ($th{$connectid}->{_leftid} ne "n/a"){
+        $myid = "$th{$connectid}->{_leftid}";
       } else {
-        $myid = $tunnel_hash{$peer}->{_leftip};
+        $myid = $th{$connectid}->{_leftip};
       }
-      my $io =  "in";
-      my $inspi = $tunnel_hash{$peer}->{_inspi};
-      my $outspi = $tunnel_hash{$peer}->{_outspi};
-      my $state = $tunnel_hash{$peer}->{_ikestate};
-      my $enc = "n/a";
-      my $hash = "n/a";
-      my $natt = "";
-      if ($tunnel_hash{$peer}->{_ikeencrypt} =~ /(.*?)_.*?_(.*)/){
-        $enc = lc($1).$2;
-        $enc =~ s/^ //g;
-      }
-      if ($tunnel_hash{$peer}->{_ikehash} =~ /.*_(.*)/){
-        $hash = lc($1);
-      }
-      if ($tunnel_hash{$peer}->{_natt} == 0){
-        $natt = "no";
-      } else {
-        $natt = "yes";
-      }
-      my $lifetime = $tunnel_hash{$peer}->{_ikelife};
-      my $expire = $tunnel_hash{$peer}->{_ikeexpire};
-      my $atime = $lifetime - $expire;
-      $atime = 0 if ($atime == $lifetime);
 
-      printf "%-15s %-15s %-9s %-9s %-8s %-5s %-6s %-6s\n",
-              substr($myid,0,14), substr($peerid,0,14), $state, $enc, $hash, $natt, $atime, $lifetime;
-
+      my $tunnel = "$peerid-$myid";
+      
+      if (not exists $tunhash{$tunnel}) {
+        $tunhash{$tunnel}=[];
+      }
+        my @tmp = ( $th{$connectid}->{_tunnelnum},
+               $th{$connectid}->{_ikestate},
+               $th{$connectid}->{_newestike},
+               $th{$connectid}->{_ikeencrypt},
+               $th{$connectid}->{_ikehash},
+               $th{$connectid}->{_natt},
+               $th{$connectid}->{_lifetime},
+               $th{$connectid}->{_expire} );
+        push (@{$tunhash{$tunnel}}, [ @tmp ]);
+      
     }
+    for my $connid (keys %tunhash){
+    print <<EOH;
+Peer ID / IP                            Local ID / IP               
+--------------------------------------- ----------------------------------------
+EOH
+      (my $peerid, my $myid) = $connid =~ /(.*?)-(.*)/;
+      printf "%-39s %-39s\n", $peerid, $myid;
+      print <<EOH;
+--------------------------------------- ----------------------------------------
+    Tunnel  State  ISAKMP#  Encrypt  Hash  NAT-T  A-Time  L-Time
+    ------  -----  -------  -------  ----  -----  ------  ------
+EOH
+      for my $tunnel (@{$tunhash{$connid}}){
+        (my $tunnum, my $state, my $isakmpnum, my $enc, 
+         my $hash, my $natt, my $life, my $expire) = @{$tunnel};
+        my $encp = "n/a";
+        my $hashp = "n/a";
+        my $nattp = "";
+        if ($enc =~ /(.*?)_.*?_(.*)/){
+          $encp = lc($1).$2;
+          $encp =~ s/^ //g;
+        }
+        if ($hash =~ /.*_(.*)/){
+          $hashp = lc($1);
+        }
+        if ($natt == 0){
+          $nattp = "no";
+        } else {
+          $nattp = "yes";
+        }
+        my $atime = $life - $expire;
+        $atime = 0 if ($atime == $life);
+	printf "    %-7s %-6s %-8s %-8s %-5s %-6s %-7s %-7s\n",
+	$tunnum, $state, $isakmpnum, $encp, $hashp, $nattp, $atime, $life;
+      }
+      print <<EOH;
+--------------------------------------------------------------------------------
 
+EOH
+    }
 }
 
 ## CLI options get processed here
