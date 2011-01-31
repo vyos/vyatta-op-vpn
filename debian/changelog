@@ -1,3 +1,10 @@
+vyatta-op-vpn (0.13.37) unstable; urgency=low
+
+  * Work on new IPsec operational mode script. Rework to reduce the
+    amount of redundant information in 'show vpn ipsec sa detail'
+
+ -- John Southworth <john.southworth@vyatta.com>  Mon, 31 Jan 2011 14:31:26 -0600
+
 vyatta-op-vpn (0.13.36) unstable; urgency=low
 
   * Work on new IPsec operational mode script. Fix some syntax; make
