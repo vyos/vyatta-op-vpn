@@ -1,0 +1,3 @@
+help: Show stats for all active IPsec Security Associations (SA) for a connection
+allowed: /opt/vyatta/bin/sudo-users/vyatta-op-vpn.pl --get-conn-for-cli
+run: sudo /opt/vyatta/bin/sudo-users/vyatta-op-vpn.pl --show-ipsec-sa-stats-conn="$7"

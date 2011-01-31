@@ -187,7 +187,15 @@ sub get_peers_for_cli
 {
     my %tunnel_hash = get_tunnel_info();
     for my $peer ( keys %tunnel_hash ) {
-      print %{$tunnel_hash{$peer}}->{_rightid}."\n"
+      print %{$tunnel_hash{$peer}}->{_rightid}."\n";
+    }
+}
+
+sub get_conn_for_cli
+{
+    my %tunnel_hash = get_tunnel_info();
+    for my $peer ( keys %tunnel_hash ) {
+      print "$peer\n";
     }
 }
 
@@ -219,6 +227,7 @@ sub show_ipsec_sa_peer
     display_ipsec_sa_brief(\%tmphash);
 
 }
+
 sub show_ipsec_sa_stats_peer
 {
     my %tunnel_hash = get_tunnel_info();
@@ -237,6 +246,19 @@ sub show_ipsec_sa_stats_peer
 
 }
 
+sub show_ipsec_sa_stats_conn
+{
+    my %tunnel_hash = get_tunnel_info();
+    my %tmphash = ();
+    my $peerid = pop(@_);
+    for my $peer ( keys %tunnel_hash ) {
+          if ($peer eq $peerid){
+             $tmphash{$peer} = \%{$tunnel_hash{$peer}};
+          }
+    }
+    display_ipsec_sa_stats(\%tmphash);
+}
+
 sub show_ipsec_sa_peer_detail
 {
     my %tunnel_hash = get_tunnel_info();
@@ -250,6 +272,20 @@ sub show_ipsec_sa_peer_detail
           }
         }
       }
+    }
+    display_ipsec_sa_detail(\%tmphash);
+
+}
+
+sub show_ipsec_sa_conn_detail
+{
+    my %tunnel_hash = get_tunnel_info();
+    my %tmphash = ();
+    my $peerid = pop(@_);
+    for my $peer ( keys %tunnel_hash ) {
+          if ($peer eq $peerid){
+             $tmphash{$peer} = \%{$tunnel_hash{$peer}};
+          }
     }
     display_ipsec_sa_detail(\%tmphash);
 
@@ -632,16 +668,19 @@ EOH
 }
 
 ## CLI options get processed here
-my ($get_peers_for_cli, $show_ipsec_sa, $show_ipsec_sa_detail, , $show_ipsec_sa_peer, $show_ipsec_sa_peer_detail, $show_ipsec_sa_natt, $show_ipsec_sa_stats, $show_ipsec_sa_stats_peer, $show_ike_sa, $show_ike_sa_peer, $show_ike_sa_natt, $show_ike_secrets);
+my ($get_peers_for_cli, $get_conn_for_cli, $show_ipsec_sa, $show_ipsec_sa_detail, , $show_ipsec_sa_peer, $show_ipsec_sa_peer_detail, $show_ipsec_sa_natt, $show_ipsec_sa_stats, $show_ipsec_sa_stats_peer, $show_ike_sa, $show_ike_sa_peer, $show_ike_sa_natt, $show_ike_secrets, $show_ipsec_sa_conn_detail, $show_ipsec_sa_stats_conn);
 
 GetOptions("show-ipsec-sa!"             => \$show_ipsec_sa,
            "show-ipsec-sa-detail!"      => \$show_ipsec_sa_detail,
            "get-peers-for-cli!"         => \$get_peers_for_cli,
+           "get-conn-for-cli!"         => \$get_conn_for_cli,
            "show-ipsec-sa-peer=s"        => \$show_ipsec_sa_peer,
            "show-ipsec-sa-peer-detail=s" => \$show_ipsec_sa_peer_detail,
            "show-ipsec-sa-natt!"        => \$show_ipsec_sa_natt,
            "show-ipsec-sa-stats!"       => \$show_ipsec_sa_stats,
            "show-ipsec-sa-stats-peer=s" => \$show_ipsec_sa_stats_peer,
+           "show-ipsec-sa-stats-conn=s" => \$show_ipsec_sa_stats_conn,
+           "show-ipsec-sa-conn-detail=s"=> \$show_ipsec_sa_conn_detail,
            "show-ike-sa!"               => \$show_ike_sa,
            "show-ike-sa-peer=s"          => \$show_ike_sa_peer,
            "show-ike-sa-natt!"          => \$show_ike_sa_natt,
@@ -649,6 +688,9 @@ GetOptions("show-ipsec-sa!"             => \$show_ipsec_sa,
 
 if (defined $get_peers_for_cli) {
   get_peers_for_cli;
+}
+if (defined $get_conn_for_cli) {
+  get_conn_for_cli;
 }
 if (defined $show_ipsec_sa) {
   show_ipsec_sa;
@@ -662,6 +704,9 @@ if (defined $show_ipsec_sa_peer) {
 if (defined $show_ipsec_sa_peer_detail) {
   show_ipsec_sa_peer_detail($show_ipsec_sa_peer_detail);
 }
+if (defined $show_ipsec_sa_conn_detail) {
+  show_ipsec_sa_conn_detail($show_ipsec_sa_conn_detail);
+}
 if (defined $show_ipsec_sa_natt) {
   show_ipsec_sa_natt;
 }
@@ -670,6 +715,9 @@ if (defined $show_ipsec_sa_stats) {
 }
 if (defined $show_ipsec_sa_stats_peer) {
   show_ipsec_sa_stats_peer($show_ipsec_sa_stats_peer);
+}
+if (defined $show_ipsec_sa_stats_conn) {
+  show_ipsec_sa_stats_conn($show_ipsec_sa_stats_conn);
 }
 if (defined $show_ike_sa) {
   show_ike_sa;

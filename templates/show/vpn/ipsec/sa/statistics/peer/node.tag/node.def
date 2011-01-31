@@ -1,0 +1,3 @@
+help: Show stats for all active IPsec Security Associations (SA) for a peer
+allowed: /opt/vyatta/bin/sudo-users/vyatta-op-vpn.pl --get-peers-for-cli
+run: sudo /opt/vyatta/bin/sudo-users/vyatta-op-vpn.pl --show-ipsec-sa-stats-peer="$7"
