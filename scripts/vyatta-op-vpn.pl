@@ -461,98 +461,126 @@ EOH
 EOH
     }
 }
-
-sub display_ipsec_sa_detail 
+sub display_ipsec_sa_detail
 {
-    my %tunnel_hash = %{pop(@_)};
-    for my $peer ( keys %tunnel_hash){
-      print "----------\n";
-      my $peerid = "";
-      if ($tunnel_hash{$peer}->{_rightid} ne "n/a"){
-        $peerid = $tunnel_hash{$peer}->{_rightid};
+    my %th = %{pop(@_)};
+    my $listref = [];
+    my %tunhash = ();
+    my $myid = undef;
+    my $peerid = undef;
+    for my $connectid (keys %th){  
+      if ($th{$connectid}->{_rightid} ne "n/a"){
+        $peerid = "$th{$connectid}->{_rightid}";
       } else {
-        $peerid = $tunnel_hash{$peer}->{_peerid};
+        $peerid = $th{$connectid}->{_peerid};
       }
-      my $enc = "n/a";
-      my $hash = "n/a";
+      if ($th{$connectid}->{_leftid} ne "n/a"){
+        $myid = "$th{$connectid}->{_leftid}";
+      } else {
+        $myid = $th{$connectid}->{_leftip};
+      }
+
+      my $tunnel = "$peerid-$myid";
+      
+      if (not exists $tunhash{$tunnel}) {
+        $tunhash{$tunnel} = {
+          _peerip      => $th{$connectid}->{_rightip},
+          _peerid      => $th{$connectid}->{_rightid},
+          _localip     => $th{$connectid}->{_leftip},
+          _localid     => $th{$connectid}->{_leftid},
+          _natt        => $th{$connectid}->{_natt},
+          _natsrc      => $th{$connectid}->{_natsrc},
+          _natdst      => $th{$connectid}->{_natdst},
+          _tunnels     => []
+        };
+      }
+        my @tmp = ( $th{$connectid}->{_tunnelnum},
+               $th{$connectid}->{_state},
+               $th{$connectid}->{_inspi},
+               $th{$connectid}->{_outspi},
+               $th{$connectid}->{_encryption},
+               $th{$connectid}->{_hash},
+               $th{$connectid}->{_pfsgrp},
+               $th{$connectid}->{_dhgrp},
+               $th{$connectid}->{_srcnet},
+               $th{$connectid}->{_dstnet},
+               $th{$connectid}->{_inbytes},
+               $th{$connectid}->{_outbytes},
+               $th{$connectid}->{_lifetime},
+               $th{$connectid}->{_expire} );
+        push (@{$tunhash{$tunnel}->{_tunnels}}, [ @tmp ]);
+    }
+    for my $connid (keys %tunhash){
       my $natt = "";
-      if ($tunnel_hash{$peer}->{_encryption} =~ /(.*?)_.*?_(.*)/){
-        $enc = lc($1).$2;
-        $enc =~ s/^ //g;
-      }
-      if ($tunnel_hash{$peer}->{_hash} =~ /.*_(.*)/){
-        $hash = lc($1);
-      }
-      if ($tunnel_hash{$peer}->{_natt} == 0){
+      if ($tunhash{$connid}->{_natt} == 0){
         $natt = "no";
       } else {
         $natt = "yes";
       }
-      my $dh_group = "";
-      if ($tunnel_hash{$peer}->{_dhgrp} eq "MODP_768"){
-        $dh_group = 1;
-      }
-      elsif ($tunnel_hash{$peer}->{_dhgrp} eq "MODP_1024"){
-        $dh_group = 2;
-      }
-      elsif ($tunnel_hash{$peer}->{_dhgrp} eq "MODP_1536"){
-        $dh_group = 5;
-      }
-      elsif ($tunnel_hash{$peer}->{_dhgrp} eq "MODP_2048"){
-        $dh_group = 7;
-      }
-      elsif ($tunnel_hash{$peer}->{_dhgrp} eq "<N/A>"){
-        $dh_group = "n/a";
-      }
-      else {
-        $dh_group = $tunnel_hash{$peer}->{_dhgrp};
-      }
-      my $pfs_group = "";
-      if ($tunnel_hash{$peer}->{_pfsgrp} eq "MODP_768"){
-        $pfs_group = 1;
-      }
-      elsif ($tunnel_hash{$peer}->{_pfsgrp} eq "MODP_1024"){
-        $pfs_group = 2;
-      }
-      elsif ($tunnel_hash{$peer}->{_pfsgrp} eq "MODP_1536"){
-        $pfs_group = 5;
-      }
-      elsif ($tunnel_hash{$peer}->{_pfsgrp} eq "MODP_2048"){
-        $pfs_group = 7;
-      }
-      elsif ($tunnel_hash{$peer}->{_pfsgrp} eq "<N/A>"){
-        $pfs_group = "n/a";
-      }
-      else {
-        $pfs_group = $tunnel_hash{$peer}->{_pfsgrp};
-      }
-      my $lifetime = $tunnel_hash{$peer}->{_lifetime};
-      my $expire = $tunnel_hash{$peer}->{_expire};
-      my $atime = $lifetime - $expire;
-      $atime = 0 if ($atime == $lifetime);
-
-      print "Conn Name:\t\t$peer\n";
-      print "State:\t\t\t$tunnel_hash{$peer}->{_state}\n";
-      print "Peer IP:\t\t$tunnel_hash{$peer}->{_rightip}\n";
-      print "Peer ID:\t\t$tunnel_hash{$peer}->{_rightid}\n";
-      print "Local IP:\t\t$tunnel_hash{$peer}->{_leftip}\n";
-      print "Local ID:\t\t$tunnel_hash{$peer}->{_leftid}\n";
-      print "Local Net:\t\t$tunnel_hash{$peer}->{_srcnet}\n";
-      print "Remote Net:\t\t$tunnel_hash{$peer}->{_dstnet}\n";
-      print "Inbound SPI:\t\t$tunnel_hash{$peer}->{_inspi}\n";
-      print "Outbound SPI:\t\t$tunnel_hash{$peer}->{_outspi}\n";
-      print "Encryption:\t\t$enc\n";
-      print "Hash:\t\t\t$hash\n";
-      print "PFS Group:\t\t$pfs_group\n";
-      print "DH Group:\t\t$dh_group\n";
+      print "----------\n";
+      print "Peer IP:\t\t$tunhash{$connid}->{_peerip}\n";
+      print "Peer ID:\t\t$tunhash{$connid}->{_peerid}\n";
+      print "Local IP:\t\t$tunhash{$connid}->{_localip}\n";
+      print "Local ID:\t\t$tunhash{$connid}->{_localid}\n";
       print "NAT Traversal:\t\t$natt\n";
-      print "NAT Source Port:\t$tunnel_hash{$peer}->{_natsrc}\n";
-      print "NAT Dest Port:\t\t$tunnel_hash{$peer}->{_natdst}\n";
-      print "Inbound Bytes:\t\t$tunnel_hash{$peer}->{_inbytes}\n";
-      print "Outbound Bytes:\t\t$tunnel_hash{$peer}->{_outbytes}\n";
-      print "Active Time (s):\t$atime\n";
-      print "Lifetime (s):\t\t$tunnel_hash{$peer}->{_lifetime}\n";
-      print "\n";
+      print "NAT Source Port:\t$tunhash{$connid}->{_natsrc}\n";
+      print "NAT Dest Port:\t\t$tunhash{$connid}->{_natdst}\n";
+      for my $tunnel (@{$tunhash{$connid}->{_tunnels}}){
+        (my $tunnum, my $state, my $inspi, my $outspi, my $enc,
+         my $hash, my $pfsgrp, my $dhgrp, my $srcnet, my $dstnet,
+         my $inbytes, my $outbytes, my $life, my $expire) = @{$tunnel};
+        if ($enc =~ /(.*?)_.*?_(.*)/){
+          $enc = lc($1).$2;
+          $enc =~ s/^ //g;
+        }
+        if ($hash =~ /.*_(.*)/){
+          $hash = lc($1);
+        }
+        my $dh_group = "";
+        if ($dhgrp eq "MODP_768"){
+          $dh_group = 1;
+        } elsif ($dhgrp eq "MODP_1024"){
+          $dh_group = 2;
+        } elsif ($dhgrp eq "MODP_1536"){
+          $dh_group = 5;
+        } elsif ($dhgrp eq "MODP_2048"){
+          $dh_group = 7;
+        } elsif ($dhgrp eq "<N/A>"){
+          $dh_group = "n/a";
+        } else {
+          $dh_group = $dhgrp;
+        }
+        my $pfs_group = "";
+        if ($pfsgrp eq "MODP_768"){
+          $pfs_group = 1;
+        } elsif ($pfsgrp eq "MODP_1024"){
+          $pfs_group = 2;
+        } elsif ($pfsgrp eq "MODP_1536"){
+          $pfs_group = 5;
+        } elsif ($pfsgrp eq "MODP_2048"){
+          $pfs_group = 7;
+        } elsif ($pfsgrp eq "<N/A>"){
+          $pfs_group = "n/a";
+        } else {
+          $pfs_group = $pfsgrp;
+        }
+        my $atime = $life - $expire;
+
+        print "Tunnel: $tunnum\n";
+        print "    State:\t\t$state\n";
+        print "    Inbound SPI:\t$inspi\n";
+        print "    Outbound SPI:\t$outspi\n";
+        print "    Encryption:\t\t$enc\n";
+        print "    Hash:\t\t$hash\n";
+        print "    PFS Group:\t\t$pfs_group\n";
+        print "    DH Group:\t\t$dh_group\n";
+        print "    Local Net:\t\t$srcnet\n";
+        print "    Remote Net:\t\t$dstnet\n";
+        print "    Inbound Bytes:\t$inbytes\n";
+        print "    Outbound Bytes:\t$outbytes\n";
+        print "    Active Time (s):\t$atime\n";
+        print "    Lifetime (s):\t$life\n";
+      }
     }
 }
 
