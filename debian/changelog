@@ -1,3 +1,10 @@
+vyatta-op-vpn (0.13.34) unstable; urgency=low
+
+  * Work on new IPsec operational mode script. New format for commands
+    for the pending addition of ipv6
+
+ -- John Southworth <john.southworth@vyatta.com>  Mon, 31 Jan 2011 10:59:49 -0600
+
 vyatta-op-vpn (0.13.33) unstable; urgency=low
 
   * Work on new IPsec operational mode script. Clean up capitalization;
