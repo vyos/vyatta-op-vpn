@@ -216,12 +216,8 @@ sub show_ipsec_sa_peer
     my %tmphash = ();
     my $peerid = pop(@_);
     for my $peer ( keys %tunnel_hash ) {
-      for my $key ( keys %{$tunnel_hash{$peer}} ) {
-        if ($key eq "_rightid"){
-          if (%{$tunnel_hash{$peer}}->{$key} eq $peerid){
-             $tmphash{$peer} = \%{$tunnel_hash{$peer}};
-          }
-        }
+      if (%{$tunnel_hash{$peer}}->{_rightid} eq $peerid){
+        $tmphash{$peer} = \%{$tunnel_hash{$peer}};
       }
     }
     display_ipsec_sa_brief(\%tmphash);
@@ -234,12 +230,8 @@ sub show_ipsec_sa_stats_peer
     my %tmphash = ();
     my $peerid = pop(@_);
     for my $peer ( keys %tunnel_hash ) {
-      for my $key ( keys %{$tunnel_hash{$peer}} ) {
-        if ($key eq "_rightid"){
-          if (%{$tunnel_hash{$peer}}->{$key} eq $peerid){
-             $tmphash{$peer} = \%{$tunnel_hash{$peer}};
-          }
-        }
+      if (%{$tunnel_hash{$peer}}->{_rightid} eq $peerid){
+        $tmphash{$peer} = \%{$tunnel_hash{$peer}};
       }
     }
     display_ipsec_sa_stats(\%tmphash);
@@ -252,9 +244,9 @@ sub show_ipsec_sa_stats_conn
     my %tmphash = ();
     my $peerid = pop(@_);
     for my $peer ( keys %tunnel_hash ) {
-          if ($peer eq $peerid){
-             $tmphash{$peer} = \%{$tunnel_hash{$peer}};
-          }
+      if ($peer eq $peerid){
+        $tmphash{$peer} = \%{$tunnel_hash{$peer}};
+      }
     }
     display_ipsec_sa_stats(\%tmphash);
 }
@@ -265,12 +257,8 @@ sub show_ipsec_sa_peer_detail
     my %tmphash = ();
     my $peerid = pop(@_);
     for my $peer ( keys %tunnel_hash ) {
-      for my $key ( keys %{$tunnel_hash{$peer}} ) {
-        if ($key eq "_rightid"){
-          if (%{$tunnel_hash{$peer}}->{$key} eq $peerid){
-             $tmphash{$peer} = \%{$tunnel_hash{$peer}};
-          }
-        }
+      if (%{$tunnel_hash{$peer}}->{_rightid} eq $peerid){
+        $tmphash{$peer} = \%{$tunnel_hash{$peer}};
       }
     }
     display_ipsec_sa_detail(\%tmphash);
@@ -283,9 +271,9 @@ sub show_ipsec_sa_conn_detail
     my %tmphash = ();
     my $peerid = pop(@_);
     for my $peer ( keys %tunnel_hash ) {
-          if ($peer eq $peerid){
-             $tmphash{$peer} = \%{$tunnel_hash{$peer}};
-          }
+      if ($peer eq $peerid){
+        $tmphash{$peer} = \%{$tunnel_hash{$peer}};
+      }
     }
     display_ipsec_sa_detail(\%tmphash);
 
@@ -296,13 +284,9 @@ sub show_ipsec_sa_natt
     my %tunnel_hash = get_tunnel_info();
     my %tmphash = ();
     for my $peer ( keys %tunnel_hash ) {
-      for my $key ( keys %{$tunnel_hash{$peer}} ) {
-        if ($key eq "_natt"){
-          if (%{$tunnel_hash{$peer}}->{$key} == 1 ){
-             $tmphash{$peer} = \%{$tunnel_hash{$peer}};
-          }
-        }
-      }
+       if (%{$tunnel_hash{$peer}}->{_natt} == 1 ){
+         $tmphash{$peer} = \%{$tunnel_hash{$peer}};
+       }
     }
     display_ipsec_sa_brief(\%tmphash);
 
@@ -326,12 +310,8 @@ sub show_ike_sa_peer
     my %tmphash = ();
     my $peerid = pop(@_);
     for my $peer ( keys %tunnel_hash ) {
-      for my $key ( keys %{$tunnel_hash{$peer}} ) {
-        if ($key eq "_rightid"){
-          if (%{$tunnel_hash{$peer}}->{$key} eq $peerid ){
-             $tmphash{$peer} = \%{$tunnel_hash{$peer}};
-          }
-        }
+      if (%{$tunnel_hash{$peer}}->{_rightid} eq $peerid ){
+        $tmphash{$peer} = \%{$tunnel_hash{$peer}};
       }
     }
     display_ike_sa_brief(\%tmphash);
@@ -343,12 +323,8 @@ sub show_ike_sa_natt
     my %tunnel_hash = get_tunnel_info();
     my %tmphash = ();
     for my $peer ( keys %tunnel_hash ) {
-      for my $key ( keys %{$tunnel_hash{$peer}} ) {
-        if ($key eq "_natt"){
-          if (%{$tunnel_hash{$peer}}->{$key} == 1 ){
-             $tmphash{$peer} = \%{$tunnel_hash{$peer}};
-          }
-        }
+      if (%{$tunnel_hash{$peer}}->{_natt} == 1 ){
+        $tmphash{$peer} = \%{$tunnel_hash{$peer}};
       }
     }
     display_ike_sa_brief(\%tmphash);
@@ -357,7 +333,55 @@ sub show_ike_sa_natt
 
 sub show_ike_secrets
 {
-    print "show ike secrets\n";
+    my $secret_file = '/etc/ipsec.secrets';
+    unless ( -r $secret_file) {
+      die "No secrets file $secret_file\n";
+    }   
+    open(DAT, $secret_file);
+    my @raw_data=<DAT>;
+    close(DAT);
+    foreach my $line (@raw_data) {
+      if ($line =~ /PSK/) {
+        my ($lip, $pip, $lid, $pid, $secret) = ('', '', 'N/A', 'N/A', '');
+        ($secret) = $line =~ /.*:\s+PSK\s+(\"\S+\")/;
+        ($lip, $pip) = $line =~ /^(\S+)\s+(\S+)\s+\:\s+PSK\s+\"\S+\"/;
+         # This processing with depend heavily on the way we write ipsec.secrets
+         # lines with 3 entries are tagged by the config module so that we can tell
+         # if the 3rd entry is a localid or peerid (left or right)
+        if (! defined($lip)){
+          if ($line =~ /^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+\:\s+PSK\s+\"\S+\"/){
+            $lip = $1; 
+            $pip = $2; 
+            $lid = $3; 
+            $pid = $4; 
+          } elsif ($line =~ /^(\S+)\s+(\S+)\s+(\S+)\s+\:\s+PSK\s+\"\S+\".*\#(.*)\#/){
+            $lip = $1; 
+            $pip = $2; 
+            if ($4 eq 'RIGHT'){
+              $pid = $3
+            } else {$lid = $3} 
+          }   
+        }   
+        $lip = '0.0.0.0' if ! defined $lip;
+        $pip = '0.0.0.0' if ! defined $pip;
+        print <<EOH;
+Local IP/ID                             Peer IP/ID                           
+--------------------------------------- ---------------------------------------
+EOH
+        printf "%-39s %-39s\n", $lip, $pip;
+        printf "%-39s %-39s\n", substr($lid,0,39), substr($pid,0,39);
+        print <<EOS;
+--------------------------------------- ---------------------------------------
+EOS
+        print "    Secret: $secret\n";
+print <<EOS;
+-------------------------------------------------------------------------------
+
+EOS
+      }   
+    }   
+    exit 0;
+
 }
 
 sub display_ipsec_sa_brief
