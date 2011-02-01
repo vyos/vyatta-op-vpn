@@ -28,27 +28,69 @@ use Data::Dumper;
 use Vyatta::Config;
 
 use strict;
+my $vconfig = new Vyatta::Config;
 
-sub process_shell_api {
-  my $path = pop(@_);
-  my $output =  `cli-shell-api returnActiveValue $path`;
-  return undef
-    if $output eq "";
-  return $output;
+sub get_values_from_config {
+    (my $peer, my $tunid) = @_; 
+    # Get the static information from the Vyatta Configuration
+    my @values;
+    my $peerip = $peer;
+    my $lid = $vconfig->returnEffectiveValue( 
+        "vpn ipsec site-to-site peer $peer authentication id");
+    $lid = 'n/a' if (!defined($lid));
+    push (@values, $lid);
+    
+    my $rid = $vconfig->returnEffectiveValue( 
+        "vpn ipsec site-to-site peer $peer authentication remote-id");
+    $rid = 'n/a' if (!defined($rid));
+    push (@values, $rid);
+    
+    my $lip = $vconfig->returnEffectiveValue( 
+        "vpn ipsec site-to-site peer $peer local-ip");
+    $lip = 'n/a' if (!defined($lip));
+    push (@values, $lip);
+
+    my $lsnet = $vconfig->returnEffectiveValue( 
+        "vpn ipsec site-to-site peer $peer tunnel $tunid local-subnet");
+    $lsnet = 'n/a' if (!defined($lsnet));
+    push (@values, $lsnet);
+    
+    my $rsnet = $vconfig->returnEffectiveValue( 
+        "vpn ipsec site-to-site peer $peer tunnel $tunid remote-subnet");
+    $rsnet = 'n/a' if (!defined($rsnet));
+    push (@values, $rsnet);
+
+    if ($peerip =~ /\@.*/){
+      $peerip = "0.0.0.0";
+    } elsif ($peerip =~ /"any"/){
+      $peerip = "0.0.0.0";
+    }
+    push (@values, $peerip);
+    return @values;
 }
-sub ipv4sort {
-  map  { $_->[0] }
-    sort { $a->[1] <=> $b->[1] }
-      map { my ($conv,$addr)=(0,$_);
-            $conv=$_ + ($conv << 8) for split(/\./, $addr);
-	    [$addr,$conv]}
-      @_;
+
+sub get_nat_info {
+    (my $srcip, my $dstip, my $spi) = @_;
+    my @values = ();
+    my $cmd = "sudo ip xfrm state get "
+             ."src $srcip "
+             ."dst $dstip "
+             ."proto esp "
+             ."spi 0x$spi 2>/dev/null |";
+    open(XFRM, $cmd);
+    while(<XFRM>){
+      if ($_ =~ /type espinudp sport (.*?) dport (.*?) addr/){
+        push (@values, 1);
+        push (@values, $1);
+        push (@values, $2);
+      }
+    }
+    if (scalar @values <= 0){
+    	@values = (0, 'n/a', 'n/a');
+    }
+    return @values;
 }
-sub tunSort {
-  sort { 
-    $a->[0] <=> $b->[0];
-  } @_;
-}
+
 sub get_tunnel_info {
   my $cmd = "sudo ipsec statusall |";
   my $vconfig = new Vyatta::Config;
@@ -79,14 +121,8 @@ sub get_tunnel_info {
                   _newestike   => undef,
                   _encryption  => undef,
                   _hash        => undef,
-                  _leftid      => undef,
-                  _rightid     => undef,
-                  _leftip      => undef,
-                  _rightip     => undef,
                   _inspi       => undef,
                   _outspi      => undef,
-                  _srcnet      => undef,
-                  _dstnet      => undef,
                   _pfsgrp      => undef,
                   _ikeencrypt  => undef,
                   _ikehash     => undef,
@@ -95,9 +131,6 @@ sub get_tunnel_info {
                   _state       => "down",
                   _inbytes     => undef,
                   _outbytes    => undef,
-                  _natt        => 0,
-                  _natsrc      => undef,
-                  _natdst      => undef,
                   _ikelife     => undef,
                   _ikeexpire   => undef,
                   _lifetime    => undef,
@@ -156,47 +189,6 @@ sub get_tunnel_info {
       }
     }
   }
-  for my $connectid ( keys %tunnel_hash) {
-    my $peer = $tunnel_hash{$connectid}->{_peerid};
-    my $tunid = $tunnel_hash{$connectid}->{_tunnelnum};
-    # Get the static information from the Vyatta Configuration
-    my $peerip = $peer;
-    $tunnel_hash{$connectid}->{_leftid}  = $vconfig->returnEffectiveValue( 
-        "vpn ipsec site-to-site peer $peer authentication id");
-    $tunnel_hash{$connectid}->{_rightid} = $vconfig->returnEffectiveValue( 
-        "vpn ipsec site-to-site peer $peer authentication remote-id");
-    $tunnel_hash{$connectid}->{_leftip}  = $vconfig->returnEffectiveValue( 
-        "vpn ipsec site-to-site peer $peer local-ip");
-    $tunnel_hash{$connectid}->{_srcnet}  = $vconfig->returnEffectiveValue( 
-        "vpn ipsec site-to-site peer $peer tunnel $tunid local-subnet");
-    $tunnel_hash{$connectid}->{_dstnet}  = $vconfig->returnEffectiveValue( 
-        "vpn ipsec site-to-site peer $peer tunnel $tunid remote-subnet");
-    if ($peerip =~ /\@.*/){
-      $peerip = "0.0.0.0";
-    } elsif ($peerip =~ /"any"/){
-      $peerip = "0.0.0.0";
-    }
-    $tunnel_hash{$connectid}->{_rightip} = $peerip;
-
-    # Detect NAT
-    my $cmd = "sudo ip xfrm state get "
-             ."src $tunnel_hash{$connectid}->{_leftip} "
-             ."dst $peerip "
-             ."proto esp "
-             ."spi 0x$tunnel_hash{$connectid}->{_outspi} 2>/dev/null |";
-    open(XFRM, $cmd);
-    my @xfrm = [];
-    while(<XFRM>){
-      push (@xfrm, $_);
-    }
-    for my $line (@xfrm){
-      if ($line =~ /type espinudp sport (.*?) dport (.*?) addr/){
-        $tunnel_hash{$connectid}->{_natt} = 1;
-        $tunnel_hash{$connectid}->{_natsrc} = $1;
-        $tunnel_hash{$connectid}->{_natdst} = $2;
-      }
-    }
-  }
   # Set undefined vars to "N/A" so the display will be nice
   for my $peer ( keys %tunnel_hash ) {
     for my $key ( keys %{$tunnel_hash{$peer}} ) {
@@ -222,6 +214,21 @@ sub get_conn_for_cli
     for my $peer ( keys %tunnel_hash ) {
       print "$peer\n";
     }
+}
+
+sub ipv4sort {
+  map  { $_->[0] }
+    sort { $a->[1] <=> $b->[1] }
+      map { my ($conv,$addr)=(0,$_);
+            $conv=$_ + ($conv << 8) for split(/\./, $addr);
+	    [$addr,$conv]}
+      @_;
+}
+
+sub tunSort {
+  sort { 
+    $a->[0] <=> $b->[0];
+  } @_;
 }
 
 sub show_ipsec_sa
@@ -335,7 +342,7 @@ sub show_ike_sa_peer
     my %tmphash = ();
     my $peerid = pop(@_);
     for my $peer ( keys %tunnel_hash ) {
-      if (%{$tunnel_hash{$peer}}->{_peer} eq $peerid ){
+      if (%{$tunnel_hash{$peer}}->{_peerid} eq $peerid ){
         $tmphash{$peer} = \%{$tunnel_hash{$peer}};
       }
     }
@@ -417,10 +424,15 @@ sub display_ipsec_sa_brief
     my $myid = undef;
     my $peerid = undef;
     for my $connectid (keys %th){  
-        $peerid = $th{$connectid}->{_peerid};
-        $myid = $th{$connectid}->{_leftip};
-      my $tunnel = "$peerid-$myid";
-      
+      (my $lid, my $rid, my $lip, my $lsnet, 
+       my $rsnet, my $pip ) = get_values_from_config(
+                               $th{$connectid}->{_peerid},
+                               $th{$connectid}->{_tunnelnum});
+      (my $natt, my $natsrc, my $natdst) = get_nat_info($lip, $pip, 
+           $th{$connectid}->{_outspi});
+      $peerid = $th{$connectid}->{_peerid};
+      my $tunnel = "$peerid-$lip";
+        
       if (not exists $tunhash{$tunnel}) {
         $tunhash{$tunnel}={
 	  _myid => $myid,
@@ -433,7 +445,7 @@ sub display_ipsec_sa_brief
                $th{$connectid}->{_outspi},
                $th{$connectid}->{_encryption},
                $th{$connectid}->{_hash},
-               $th{$connectid}->{_natt},
+               $natt,
                $th{$connectid}->{_lifetime},
                $th{$connectid}->{_expire} );
         push (@{$tunhash{"$tunnel"}->{_tunnels}}, [ @tmp ]);
@@ -488,19 +500,25 @@ sub display_ipsec_sa_detail
     my $myid = undef;
     my $peerid = undef;
     for my $connectid (keys %th){  
-        $peerid = $th{$connectid}->{_peerid};
-        $myid = $th{$connectid}->{_leftip};
-      my $tunnel = "$peerid-$myid";
+       $peerid = $th{$connectid}->{_peerid};
+      (my $lid, my $rid, my $lip, my $lsnet, 
+       my $rsnet, my $pip ) = get_values_from_config(
+                               $th{$connectid}->{_peerid},
+                               $th{$connectid}->{_tunnelnum});
+      (my $natt, my $natsrc, my $natdst) = get_nat_info($lip, $pip, 
+           $th{$connectid}->{_outspi});
+      $peerid = $th{$connectid}->{_peerid};
+      my $tunnel = "$peerid-$lip";
       
       if (not exists $tunhash{$tunnel}) {
         $tunhash{$tunnel} = {
-          _peerip      => $th{$connectid}->{_rightip},
-          _peerid      => $th{$connectid}->{_rightid},
-          _localip     => $th{$connectid}->{_leftip},
-          _localid     => $th{$connectid}->{_leftid},
-          _natt        => $th{$connectid}->{_natt},
-          _natsrc      => $th{$connectid}->{_natsrc},
-          _natdst      => $th{$connectid}->{_natdst},
+          _peerip      => $pip,
+          _peerid      => $rid,
+          _localip     => $lip,
+          _localid     => $lid,
+          _natt        => $natt,
+          _natsrc      => $natsrc,
+          _natdst      => $natdst,
           _tunnels     => []
         };
       }
@@ -512,8 +530,8 @@ sub display_ipsec_sa_detail
                $th{$connectid}->{_hash},
                $th{$connectid}->{_pfsgrp},
                $th{$connectid}->{_dhgrp},
-               $th{$connectid}->{_srcnet},
-               $th{$connectid}->{_dstnet},
+               $lsnet,
+               $rsnet,
                $th{$connectid}->{_inbytes},
                $th{$connectid}->{_outbytes},
                $th{$connectid}->{_lifetime},
@@ -576,7 +594,7 @@ sub display_ipsec_sa_detail
         }
         my $atime = $life - $expire;
 
-        print "Tunnel: $tunnum\n";
+        print "Tunnel $tunnum:\n";
         print "    State:\t\t$state\n";
         print "    Inbound SPI:\t$inspi\n";
         print "    Outbound SPI:\t$outspi\n";
@@ -602,17 +620,19 @@ sub display_ipsec_sa_stats
     my $myid = undef;
     my $peerid = undef;
     for my $connectid (keys %th){  
-        $peerid = $th{$connectid}->{_peerid};
-        $myid = $th{$connectid}->{_leftip};
-
-      my $tunnel = "$peerid-$myid";
+      (my $lid, my $rid, my $lip, my $lsnet, 
+       my $rsnet, my $pip ) = get_values_from_config(
+                               $th{$connectid}->{_peerid},
+                               $th{$connectid}->{_tunnelnum});
+      $peerid = $th{$connectid}->{_peerid};
+      my $tunnel = "$peerid-$lip";
       
       if (not exists $tunhash{$tunnel}) {
         $tunhash{$tunnel}=[];
       }
         my @tmp = ( $th{$connectid}->{_tunnelnum},
-               $th{$connectid}->{_srcnet},
-               $th{$connectid}->{_dstnet},
+               $lsnet,
+               $rsnet,
                $th{$connectid}->{_inbytes},
                $th{$connectid}->{_outbytes} );
         push (@{$tunhash{$tunnel}}, [ @tmp ]);
@@ -652,10 +672,14 @@ sub display_ike_sa_brief {
     my $myid = undef;
     my $peerid = undef;
     for my $connectid (keys %th){  
-        $peerid = $th{$connectid}->{_peerid};
-        $myid = $th{$connectid}->{_leftip};
-
-      my $tunnel = "$peerid-$myid";
+      (my $lid, my $rid, my $lip, my $lsnet, 
+       my $rsnet, my $pip ) = get_values_from_config(
+                               $th{$connectid}->{_peerid},
+                               $th{$connectid}->{_tunnelnum});
+      (my $natt, my $natsrc, my $natdst) = get_nat_info($lip, $pip, 
+           $th{$connectid}->{_outspi});
+      $peerid = $th{$connectid}->{_peerid};
+      my $tunnel = "$peerid-$lip";
       
       if (not exists $tunhash{$tunnel}) {
         $tunhash{$tunnel}=[];
@@ -665,7 +689,7 @@ sub display_ike_sa_brief {
                $th{$connectid}->{_newestike},
                $th{$connectid}->{_ikeencrypt},
                $th{$connectid}->{_ikehash},
-               $th{$connectid}->{_natt},
+               $natt,
                $th{$connectid}->{_lifetime},
                $th{$connectid}->{_expire} );
         push (@{$tunhash{$tunnel}}, [ @tmp ]);
