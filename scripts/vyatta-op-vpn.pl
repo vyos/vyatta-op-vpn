@@ -93,7 +93,6 @@ sub get_nat_info {
 
 sub get_tunnel_info {
   my $cmd = "sudo ipsec statusall |";
-  my $vconfig = new Vyatta::Config;
   open(IPSECSTATUS, $cmd);
   my @ipsecstatus = [];
   while(<IPSECSTATUS>){
@@ -126,6 +125,9 @@ sub get_tunnel_info {
                   _pfsgrp      => undef,
                   _ikeencrypt  => undef,
                   _ikehash     => undef,
+                  _natt        => undef,
+                  _natsrc      => undef,
+                  _natdst      => undef,
                   _ikestate    => "down",
                   _dhgrp       => undef,
                   _state       => "down",
@@ -146,7 +148,8 @@ sub get_tunnel_info {
         $tunnel_hash{$connectid}->{_hash} = $2;
         $tunnel_hash{$connectid}->{_pfsgrp} = $3;
         if ($tunnel_hash{$connectid}->{_pfsgrp} eq "<Phase1>"){
-          $tunnel_hash{$connectid}->{_pfsgrp} = $tunnel_hash{$connectid}->{_dhgrp};
+          $tunnel_hash{$connectid}->{_pfsgrp} = 
+                  $tunnel_hash{$connectid}->{_dhgrp};
         }
       }
       elsif ($line =~ /STATE_MAIN_I1/){
@@ -162,9 +165,11 @@ sub get_tunnel_info {
       }
       my $ike = $tunnel_hash{$connectid}->{_newestike};
       if (defined($ike)){
-        if ($line =~ /$ike:.*ISAKMP.SA.established.*EVENT_SA_REPLACE.in.(.*?)s;/){
+        if ($line =~ /$ike:.*ISAKMP.SA.established.*EVENT_SA_REPLACE.in.(.*?)s;/)
+        {
           $tunnel_hash{$connectid}->{_ikeexpire} = $1;
-          my $atime = $tunnel_hash{$connectid}->{_ikelife} - $tunnel_hash{$connectid}->{_ikeexpire};
+          my $atime = $tunnel_hash{$connectid}->{_ikelife} - 
+                      $tunnel_hash{$connectid}->{_ikeexpire};
           if ($atime >= 0){
             $tunnel_hash{$connectid}->{_ikestate} = "up";
           }
@@ -181,7 +186,8 @@ sub get_tunnel_info {
         }
         if ($line =~ /$spi:.*?EVENT_SA_REPLACE in (.*?)s;/){
           $tunnel_hash{$connectid}->{_expire} = $1;
-          my $atime = $tunnel_hash{$connectid}->{_lifetime} - $tunnel_hash{$connectid}->{_expire};
+          my $atime = $tunnel_hash{$connectid}->{_lifetime} - 
+                      $tunnel_hash{$connectid}->{_expire};
           if ($atime >= 0){
             $tunnel_hash{$connectid}->{_state} = "up";
           } 
@@ -227,11 +233,11 @@ sub peerSort {
       $a[3] <=> $b[3];
     } map { my $tmp = (split (/-/,$_))[0]; 
             if ($tmp =~ /@(.*)/){
-	       my $int = ord(uc($1));
-               $tmp = "$int.0.0.0";
-	    }
+              my $int = ord(uc($1));
+              $tmp = "$int.0.0.0";
+            }
             [ $_, $tmp ]
-     } 
+      }
   @_;
 }
 
@@ -263,7 +269,6 @@ sub show_ipsec_sa_peer
       }
     }
     display_ipsec_sa_brief(\%tmphash);
-
 }
 
 sub show_ipsec_sa_stats_peer
@@ -277,7 +282,6 @@ sub show_ipsec_sa_stats_peer
       }
     }
     display_ipsec_sa_stats(\%tmphash);
-
 }
 
 sub show_ipsec_sa_stats_conn
@@ -304,7 +308,6 @@ sub show_ipsec_sa_peer_detail
       }
     }
     display_ipsec_sa_detail(\%tmphash);
-
 }
 
 sub show_ipsec_sa_conn_detail
@@ -318,7 +321,6 @@ sub show_ipsec_sa_conn_detail
       }
     }
     display_ipsec_sa_detail(\%tmphash);
-
 }
 
 sub show_ipsec_sa_natt
@@ -326,12 +328,29 @@ sub show_ipsec_sa_natt
     my %tunnel_hash = get_tunnel_info();
     my %tmphash = ();
     for my $peer ( keys %tunnel_hash ) {
-       if (%{$tunnel_hash{$peer}}->{_natt} == 1 ){
+      my $peerip;
+      if ($peer =~ /peer-(.*?)-.*/){
+        $peerip = $1;
+      }
+      my $lip = $vconfig->returnEffectiveValue( 
+        "vpn ipsec site-to-site peer $peerip local-ip");
+      if ($peerip =~ /\@.*/){
+         $peerip = "0.0.0.0";
+      } elsif ($peerip =~ /"any"/){
+         $peerip = "0.0.0.0";
+      }
+      (my $natt, my $natsrc, my $natdst) = get_nat_info( 
+                                           $lip,
+                                           $peerip,
+                                           $tunnel_hash{$peer}->{_outspi});
+       if ($natt == 1 ){
+         %{$tunnel_hash{$peer}}->{_natt} = 1;
+         %{$tunnel_hash{$peer}}->{_natsrc} = $natsrc;
+         %{$tunnel_hash{$peer}}->{_natt} = $natdst;
          $tmphash{$peer} = \%{$tunnel_hash{$peer}};
        }
     }
     display_ipsec_sa_brief(\%tmphash);
-
 }
 
 sub show_ike_sa
@@ -357,7 +376,6 @@ sub show_ike_sa_peer
       }
     }
     display_ike_sa_brief(\%tmphash);
-
 }
 
 sub show_ike_sa_natt
@@ -365,12 +383,32 @@ sub show_ike_sa_natt
     my %tunnel_hash = get_tunnel_info();
     my %tmphash = ();
     for my $peer ( keys %tunnel_hash ) {
+      my $peerip;
+      if ($peer =~ /peer-(.*?)-.*/){
+        $peerip = $1;
+      }
+      my $lip = $vconfig->returnEffectiveValue( 
+        "vpn ipsec site-to-site peer $peerip local-ip");
+      if ($peerip =~ /\@.*/){
+         $peerip = "0.0.0.0";
+      } elsif ($peerip =~ /"any"/){
+         $peerip = "0.0.0.0";
+      }
+      (my $natt, my $natsrc, my $natdst) = get_nat_info( 
+                                           $lip,
+                                           $peerip,
+                                           $tunnel_hash{$peer}->{_outspi});
+       if ($natt == 1 ){
+         %{$tunnel_hash{$peer}}->{_natt} = 1;
+         %{$tunnel_hash{$peer}}->{_natsrc} = $natsrc;
+         %{$tunnel_hash{$peer}}->{_natt} = $natdst;
+         $tmphash{$peer} = \%{$tunnel_hash{$peer}};
+       }
       if (%{$tunnel_hash{$peer}}->{_natt} == 1 ){
         $tmphash{$peer} = \%{$tunnel_hash{$peer}};
       }
     }
     display_ike_sa_brief(\%tmphash);
-
 }
 
 sub show_ike_secrets
@@ -388,15 +426,16 @@ sub show_ike_secrets
         ($secret) = $line =~ /.*:\s+PSK\s+(\"\S+\")/;
         ($lip, $pip) = $line =~ /^(\S+)\s+(\S+)\s+\:\s+PSK\s+\"\S+\"/;
          # This processing with depend heavily on the way we write ipsec.secrets
-         # lines with 3 entries are tagged by the config module so that we can tell
-         # if the 3rd entry is a localid or peerid (left or right)
+         # lines with 3 entries are tagged by the config module so that we can 
+         # tell if the 3rd entry is a localid or peerid (left or right)
         if (! defined($lip)){
           if ($line =~ /^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+\:\s+PSK\s+\"\S+\"/){
             $lip = $1; 
             $pip = $2; 
             $lid = $3; 
             $pid = $4; 
-          } elsif ($line =~ /^(\S+)\s+(\S+)\s+(\S+)\s+\:\s+PSK\s+\"\S+\".*\#(.*)\#/){
+          } elsif ($line =~ 
+                   /^(\S+)\s+(\S+)\s+(\S+)\s+\:\s+PSK\s+\"\S+\".*\#(.*)\#/){
             $lip = $1; 
             $pip = $2; 
             if ($4 eq 'RIGHT'){
@@ -406,7 +445,7 @@ sub show_ike_secrets
         }   
         $lip = '0.0.0.0' if ! defined $lip;
         $pip = '0.0.0.0' if ! defined $pip;
-	$pip = '0.0.0.0' if ($pip eq '%any');
+        $pip = '0.0.0.0' if ($pip eq '%any');
         print <<EOH;
 Local IP/ID                             Peer IP/ID                           
 --------------------------------------- ---------------------------------------
@@ -424,7 +463,6 @@ EOS
       }   
     }   
     exit 0;
-
 }
 
 sub display_ipsec_sa_brief
@@ -437,16 +475,18 @@ sub display_ipsec_sa_brief
     for my $connectid (keys %th){  
       (my $lid, my $rid, my $lip, my $lsnet, 
        my $rsnet, my $pip ) = get_values_from_config(
-                               $th{$connectid}->{_peerid},
-                               $th{$connectid}->{_tunnelnum});
-      (my $natt, my $natsrc, my $natdst) = get_nat_info($lip, $pip, 
-           $th{$connectid}->{_outspi});
+                              $th{$connectid}->{_peerid},
+                              $th{$connectid}->{_tunnelnum});
+      my $natt;
+      if ($th{$connectid}->{_natt} eq 'n/a'){
+          ($natt, my $natsrc, my $natdst) = get_nat_info($lip, $pip, 
+                                           $th{$connectid}->{_outspi});
+      } else { $natt = $th{$connectid}->{_natt}; }
       $peerid = $th{$connectid}->{_peerid};
       my $tunnel = "$peerid-$lip";
         
       if (not exists $tunhash{$tunnel}) {
         $tunhash{$tunnel}={
-          _myid => $myid,
           _tunnels => []
         };
       }
@@ -495,7 +535,8 @@ EOH
         my $atime = $life - $expire;
         $atime = 0 if ($atime == $life);
         printf "    %-7s %-6s %-9s %-10s %-8s %-5s %-6s %-7s %-7s\n",
-        $tunnum, $state, $inbytes, $outbytes, $encp, $hashp, $nattp, $atime, $life;
+              $tunnum, $state, $inbytes, $outbytes, $encp, $hashp, $nattp, 
+              $atime, $life;
       }
       print <<EOH;
 --------------------------------------------------------------------------------
@@ -514,10 +555,10 @@ sub display_ipsec_sa_detail
        $peerid = $th{$connectid}->{_peerid};
       (my $lid, my $rid, my $lip, my $lsnet, 
        my $rsnet, my $pip ) = get_values_from_config(
-                               $th{$connectid}->{_peerid},
-                               $th{$connectid}->{_tunnelnum});
+                              $th{$connectid}->{_peerid},
+                              $th{$connectid}->{_tunnelnum});
       (my $natt, my $natsrc, my $natdst) = get_nat_info($lip, $pip, 
-           $th{$connectid}->{_outspi});
+                                           $th{$connectid}->{_outspi});
       $peerid = $th{$connectid}->{_peerid};
       my $tunnel = "$peerid-$lip";
       
@@ -634,8 +675,8 @@ sub display_ipsec_sa_stats
     for my $connectid (keys %th){  
       (my $lid, my $rid, my $lip, my $lsnet, 
        my $rsnet, my $pip ) = get_values_from_config(
-                               $th{$connectid}->{_peerid},
-                               $th{$connectid}->{_tunnelnum});
+                              $th{$connectid}->{_peerid},
+                              $th{$connectid}->{_tunnelnum});
       $peerid = $th{$connectid}->{_peerid};
       my $tunnel = "$peerid-$lip";
       
@@ -648,7 +689,6 @@ sub display_ipsec_sa_stats
                $th{$connectid}->{_inbytes},
                $th{$connectid}->{_outbytes} );
         push (@{$tunhash{$tunnel}}, [ @tmp ]);
-      
     }
     for my $connid (peerSort(keys %tunhash)){
     print <<EOH;
@@ -686,10 +726,13 @@ sub display_ike_sa_brief {
     for my $connectid (keys %th){  
       (my $lid, my $rid, my $lip, my $lsnet, 
        my $rsnet, my $pip ) = get_values_from_config(
-                               $th{$connectid}->{_peerid},
-                               $th{$connectid}->{_tunnelnum});
-      (my $natt, my $natsrc, my $natdst) = get_nat_info($lip, $pip, 
-           $th{$connectid}->{_outspi});
+                              $th{$connectid}->{_peerid},
+                              $th{$connectid}->{_tunnelnum});
+      my $natt;
+      if ($th{$connectid}->{_natt} eq 'n/a'){
+        ($natt, my $natsrc, my $natdst) = get_nat_info($lip, $pip, 
+                                           $th{$connectid}->{_outspi});
+      } else { $natt = $th{$connectid}->{_natt}; }
       $peerid = $th{$connectid}->{_peerid};
       my $tunnel = "$peerid-$lip";
       
@@ -702,8 +745,8 @@ sub display_ike_sa_brief {
                $th{$connectid}->{_ikeencrypt},
                $th{$connectid}->{_ikehash},
                $natt,
-               $th{$connectid}->{_lifetime},
-               $th{$connectid}->{_expire} );
+               $th{$connectid}->{_ikelife},
+               $th{$connectid}->{_ikeexpire} );
         push (@{$tunhash{$tunnel}}, [ @tmp ]);
       
     }
@@ -739,8 +782,8 @@ EOH
         }
         my $atime = $life - $expire;
         $atime = 0 if ($atime == $life);
-	printf "    %-7s %-6s %-8s %-8s %-5s %-6s %-7s %-7s\n",
-	$tunnum, $state, $isakmpnum, $encp, $hashp, $nattp, $atime, $life;
+        printf "    %-7s %-6s %-8s %-8s %-5s %-6s %-7s %-7s\n",
+              $tunnum, $state, $isakmpnum, $encp, $hashp, $nattp, $atime, $life;
       }
       print <<EOH;
 --------------------------------------------------------------------------------
@@ -750,7 +793,11 @@ EOH
 }
 
 ## CLI options get processed here
-my ($get_peers_for_cli, $get_conn_for_cli, $show_ipsec_sa, $show_ipsec_sa_detail, , $show_ipsec_sa_peer, $show_ipsec_sa_peer_detail, $show_ipsec_sa_natt, $show_ipsec_sa_stats, $show_ipsec_sa_stats_peer, $show_ike_sa, $show_ike_sa_peer, $show_ike_sa_natt, $show_ike_secrets, $show_ipsec_sa_conn_detail, $show_ipsec_sa_stats_conn);
+my ($get_peers_for_cli, $get_conn_for_cli, $show_ipsec_sa, $show_ipsec_sa_detail,
+    $show_ipsec_sa_peer, $show_ipsec_sa_peer_detail, $show_ipsec_sa_natt, 
+    $show_ipsec_sa_stats, $show_ipsec_sa_stats_peer, $show_ike_sa, 
+    $show_ike_sa_peer, $show_ike_sa_natt, $show_ike_secrets, 
+    $show_ipsec_sa_conn_detail, $show_ipsec_sa_stats_conn);
 
 GetOptions("show-ipsec-sa!"             => \$show_ipsec_sa,
            "show-ipsec-sa-detail!"      => \$show_ipsec_sa_detail,
