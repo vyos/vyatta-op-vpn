@@ -216,13 +216,23 @@ sub get_conn_for_cli
     }
 }
 
-sub ipv4sort {
-  map  { $_->[0] }
-    sort { $a->[1] <=> $b->[1] }
-      map { my ($conv,$addr)=(0,$_);
-            $conv=$_ + ($conv << 8) for split(/\./, $addr);
-	    [$addr,$conv]}
-      @_;
+sub peerSort {
+  map { $_ -> [0] }
+    sort {
+      our @a = split(/\./, $a->[1]);
+      our @b = split(/\./, $b->[1]);
+      $a[0] <=> $b[0] or
+      $a[1] <=> $b[1] or 
+      $a[2] <=> $b[2] or
+      $a[3] <=> $b[3];
+    } map { my $tmp = (split (/-/,$_))[0]; 
+            if ($tmp =~ /@(.*)/){
+	       my $int = ord(uc($1));
+               $tmp = "$int.0.0.0";
+	    }
+            [ $_, $tmp ]
+     } 
+  @_;
 }
 
 sub tunSort {
@@ -396,6 +406,7 @@ sub show_ike_secrets
         }   
         $lip = '0.0.0.0' if ! defined $lip;
         $pip = '0.0.0.0' if ! defined $pip;
+	$pip = '0.0.0.0' if ($pip eq '%any');
         print <<EOH;
 Local IP/ID                             Peer IP/ID                           
 --------------------------------------- ---------------------------------------
@@ -435,23 +446,23 @@ sub display_ipsec_sa_brief
         
       if (not exists $tunhash{$tunnel}) {
         $tunhash{$tunnel}={
-	  _myid => $myid,
-	  _tunnels => []
-	};
+          _myid => $myid,
+          _tunnels => []
+        };
       }
-        my @tmp = ( $th{$connectid}->{_tunnelnum},
+      my @tmp = ( $th{$connectid}->{_tunnelnum},
                $th{$connectid}->{_state},
-               $th{$connectid}->{_inspi},
-               $th{$connectid}->{_outspi},
+               $th{$connectid}->{_inbytes},
+               $th{$connectid}->{_outbytes},
                $th{$connectid}->{_encryption},
                $th{$connectid}->{_hash},
                $natt,
                $th{$connectid}->{_lifetime},
                $th{$connectid}->{_expire} );
-        push (@{$tunhash{"$tunnel"}->{_tunnels}}, [ @tmp ]);
+      push (@{$tunhash{"$tunnel"}->{_tunnels}}, [ @tmp ]);
       
     }
-    for my $connid (ipv4sort (keys %tunhash)){
+    for my $connid (peerSort (keys %tunhash)){
     print <<EOH;
 Peer ID / IP                            Local ID / IP               
 --------------------------------------- ----------------------------------------
@@ -460,12 +471,12 @@ EOH
       printf "%-39s %-39s\n", $peerid, $myid;
       print <<EOH;
 --------------------------------------- ----------------------------------------
-    Tunnel  State  In SPI    Out SPI   Encrypt  Hash  NAT-T  A-Time  L-Time
-    ------  -----  --------  --------  -------  ----  -----  ------  ------
+    Tunnel  State  In Bytes  Out Bytes  Encrypt  Hash  NAT-T  A-Time  L-Time
+    ------  -----  --------  ---------  -------  ----  -----  ------  ------
 EOH
       for my $tunnel (tunSort(@{$tunhash{$connid}->{_tunnels}})){
-        (my $tunnum, my $state, my $inspi, my $outspi, 
-	 my $enc, my $hash, my $natt, my $life, my $expire) = @{$tunnel};
+        (my $tunnum, my $state, my $inbytes, my $outbytes, 
+         my $enc, my $hash, my $natt, my $life, my $expire) = @{$tunnel};
         my $encp = "n/a";
         my $hashp = "n/a";
         my $nattp = "";
@@ -483,8 +494,8 @@ EOH
         }
         my $atime = $life - $expire;
         $atime = 0 if ($atime == $life);
-	printf "    %-7s %-6s %-9s %-9s %-8s %-5s %-6s %-7s %-7s\n",
-	$tunnum, $state, $inspi, $outspi, $encp, $hashp, $nattp, $atime, $life;
+        printf "    %-7s %-6s %-9s %-10s %-8s %-5s %-6s %-7s %-7s\n",
+        $tunnum, $state, $inbytes, $outbytes, $encp, $hashp, $nattp, $atime, $life;
       }
       print <<EOH;
 --------------------------------------------------------------------------------
@@ -522,7 +533,7 @@ sub display_ipsec_sa_detail
           _tunnels     => []
         };
       }
-        my @tmp = ( $th{$connectid}->{_tunnelnum},
+      my @tmp = ( $th{$connectid}->{_tunnelnum},
                $th{$connectid}->{_state},
                $th{$connectid}->{_inspi},
                $th{$connectid}->{_outspi},
@@ -536,9 +547,9 @@ sub display_ipsec_sa_detail
                $th{$connectid}->{_outbytes},
                $th{$connectid}->{_lifetime},
                $th{$connectid}->{_expire} );
-        push (@{$tunhash{$tunnel}->{_tunnels}}, [ @tmp ]);
+      push (@{$tunhash{$tunnel}->{_tunnels}}, [ @tmp ]);
     }
-    for my $connid (ipv4sort(keys %tunhash)){
+    for my $connid (peerSort(keys %tunhash)){
       my $natt = "";
       if ($tunhash{$connid}->{_natt} == 0){
         $natt = "no";
@@ -593,6 +604,7 @@ sub display_ipsec_sa_detail
           $pfs_group = $pfsgrp;
         }
         my $atime = $life - $expire;
+        $atime = 0 if ($atime == $life);
 
         print "Tunnel $tunnum:\n";
         print "    State:\t\t$state\n";
@@ -638,7 +650,7 @@ sub display_ipsec_sa_stats
         push (@{$tunhash{$tunnel}}, [ @tmp ]);
       
     }
-    for my $connid (ipv4sort(keys %tunhash)){
+    for my $connid (peerSort(keys %tunhash)){
     print <<EOH;
 Peer ID / IP                            Local ID / IP               
 --------------------------------------- ----------------------------------------
@@ -695,7 +707,7 @@ sub display_ike_sa_brief {
         push (@{$tunhash{$tunnel}}, [ @tmp ]);
       
     }
-    for my $connid (ipv4sort(keys %tunhash)){
+    for my $connid (peerSort(keys %tunhash)){
     print <<EOH;
 Peer ID / IP                            Local ID / IP               
 --------------------------------------- ----------------------------------------
