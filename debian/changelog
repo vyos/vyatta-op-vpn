@@ -1,3 +1,10 @@
+vyatta-op-vpn (0.13.38) unstable; urgency=low
+
+  * Work on new IPsec operational mode script. Added sorting and fixed
+    cases where peer is set to '@<id>'
+
+ -- John Southworth <john.southworth@vyatta.com>  Mon, 31 Jan 2011 20:16:05 -0600
+
 vyatta-op-vpn (0.13.37) unstable; urgency=low
 
   * Work on new IPsec operational mode script. Rework to reduce the
