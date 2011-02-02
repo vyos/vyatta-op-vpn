@@ -61,12 +61,12 @@ sub get_tunnel_info {
         $tunnel_hash{$connectid} = {
                   _peerid      => $peer,
                   _tunnelnum   => $tunid,
-		  _lip         => undef,
-		  _rip         => undef,
-		  _lid         => undef,
-		  _rid         => undef,
-		  _lsnet       => undef,
-		  _rsnet       => undef,
+                  _lip         => undef,
+                  _rip         => undef,
+                  _lid         => undef,
+                  _rid         => undef,
+                  _lsnet       => undef,
+                  _rsnet       => undef,
                   _newestspi   => undef,
                   _newestike   => undef,
                   _encryption  => undef,
@@ -97,28 +97,28 @@ sub get_tunnel_info {
       elsif ($line =~ /: (.*?)===(.*?)\[(.*?)\]...(.*?)\[(.*?)\]===(.*?);/){
         my $lsnet = $1;
         my $lip = $2;
-	my $lid = $3;
-	my $rip = $4;
-	my $rid = $5;
-	my $rsnet = $6;
+        my $lid = $3;
+        my $rip = $4;
+        my $rid = $5;
+        my $rsnet = $6;
         $tunnel_hash{$connectid}->{_lid} = conv_id($lid);
-	if ($lip =~ /(\d+\.\d+\.\d+\.\d+):(\d+)/){
-	   $lip = $1;
-	   $tunnel_hash{$connectid}->{_natt}=1;
-	   $tunnel_hash{$connectid}->{_natsrc}=$2;
-	} else {
-	   $tunnel_hash{$connectid}->{_natt}=0;
-	   $tunnel_hash{$connectid}->{_natsrc}='n/a';
-	}
+        if ($lip =~ /(\d+\.\d+\.\d+\.\d+):(\d+)/){
+          $lip = $1;
+          $tunnel_hash{$connectid}->{_natt}=1;
+          $tunnel_hash{$connectid}->{_natsrc}=$2;
+        } else {
+          $tunnel_hash{$connectid}->{_natt}=0;
+          $tunnel_hash{$connectid}->{_natsrc}='n/a';
+        }
         $tunnel_hash{$connectid}->{_lip} = $lip;
         $tunnel_hash{$connectid}->{_lsnet} = $lsnet;
         $tunnel_hash{$connectid}->{_rid} = conv_id($rid);
-	if ($rip =~ /(\d+\.\d+\.\d+\.\d+):(\d+)/){
-	   $rip = $1;
-	   $tunnel_hash{$connectid}->{_natdst}=$2;
-	} else {
-	   $tunnel_hash{$connectid}->{_natdst}='n/a';
-	}
+        if ($rip =~ /(\d+\.\d+\.\d+\.\d+):(\d+)/){
+          $rip = $1;
+          $tunnel_hash{$connectid}->{_natdst}=$2;
+        } else {
+          $tunnel_hash{$connectid}->{_natdst}='n/a';
+        }
         $tunnel_hash{$connectid}->{_rip} = $rip;
         $tunnel_hash{$connectid}->{_rsnet} = $rsnet;
       }
@@ -128,7 +128,7 @@ sub get_tunnel_info {
         $tunnel_hash{$connectid}->{_pfsgrp} = $3;
         if ($tunnel_hash{$connectid}->{_pfsgrp} eq "<Phase1>"){
           $tunnel_hash{$connectid}->{_pfsgrp} = 
-                  $tunnel_hash{$connectid}->{_dhgrp};
+                            $tunnel_hash{$connectid}->{_dhgrp};
         }
       }
       elsif ($line =~ /STATE_MAIN_I1/){
@@ -419,8 +419,8 @@ sub display_ipsec_sa_brief
         
       if (not exists $tunhash{$tunnel}) {
         $tunhash{$tunnel} = {
-	  _outspi  => $th{$connectid}->{_outspi},
-	  _natt  => $th{$connectid}->{_natt},
+          _outspi  => $th{$connectid}->{_outspi},
+          _natt  => $th{$connectid}->{_natt},
           _lip  => $lip,
           _tunnels => []
         };
@@ -451,20 +451,14 @@ EOH
       for my $tunnel (tunSort(@{$tunhash{$connid}->{_tunnels}})){
         (my $tunnum, my $state, my $inbytes, my $outbytes, 
          my $enc, my $hash, my $life, my $expire) = @{$tunnel};
-        my $natt;
-	my $lip = $tunhash{$connid}->{_lip};
-	my $peerip = $peerid;
+        my $lip = $tunhash{$connid}->{_lip};
+        my $peerip = $peerid;
         if ($peerip =~ /\@.*/){
            $peerip = "0.0.0.0";
         } elsif ($peerip =~ /"any"/){
            $peerip = "0.0.0.0";
         }
-	# natt will only be set to 1 or 0 if it has been processed 
-	# so if it is n/a we need to do nat processing.
-        if ($tunhash{$connid}->{_natt} eq 'n/a'){
-          ($natt, my $natsrc, my $natdst) = get_nat_info($lip, $peerip, 
-                                           $tunhash{$connid}->{_outspi});
-        } else { $natt = $tunhash{$connid}->{_natt}; }
+        my $natt = $tunhash{$connid}->{_natt};
         my $encp = "n/a";
         my $hashp = "n/a";
         my $nattp = "";
