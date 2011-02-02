@@ -1,3 +1,12 @@
+vyatta-op-vpn (0.13.42) unstable; urgency=low
+
+  * Work on new IPsec operational mode script. Removed calls to external
+    functions; Processes 6000 tunnel configuration in approx 2 sec.
+  * Work on new IPsec operational mode script. Removed calls to external
+    functions; Cleaned up formatting
+
+ -- John Southworth <john.southworth@vyatta.com>  Tue, 01 Feb 2011 20:06:09 -0600
+
 vyatta-op-vpn (0.13.41) unstable; urgency=low
 
   * Work on new IPsec operational mode script. Fix 'show vpn ipsec sa
