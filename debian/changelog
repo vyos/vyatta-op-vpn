@@ -1,3 +1,11 @@
+vyatta-op-vpn (0.13.43) unstable; urgency=low
+
+  * Work on new IPsec operational mode script. Split into perl module;
+    Adjustments for showing per tunnel information; Fix parsing of
+    ipsecstatus all when using GRE matching
+
+ -- John Southworth <john.southworth@vyatta.com>  Wed, 02 Feb 2011 18:15:45 -0600
+
 vyatta-op-vpn (0.13.42) unstable; urgency=low
 
   * Work on new IPsec operational mode script. Removed calls to external
