@@ -3,6 +3,7 @@ opdir		 = $(datadir)/vyatta-op/templates
 xsldir          = @XSLDIR@
 
 bin_sudo_usersdir = $(bindir)/sudo-users
+share_perl5dir	 = $(datarootdir)/perl5/Vyatta/VPN
 
 xsl_DATA =
 
@@ -14,6 +15,8 @@ xsl_DATA	+= src/xsl/show_vpn_ipsec_sa.xsl
 xsl_DATA	+= src/xsl/show_vpn_ipsec_status.xsl
 
 bin_sudo_users_PROGRAMS	= command_proc_show_vpn
+
+share_perl5_DATA = lib/OPMode.pm
 
 bin_sudo_users_SCRIPTS = scripts/gen_local_rsa_key.pl
 bin_sudo_users_SCRIPTS += scripts/vyatta-show-vpn.pl
