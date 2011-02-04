@@ -25,6 +25,8 @@
 
 package Vyatta::VPN::OPMode;
 
+use lib "/opt/vyatta/share/perl5/";
+use Vyatta::VPN::Util;
 use strict;
 
 sub conv_id {
@@ -165,7 +167,7 @@ sub get_tunnel_info {
         $tunnel_hash{$connectid}->{_natsrc} = $natsrc;
         $tunnel_hash{$connectid}->{_natdst} = $natdst;
       }
-      elsif ($line =~ /: (.*?)\[(.*?)\]:47\/0...(.*?)\[(.*?)\]:47\/0;/){
+      elsif ($line =~ /: (.*?)\[(.*?)\]...(.*?)\[(.*?)\];/){
         my $lip = $1;
         my $lid = $2;
         my $rip = $3;
@@ -178,15 +180,50 @@ sub get_tunnel_info {
         $tunnel_hash{$connectid}->{_natt} = $natt;
         $tunnel_hash{$connectid}->{_natsrc} = $natsrc;
         $tunnel_hash{$connectid}->{_natdst} = $natdst;
-        $tunnel_hash{$connectid}->{_proto} = "GRE";
+        }
+      elsif ($line =~ /: (.*?)\[(.*?)\]:(\d+)\/(\d+)...(.*?)\[(.*?)\]:(\d+)\/(\d+);/){
+        my $lip = $1;
+        my $lid = $2;
+        my $lproto = $3;
+        $lproto = conv_protocol($lproto);
+        my $lport = $4;
+        my $rip = $5;
+        my $rid = $6;
+        my $rproto = conv_protocol($7);
+        my $rport = $8;
+        my $lprotoport;
+        my $rprotoport;
+        $lprotoport = $lproto if ($lport == 0);
+        $lprotoport = "$lproto/$lport" if ($lport != 0);
+        $rprotoport = $rproto if ($rport == 0);
+        $rprotoport = "$rproto/$rport" if ($rport != 0);
+        ($lip, my $natt, my $natsrc, $rip, my $natdst) = nat_detect($lip, $rip);
+        $tunnel_hash{$connectid}->{_lid} = conv_id($lid);
+        $tunnel_hash{$connectid}->{_lip} = $lip;
+        $tunnel_hash{$connectid}->{_rid} = conv_id($rid);
+        $tunnel_hash{$connectid}->{_rip} = $rip;
+        $tunnel_hash{$connectid}->{_natt} = $natt;
+        $tunnel_hash{$connectid}->{_natsrc} = $natsrc;
+        $tunnel_hash{$connectid}->{_natdst} = $natdst;
+        $tunnel_hash{$connectid}->{_proto} = "$lprotoport-$rprotoport";
       } 
-      elsif ($line =~ /: (.*)===(.*?)\[(.*?)\]:47\/0...(.*?)\[(.*?)\]:47\/0===(.*?);/){
+      elsif ($line =~ /: (.*)===(.*?)\[(.*?)\]:(\d+)\/(\d+)...(.*?)\[(.*?)\]:(\d+)\/(\d+)===(.*?);/){
         my $lsnet = $1;
         my $lip = $2;
         my $lid = $3;
-        my $rip = $4;
-        my $rid = $5;
-        my $rsnet = $6;
+        my $lproto = conv_protocol($4);
+        my $lport = $5;
+        my $rip = $6;
+        my $rid = $7;
+        my $rproto = conv_protocol($8);
+        my $rport = $9;
+        my $rsnet = $10;
+        my $lprotoport;
+        my $rprotoport;
+        $lprotoport = $lproto if ($lport == 0);
+        $lprotoport = "$lproto/$lport" if ($lport != 0);
+        $rprotoport = $rproto if ($rport == 0);
+        $rprotoport = "$rproto/$rport" if ($rport != 0);
         ($lip, my $natt, my $natsrc, $rip, my $natdst) = nat_detect($lip, $rip);
         $tunnel_hash{$connectid}->{_lid} = conv_id($lid);
         $tunnel_hash{$connectid}->{_lip} = $lip;
@@ -194,7 +231,7 @@ sub get_tunnel_info {
         $tunnel_hash{$connectid}->{_rid} = conv_id($rid);
         $tunnel_hash{$connectid}->{_rip} = $rip;
         $tunnel_hash{$connectid}->{_rsnet} = $rsnet;
-        $tunnel_hash{$connectid}->{_proto} = "GRE";
+        $tunnel_hash{$connectid}->{_proto} = "$lprotoport-$rprotoport";
         $tunnel_hash{$connectid}->{_natt} = $natt;
         $tunnel_hash{$connectid}->{_natsrc} = $natsrc;
         $tunnel_hash{$connectid}->{_natdst} = $natdst;
@@ -611,7 +648,7 @@ EOH
         }
         my $atime = $life - $expire;
         $atime = 0 if ($atime == $life);
-        printf "    %-7s %-6s %-14s %-8s %-5s %-6s %-7s %-6s %4s\n",
+        printf "    %-7s %-6s %-14s %-8s %-5s %-6s %-7s %-7s %-2s\n",
               $tunnum, $state, $bytesp, $encp, $hashp, $nattp, 
               $atime, $life, $proto;
       }
