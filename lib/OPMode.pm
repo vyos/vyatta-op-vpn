@@ -853,7 +853,7 @@ sub display_ike_sa_brief {
       my $lip = $th{$connectid}->{_lip};
       $peerid = $th{$connectid}->{_peerid};
       my $tunnel = "$peerid-$lip";
-      
+      next if ($th{$connectid}->{_ikestate} eq 'down');
       if (not exists $tunhash{$tunnel}) {
         $tunhash{$tunnel}=[];
       }
@@ -877,8 +877,8 @@ EOH
       printf "%-39s %-39s\n", $peerid, $myid;
       print <<EOH;
 --------------------------------------- ----------------------------------------
-    Tunnel  State  ISAKMP#  Encrypt  Hash  NAT-T  A-Time  L-Time
-    ------  -----  -------  -------  ----  -----  ------  ------
+    State  Encrypt  Hash  NAT-T  A-Time  L-Time
+    -----  -------  ----  -----  ------  ------
 EOH
       for my $tunnel (tunSort(@{$tunhash{$connid}})){
         (my $tunnum, my $state, my $isakmpnum, my $enc, 
@@ -900,8 +900,8 @@ EOH
         }
         my $atime = $life - $expire;
         $atime = 0 if ($atime == $life);
-        printf "    %-7s %-6s %-8s %-8s %-5s %-6s %-7s %-7s\n",
-              $tunnum, $state, $isakmpnum, $encp, $hashp, $nattp, $atime, $life;
+        printf "    %-6s %-8s %-5s %-6s %-7s %-7s\n",
+               $state, $encp, $hashp, $nattp, $atime, $life;
       }
       print <<EOH;
 --------------------------------------------------------------------------------
