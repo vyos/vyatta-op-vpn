@@ -1,3 +1,10 @@
+vyatta-op-vpn (0.13.46) unstable; urgency=low
+
+  * Work on new IPsec operational mode script. Since protocol must be
+    the same on local and remote we can show it on the brief output
+
+ -- John Southworth <john.southworth@vyatta.com>  Fri, 04 Feb 2011 13:25:45 -0600
+
 vyatta-op-vpn (0.13.45) unstable; urgency=low
 
   * Work on new IPsec operational mode script. Cleanup output for
