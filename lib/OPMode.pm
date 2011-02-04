@@ -605,6 +605,7 @@ sub display_ipsec_sa_brief
                $th{$connectid}->{_encryption},
                $th{$connectid}->{_hash},
                $th{$connectid}->{_lifetime},
+               $th{$connectid}->{_lproto},
                $th{$connectid}->{_expire});
       push (@{$tunhash{"$tunnel"}->{_tunnels}}, [ @tmp ]);
       
@@ -618,12 +619,12 @@ EOH
       printf "%-39s %-39s\n", $peerid, $myid;
       print <<EOH;
 --------------------------------------- ----------------------------------------
-    Tunnel  State  Bytes Out/In   Encrypt  Hash  NAT-T  A-Time  L-Time  
-    ------  -----  -------------  -------  ----  -----  ------  ------  
+    Tunnel  State  Bytes Out/In   Encrypt  Hash  NAT-T  A-Time  L-Time  Proto
+    ------  -----  -------------  -------  ----  -----  ------  ------  -----
 EOH
       for my $tunnel (tunSort(@{$tunhash{$connid}->{_tunnels}})){
         (my $tunnum, my $state, my $inbytes, my $outbytes, 
-         my $enc, my $hash, my $life, my $expire) = @{$tunnel};
+         my $enc, my $hash, my $life, my $proto, my $expire) = @{$tunnel};
         my $lip = $tunhash{$connid}->{_lip};
         my $peerip = conv_ip($peerid);
         my $natt = $tunhash{$connid}->{_natt};
@@ -650,9 +651,9 @@ EOH
         }
         my $atime = $life - $expire;
         $atime = 0 if ($atime == $life);
-        printf "    %-7s %-6s %-14s %-8s %-5s %-6s %-7s %-7s\n",
+        printf "    %-7s %-6s %-14s %-8s %-5s %-6s %-7s %-7s %-2s\n",
               $tunnum, $state, $bytesp, $encp, $hashp, $nattp, 
-              $atime, $life;
+              $atime, $life, $proto;
       }
       print <<EOH;
 --------------------------------------------------------------------------------
