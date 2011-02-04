@@ -121,7 +121,10 @@ sub get_tunnel_info {
                   _rid         => 'n/a',
                   _lsnet       => 'n/a',
                   _rsnet       => 'n/a',
-                  _proto       => 'all',
+                  _lproto      => 'all',
+                  _rproto      => 'all',
+                  _lport       => 'all',
+                  _rport       => 'all',
                   _newestspi   => 'n/a',
                   _newestike   => 'n/a',
                   _encryption  => 'n/a',
@@ -191,12 +194,6 @@ sub get_tunnel_info {
         my $rid = $6;
         my $rproto = conv_protocol($7);
         my $rport = $8;
-        my $lprotoport;
-        my $rprotoport;
-        $lprotoport = $lproto if ($lport == 0);
-        $lprotoport = "$lproto/$lport" if ($lport != 0);
-        $rprotoport = $rproto if ($rport == 0);
-        $rprotoport = "$rproto/$rport" if ($rport != 0);
         ($lip, my $natt, my $natsrc, $rip, my $natdst) = nat_detect($lip, $rip);
         $tunnel_hash{$connectid}->{_lid} = conv_id($lid);
         $tunnel_hash{$connectid}->{_lip} = $lip;
@@ -205,7 +202,10 @@ sub get_tunnel_info {
         $tunnel_hash{$connectid}->{_natt} = $natt;
         $tunnel_hash{$connectid}->{_natsrc} = $natsrc;
         $tunnel_hash{$connectid}->{_natdst} = $natdst;
-        $tunnel_hash{$connectid}->{_proto} = "$lprotoport-$rprotoport";
+        $tunnel_hash{$connectid}->{_lproto} = "$lproto";
+        $tunnel_hash{$connectid}->{_rproto} = "$rproto";
+        $tunnel_hash{$connectid}->{_lport} = "$lport";
+        $tunnel_hash{$connectid}->{_rport} = "$rport";
       } 
       elsif ($line =~ /: (.*)===(.*?)\[(.*?)\]:(\d+)\/(\d+)...(.*?)\[(.*?)\]:(\d+)\/(\d+)===(.*?);/){
         my $lsnet = $1;
@@ -231,7 +231,10 @@ sub get_tunnel_info {
         $tunnel_hash{$connectid}->{_rid} = conv_id($rid);
         $tunnel_hash{$connectid}->{_rip} = $rip;
         $tunnel_hash{$connectid}->{_rsnet} = $rsnet;
-        $tunnel_hash{$connectid}->{_proto} = "$lprotoport-$rprotoport";
+        $tunnel_hash{$connectid}->{_lproto} = "$lproto";
+        $tunnel_hash{$connectid}->{_rproto} = "$rproto";
+        $tunnel_hash{$connectid}->{_lport} = "$lport";
+        $tunnel_hash{$connectid}->{_rport} = "$rport";
         $tunnel_hash{$connectid}->{_natt} = $natt;
         $tunnel_hash{$connectid}->{_natsrc} = $natsrc;
         $tunnel_hash{$connectid}->{_natdst} = $natdst;
@@ -602,8 +605,7 @@ sub display_ipsec_sa_brief
                $th{$connectid}->{_encryption},
                $th{$connectid}->{_hash},
                $th{$connectid}->{_lifetime},
-               $th{$connectid}->{_expire},
-               $th{$connectid}->{_proto} );
+               $th{$connectid}->{_expire});
       push (@{$tunhash{"$tunnel"}->{_tunnels}}, [ @tmp ]);
       
     }
@@ -616,12 +618,12 @@ EOH
       printf "%-39s %-39s\n", $peerid, $myid;
       print <<EOH;
 --------------------------------------- ----------------------------------------
-    Tunnel  State  Bytes Out/In   Encrypt  Hash  NAT-T  A-Time  L-Time  Proto
-    ------  -----  -------------  -------  ----  -----  ------  ------  -----
+    Tunnel  State  Bytes Out/In   Encrypt  Hash  NAT-T  A-Time  L-Time  
+    ------  -----  -------------  -------  ----  -----  ------  ------  
 EOH
       for my $tunnel (tunSort(@{$tunhash{$connid}->{_tunnels}})){
         (my $tunnum, my $state, my $inbytes, my $outbytes, 
-         my $enc, my $hash, my $life, my $expire, my $proto) = @{$tunnel};
+         my $enc, my $hash, my $life, my $expire) = @{$tunnel};
         my $lip = $tunhash{$connid}->{_lip};
         my $peerip = conv_ip($peerid);
         my $natt = $tunhash{$connid}->{_natt};
@@ -648,9 +650,9 @@ EOH
         }
         my $atime = $life - $expire;
         $atime = 0 if ($atime == $life);
-        printf "    %-7s %-6s %-14s %-8s %-5s %-6s %-7s %-7s %-2s\n",
+        printf "    %-7s %-6s %-14s %-8s %-5s %-6s %-7s %-7s\n",
               $tunnum, $state, $bytesp, $encp, $hashp, $nattp, 
-              $atime, $life, $proto;
+              $atime, $life;
       }
       print <<EOH;
 --------------------------------------------------------------------------------
@@ -696,7 +698,10 @@ sub display_ipsec_sa_detail
                $th{$connectid}->{_outbytes},
                $th{$connectid}->{_lifetime},
                $th{$connectid}->{_expire},
-               $th{$connectid}->{_proto} );
+               $th{$connectid}->{_lproto},
+               $th{$connectid}->{_rproto},
+               $th{$connectid}->{_lport},
+               $th{$connectid}->{_rport} );
       push (@{$tunhash{$tunnel}->{_tunnels}}, [ @tmp ]);
     }
     for my $connid (peerSort(keys %tunhash)){
@@ -707,7 +712,7 @@ sub display_ipsec_sa_detail
         $natt = "yes";
       }
       my $peerip = conv_ip($tunhash{$connid}->{_peerip});
-      print "----------\n";
+      print "------------------------------------------------------------------\n";
       print "Peer IP:\t\t$peerip\n";
       print "Peer ID:\t\t$tunhash{$connid}->{_peerid}\n";
       print "Local IP:\t\t$tunhash{$connid}->{_localip}\n";
@@ -715,10 +720,12 @@ sub display_ipsec_sa_detail
       print "NAT Traversal:\t\t$natt\n";
       print "NAT Source Port:\t$tunhash{$connid}->{_natsrc}\n";
       print "NAT Dest Port:\t\t$tunhash{$connid}->{_natdst}\n";
+      print "------------------------------------------------------------------\n";
       for my $tunnel (tunSort(@{$tunhash{$connid}->{_tunnels}})){
         (my $tunnum, my $state, my $inspi, my $outspi, my $enc,
          my $hash, my $pfsgrp, my $dhgrp, my $srcnet, my $dstnet,
-         my $inbytes, my $outbytes, my $life, my $expire, my $proto) = @{$tunnel};
+         my $inbytes, my $outbytes, my $life, my $expire, my $lproto,
+         my $rproto, my $lport, my $rport) = @{$tunnel};
         if ($enc =~ /(.*?)_.*?_(.*)/){
           $enc = lc($1).$2;
           $enc =~ s/^ //g;
@@ -759,22 +766,30 @@ sub display_ipsec_sa_detail
         $inbytes = conv_bytes($inbytes);
         $outbytes = conv_bytes($outbytes);
 
-        print "Tunnel $tunnum:\n";
-        print "    State:\t\t$state\n";
-        print "    Inbound SPI:\t$inspi\n";
-        print "    Outbound SPI:\t$outspi\n";
-        print "    Encryption:\t\t$enc\n";
-        print "    Hash:\t\t$hash\n";
-        print "    PFS Group:\t\t$pfs_group\n";
-        print "    DH Group:\t\t$dh_group\n";
-        print "    Local Net:\t\t$srcnet\n";
-        print "    Remote Net:\t\t$dstnet\n";
-        print "    Protocol:\t\t$proto\n";
-        print "    Inbound Bytes:\t$inbytes\n";
-        print "    Outbound Bytes:\t$outbytes\n";
-        print "    Active Time (s):\t$atime\n";
-        print "    Lifetime (s):\t$life\n";
+        print "    Tunnel $tunnum:\n";
+        print "        State:\t\t\t$state\n";
+        print "        Inbound SPI:\t\t$inspi\n";
+        print "        Outbound SPI:\t\t$outspi\n";
+        print "        Encryption:\t\t$enc\n";
+        print "        Hash:\t\t\t$hash\n";
+        print "        PFS Group:\t\t$pfs_group\n";
+        print "        DH Group:\t\t$dh_group\n";
+        print "        --------------------------------------------------------\n";
+        print "        Local Net:\t\t$srcnet\n";
+        print "        Local Protocol:\t\t$lproto\n";
+        print "        Local Port: \t\t$lport\n";
+        print "        --------------------------------------------------------\n";
+        print "        Remote Net:\t\t$dstnet\n";
+        print "        Remote Protocol:\t$rproto\n";
+        print "        Remote Port: \t\t$rport\n";
+        print "        --------------------------------------------------------\n";
+        print "        Inbound Bytes:\t\t$inbytes\n";
+        print "        Outbound Bytes:\t\t$outbytes\n";
+        print "        Active Time (s):\t$atime\n";
+        print "        Lifetime (s):\t\t$life\n";
+        print "    ------------------------------------------------------------\n";
       }
+      print "\n";
     }
 }
 
