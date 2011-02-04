@@ -1,0 +1,14 @@
+help: Show debugging information for a peer
+allowed: /opt/vyatta/bin/sudo-users/vyatta-op-vpn.pl --get-peers-for-cli
+run: if [ -n "$(cli-shell-api returnActiveValues \
+                  vpn ipsec ipsec-interfaces interface)" ]; then
+       if pgrep pluto > /dev/null
+       then
+        /opt/vyatta/bin/sudo-users/vyatta-vpn-op.pl --op=show-vpn-debug | grep peer-$5
+       else
+         echo IPsec process not running
+       fi
+     else
+        echo VPN ipsec not configured
+     fi
+

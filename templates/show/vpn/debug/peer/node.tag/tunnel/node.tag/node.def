@@ -1,0 +1,14 @@
+help: Show debugging information for a peer's tunnel
+allowed: /opt/vyatta/bin/sudo-users/vyatta-op-vpn.pl --get-conn-for-cli=${COMP_WORDS[4]}
+run: if [ -n "$(cli-shell-api returnActiveValues \
+                  vpn ipsec ipsec-interfaces interface)" ]; then
+       if pgrep pluto > /dev/null
+       then
+        /opt/vyatta/bin/sudo-users/vyatta-vpn-op.pl --op=show-vpn-debug | grep "peer-$5-tunnel-$7"
+       else
+         echo IPsec process not running
+       fi
+     else
+        echo VPN ipsec not configured
+     fi
+
