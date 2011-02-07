@@ -63,7 +63,12 @@ if ($op eq '') {
 
 if ($op eq 'clear-vpn-ipsec-process') {
 	print "Clearing IPsec process...\n";
-	system 'sudo /usr/sbin/ipsec restart >&/dev/null';
+  my $update_interval = `cli-shell-api returnActiveValue vpn ipsec auto-update`;
+  if ($update_interval eq ''){
+	  system 'sudo /usr/sbin/ipsec restart >&/dev/null';
+  } else {
+    system 'sudo /usr/sbin/ipsec restart --auto-update '.$update_interval.' >&/dev/null';
+  }
 
 } elsif ($op eq 'show-vpn-debug') {
 	system 'sudo /usr/sbin/ipsec statusall';
