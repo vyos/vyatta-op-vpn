@@ -1,3 +1,9 @@
+vyatta-op-vpn (0.13.49) unstable; urgency=low
+
+  * Fix filehandlers to conform to perl style guidelines
+
+ -- John Southworth <john.southworth@vyatta.com>  Mon, 07 Feb 2011 12:34:09 -0600
+
 vyatta-op-vpn (0.13.48) unstable; urgency=low
 
   * Allow debugging of specific peers and tunnels
