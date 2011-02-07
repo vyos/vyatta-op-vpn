@@ -97,10 +97,10 @@ sub nat_detect {
 }
 
 sub get_tunnel_info {
-  my $cmd = "sudo ipsec statusall |";
-  open(IPSECSTATUS, $cmd);
+  my $cmd = "sudo ipsec statusall";
+  open(my $IPSECSTATUS, ,'-|', $cmd);
   my @ipsecstatus = [];
-  while(<IPSECSTATUS>){
+  while(<$IPSECSTATUS>){
     push (@ipsecstatus, $_);
   }
   my %tunnel_hash = ();
@@ -295,10 +295,10 @@ sub get_tunnel_info {
 }
 sub get_conns
 {
-  my $cmd = "sudo cat /etc/ipsec.conf |";
-  open(IPSECCONF, $cmd);
+  my $cmd = "sudo cat /etc/ipsec.conf";
+  open(my $IPSECCONF, '-|', $cmd);
   my @ipsecconf = [];
-  while(<IPSECCONF>){
+  while(<$IPSECCONF>){
     push (@ipsecconf, $_);
   }
   my %th = ();
@@ -530,9 +530,9 @@ sub show_ike_secrets
     unless ( -r $secret_file) {
       die "No secrets file $secret_file\n";
     }   
-    open(DAT, $secret_file);
-    my @raw_data=<DAT>;
-    close(DAT);
+    open(my $DAT, '<', $secret_file);
+    my @raw_data=<$DAT>;
+    close($DAT);
     foreach my $line (@raw_data) {
       if ($line =~ /PSK/) {
         my ($lip, $pip, $lid, $pid, $secret) = ('', '', 'N/A', 'N/A', '');

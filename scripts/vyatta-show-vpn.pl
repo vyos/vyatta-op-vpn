@@ -38,9 +38,9 @@ if ($arg0 eq 'secrets') {
     unless ( -r $secret_file) {
 	die "No secrets file $secret_file\n";
     }
-    open(DAT, $secret_file);
-    my @raw_data=<DAT>;
-    close(DAT);
+    open(my $DAT, '<', $secret_file);
+    my @raw_data=<$DAT>;
+    close($DAT);
     print "Local           Peer            Local ID      Peer ID       Secret\n";
     print "--------        -------         --------      -------       ------\n";
     foreach my $line (@raw_data) {
