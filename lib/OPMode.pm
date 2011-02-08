@@ -175,6 +175,11 @@ sub get_tunnel_info {
         my $lid = $2;
         my $rip = $3;
         my $rid = $4;
+        my $lsnet;
+        if ($lip =~ /(.*?)===(.*)/){
+          $lsnet = $1;
+          $lip = $2;
+        }
         ($lip, my $natt, my $natsrc, $rip, my $natdst) = nat_detect($lip, $rip);
         $tunnel_hash{$connectid}->{_lid} = conv_id($lid);
         $tunnel_hash{$connectid}->{_lip} = $lip;
@@ -183,20 +188,26 @@ sub get_tunnel_info {
         $tunnel_hash{$connectid}->{_natt} = $natt;
         $tunnel_hash{$connectid}->{_natsrc} = $natsrc;
         $tunnel_hash{$connectid}->{_natdst} = $natdst;
-        }
+        $tunnel_hash{$connectid}->{_lsnet} = $lsnet if (defined($lsnet));
+      }
       elsif ($line =~ /: (.*?)\[(.*?)\]:(\d+)\/(\d+)...(.*?)\[(.*?)\]:(\d+)\/(\d+);/){
         my $lip = $1;
+        my $lsnet;
         my $lid = $2;
-        my $lproto = $3;
-        $lproto = conv_protocol($lproto);
+        my $lproto = conv_protocol($3);
         my $lport = $4;
         my $rip = $5;
         my $rid = $6;
         my $rproto = conv_protocol($7);
         my $rport = $8;
+        if ($lip =~ /(.*?)===(.*)/){
+          $lsnet = $1;
+          $lip = $2;
+        }
         ($lip, my $natt, my $natsrc, $rip, my $natdst) = nat_detect($lip, $rip);
         $tunnel_hash{$connectid}->{_lid} = conv_id($lid);
         $tunnel_hash{$connectid}->{_lip} = $lip;
+        $tunnel_hash{$connectid}->{_lsnet} = $lsnet if (defined($lsnet));
         $tunnel_hash{$connectid}->{_rid} = conv_id($rid);
         $tunnel_hash{$connectid}->{_rip} = $rip;
         $tunnel_hash{$connectid}->{_natt} = $natt;
