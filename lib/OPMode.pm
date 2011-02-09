@@ -125,6 +125,8 @@ sub get_tunnel_info {
                   _rproto      => 'all',
                   _lport       => 'all',
                   _rport       => 'all',
+                  _lca         => undef,
+                  _rca         => undef,
                   _newestspi   => 'n/a',
                   _newestike   => 'n/a',
                   _encryption  => 'n/a',
@@ -269,6 +271,10 @@ sub get_tunnel_info {
       elsif ($line =~ /ike_life: (.*?)s; ipsec_life: (.*?)s;/){
         $tunnel_hash{$connectid}->{_ikelife} = $1;
         $tunnel_hash{$connectid}->{_lifetime} = $2;
+      }
+      elsif ($line=~ /CAs: (.*?)\.\.\.(.*)/){
+        $tunnel_hash{$connectid}->{_lca} = $1;
+        $tunnel_hash{$connectid}->{_rca} = $2;
       }
       my $ike = $tunnel_hash{$connectid}->{_newestike};
       if (defined($ike)){
@@ -710,6 +716,8 @@ sub display_ipsec_sa_detail
                $th{$connectid}->{_outbytes},
                $th{$connectid}->{_lifetime},
                $th{$connectid}->{_expire},
+               $th{$connectid}->{_lca},
+               $th{$connectid}->{_rca},
                $th{$connectid}->{_lproto},
                $th{$connectid}->{_rproto},
                $th{$connectid}->{_lport},
@@ -724,11 +732,19 @@ sub display_ipsec_sa_detail
         $natt = "yes";
       }
       my $peerip = conv_ip($tunhash{$connid}->{_peerip});
+      my $localid = $tunhash{$connid}->{_localid};
+      if ($localid =~ /CN=(.*?),/){
+        $localid = $1;
+      }
+      my $peerid = $tunhash{$connid}->{_peerid};
+      if ($peerid =~ /CN=(.*?),/){
+        $peerid = $1;
+      }
       print "------------------------------------------------------------------\n";
       print "Peer IP:\t\t$peerip\n";
-      print "Peer ID:\t\t$tunhash{$connid}->{_peerid}\n";
+      print "Peer ID:\t\t$peerid\n";
       print "Local IP:\t\t$tunhash{$connid}->{_localip}\n";
-      print "Local ID:\t\t$tunhash{$connid}->{_localid}\n";
+      print "Local ID:\t\t$localid\n";
       print "NAT Traversal:\t\t$natt\n";
       print "NAT Source Port:\t$tunhash{$connid}->{_natsrc}\n";
       print "NAT Dest Port:\t\t$tunhash{$connid}->{_natdst}\n";
@@ -736,8 +752,8 @@ sub display_ipsec_sa_detail
       for my $tunnel (tunSort(@{$tunhash{$connid}->{_tunnels}})){
         (my $tunnum, my $state, my $inspi, my $outspi, my $enc,
          my $hash, my $pfsgrp, my $dhgrp, my $srcnet, my $dstnet,
-         my $inbytes, my $outbytes, my $life, my $expire, my $lproto,
-         my $rproto, my $lport, my $rport) = @{$tunnel};
+         my $inbytes, my $outbytes, my $life, my $expire, my $lca, 
+         my $rca, my $lproto, my $rproto, my $lport, my $rport) = @{$tunnel};
         if ($enc =~ /(.*?)_.*?_(.*)/){
           $enc = lc($1).$2;
           $enc =~ s/^ //g;
@@ -773,6 +789,7 @@ sub display_ipsec_sa_detail
         } else {
           $pfs_group = $pfsgrp;
         }
+        
         my $atime = $life - $expire;
         $atime = 0 if ($atime == $life);
         $inbytes = conv_bytes($inbytes);
@@ -786,6 +803,16 @@ sub display_ipsec_sa_detail
         print "        Hash:\t\t\t$hash\n";
         print "        PFS Group:\t\t$pfs_group\n";
         print "        DH Group:\t\t$dh_group\n";
+        if (defined $lca){
+        print "        --------------------------------------------------------\n";
+          print "        CA:\n";
+          foreach my $field (split(', ', $lca)){
+            $field=~s/\"//g;
+            print "            $field\n";
+          }
+        }
+        #print "        Local CA:\t\t$lca\n" if defined($lca);
+        #print "        Right CA:\t\t$rca\n" if defined($rca);
         print "        --------------------------------------------------------\n";
         print "        Local Net:\t\t$srcnet\n";
         print "        Local Protocol:\t\t$lproto\n";
