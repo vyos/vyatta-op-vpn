@@ -1,3 +1,9 @@
+vyatta-op-vpn (0.13.52) unstable; urgency=low
+
+  * Initial x509 for site-to-site ipsec vpn
+
+ -- John Southworth <john.southworth@vyatta.com>  Tue, 08 Feb 2011 19:06:49 -0600
+
 vyatta-op-vpn (0.13.51) unstable; urgency=low
 
   * Fix parsing  when only the left subnet is configured
