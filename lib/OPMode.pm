@@ -103,6 +103,22 @@ sub get_tunnel_info {
   while(<$IPSECSTATUS>){
     push (@ipsecstatus, $_);
   }
+  process_tunnels(\@ipsecstatus);
+}
+
+sub get_tunnel_info_peer {
+  my $peer = pop(@_);
+  my $cmd = "sudo ipsec statusall | grep peer-$peer-";
+  open(my $IPSECSTATUS, ,'-|', $cmd);
+  my @ipsecstatus = [];
+  while(<$IPSECSTATUS>){
+    push (@ipsecstatus, $_);
+  }
+  process_tunnels(\@ipsecstatus);
+}
+
+sub process_tunnels{
+  my @ipsecstatus = @{pop(@_)};
   my %tunnel_hash = ();
   foreach my $line (@ipsecstatus) {
     if (($line =~ /\"(peer-.*-tunnel-.*?)\"/)){
@@ -397,40 +413,26 @@ sub show_ipsec_sa_detail
 
 sub show_ipsec_sa_peer
 {
-    my %tunnel_hash = get_tunnel_info();
-    my %tmphash = ();
     my $peerid = pop(@_);
-    for my $peer ( keys %tunnel_hash ) {
-      if (%{$tunnel_hash{$peer}}->{_peerid} eq $peerid){
-        $tmphash{$peer} = \%{$tunnel_hash{$peer}};
-      }
-    }
-    display_ipsec_sa_brief(\%tmphash);
+    my %tunnel_hash = get_tunnel_info_peer($peerid);
+    display_ipsec_sa_brief(\%tunnel_hash);
 }
 
 sub show_ipsec_sa_stats_peer
 {
-    my %tunnel_hash = get_tunnel_info();
-    my %tmphash = ();
     my $peerid = pop(@_);
-    for my $peer ( keys %tunnel_hash ) {
-      if (%{$tunnel_hash{$peer}}->{_peerid} eq $peerid){
-        $tmphash{$peer} = \%{$tunnel_hash{$peer}};
-      }
-    }
-    display_ipsec_sa_stats(\%tmphash);
+    my %tunnel_hash = get_tunnel_info_peer($peerid);
+    display_ipsec_sa_stats(\%tunnel_hash);
 }
 
 sub show_ipsec_sa_stats_conn
 {
-    my %th = get_tunnel_info();
     my %tmphash = ();
     (my $peerid, my $tun) = @_;
+    my %th = get_tunnel_info_peer($peerid);
     for my $peer ( keys %th ) {
-      if ($th{$peer}->{_peerid} eq $peerid){
-        if ($th{$peer}->{_tunnelnum} eq $tun){
-          $tmphash{$peer} = \%{$th{$peer}};
-        }
+      if ($th{$peer}->{_tunnelnum} eq $tun){
+        $tmphash{$peer} = \%{$th{$peer}};
       }
     }
     display_ipsec_sa_stats(\%tmphash);
@@ -438,27 +440,19 @@ sub show_ipsec_sa_stats_conn
 
 sub show_ipsec_sa_peer_detail
 {
-    my %tunnel_hash = get_tunnel_info();
-    my %tmphash = ();
     my $peerid = pop(@_);
-    for my $peer ( keys %tunnel_hash ) {
-      if (%{$tunnel_hash{$peer}}->{_peerid} eq $peerid){
-        $tmphash{$peer} = \%{$tunnel_hash{$peer}};
-      }
-    }
-    display_ipsec_sa_detail(\%tmphash);
+    my %tunnel_hash = get_tunnel_info_peer($peerid);
+    display_ipsec_sa_detail(\%tunnel_hash);
 }
 
 sub show_ipsec_sa_conn_detail
 {
-    my %th = get_tunnel_info();
     my %tmphash = ();
     (my $peerid, my $tun) = @_;
+    my %th = get_tunnel_info_peer($peerid);
     for my $peer ( keys %th ) {
-      if ($th{$peer}->{_peerid} eq $peerid){
-        if ($th{$peer}->{_tunnelnum} eq $tun){
-          $tmphash{$peer} = \%{$th{$peer}};
-        }
+      if ($th{$peer}->{_tunnelnum} eq $tun){
+        $tmphash{$peer} = \%{$th{$peer}};
       }
     }
     display_ipsec_sa_detail(\%tmphash);
@@ -466,14 +460,12 @@ sub show_ipsec_sa_conn_detail
 
 sub show_ipsec_sa_conn
 {
-    my %th = get_tunnel_info();
     my %tmphash = ();
     (my $peerid, my $tun) = @_;
+    my %th = get_tunnel_info_peer($peerid);
     for my $peer ( keys %th ) {
-      if ($th{$peer}->{_peerid} eq $peerid){
-        if ($th{$peer}->{_tunnelnum} eq $tun){
-          $tmphash{$peer} = \%{$th{$peer}};
-        }
+      if ($th{$peer}->{_tunnelnum} eq $tun){
+        $tmphash{$peer} = \%{$th{$peer}};
       }
     }
     display_ipsec_sa_brief(\%tmphash);
@@ -481,13 +473,11 @@ sub show_ipsec_sa_conn
 
 sub get_connection_status
 {
-    my %th = get_tunnel_info();
     (my $peerid, my $tun) = @_;
+    my %th = get_tunnel_info_peer($peerid);
     for my $peer ( keys %th ) {
-      if (%{$th{$peer}}->{_peerid} eq $peerid){
-        if (%{$th{$peer}}->{_tunnelnum} eq $tun){
-          return %{$th{$peer}}->{_state};
-        }
+      if (%{$th{$peer}}->{_tunnelnum} eq $tun){
+        return %{$th{$peer}}->{_state};
       }
     }
 }
@@ -518,15 +508,9 @@ sub show_ipsec_sa_stats
 
 sub show_ike_sa_peer
 {
-    my %tunnel_hash = get_tunnel_info();
-    my %tmphash = ();
     my $peerid = pop(@_);
-    for my $peer ( keys %tunnel_hash ) {
-      if (%{$tunnel_hash{$peer}}->{_peerid} eq $peerid ){
-        $tmphash{$peer} = \%{$tunnel_hash{$peer}};
-      }
-    }
-    display_ike_sa_brief(\%tmphash);
+    my %tunnel_hash = get_tunnel_info_peer($peerid);
+    display_ike_sa_brief(\%tunnel_hash);
 }
 
 sub show_ike_sa_natt
