@@ -1,3 +1,9 @@
+vyatta-op-vpn (0.13.53) unstable; urgency=low
+
+  * Faster per peer/tunnel processing for operational mode commands
+
+ -- John Southworth <john.southworth@vyatta.com>  Thu, 10 Feb 2011 16:10:15 -0600
+
 vyatta-op-vpn (0.13.52) unstable; urgency=low
 
   * Initial x509 for site-to-site ipsec vpn
