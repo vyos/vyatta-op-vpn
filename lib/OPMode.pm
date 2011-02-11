@@ -562,18 +562,12 @@ sub show_ike_secrets
         $pip = '0.0.0.0' if ($pip eq '%any');
         print <<EOH;
 Local IP/ID                             Peer IP/ID                           
---------------------------------------- ---------------------------------------
+-----------                             -----------
 EOH
         printf "%-39s %-39s\n", $lip, $pip;
-        printf "%-39s %-39s\n", substr($lid,0,39), substr($pid,0,39);
-        print <<EOS;
---------------------------------------- ---------------------------------------
-EOS
+        printf "%-39s %-39s\n\n", substr($lid,0,39), substr($pid,0,39);
         print "    Secret: $secret\n";
-print <<EOS;
--------------------------------------------------------------------------------
-
-EOS
+        print "\n";
       }   
     }   
     exit 0;
@@ -614,12 +608,12 @@ sub display_ipsec_sa_brief
     for my $connid (peerSort (keys %tunhash)){
     print <<EOH;
 Peer ID / IP                            Local ID / IP               
---------------------------------------- ----------------------------------------
+------------                            -------------
 EOH
       (my $peerid, my $myid) = $connid =~ /(.*?)-(.*)/;
       printf "%-39s %-39s\n", $peerid, $myid;
       print <<EOH;
---------------------------------------- ----------------------------------------
+
     Tunnel  State  Bytes Out/In   Encrypt  Hash  NAT-T  A-Time  L-Time  Proto
     ------  -----  -------------  -------  ----  -----  ------  ------  -----
 EOH
@@ -656,10 +650,7 @@ EOH
               $tunnum, $state, $bytesp, $encp, $hashp, $nattp, 
               $atime, $life, $proto;
       }
-      print <<EOH;
---------------------------------------------------------------------------------
-
-EOH
+    print "\n\n";
     }
 }
 sub display_ipsec_sa_detail
@@ -732,7 +723,7 @@ sub display_ipsec_sa_detail
       print "NAT Traversal:\t\t$natt\n";
       print "NAT Source Port:\t$tunhash{$connid}->{_natsrc}\n";
       print "NAT Dest Port:\t\t$tunhash{$connid}->{_natdst}\n";
-      print "------------------------------------------------------------------\n";
+      print "\n";
       for my $tunnel (tunSort(@{$tunhash{$connid}->{_tunnels}})){
         (my $tunnum, my $state, my $inspi, my $outspi, my $enc,
          my $hash, my $pfsgrp, my $dhgrp, my $srcnet, my $dstnet,
@@ -788,7 +779,7 @@ sub display_ipsec_sa_detail
         print "        PFS Group:\t\t$pfs_group\n";
         print "        DH Group:\t\t$dh_group\n";
         if (defined $lca){
-        print "        --------------------------------------------------------\n";
+        print "        \n";
           print "        CA:\n";
           foreach my $field (split(', ', $lca)){
             $field=~s/\"//g;
@@ -797,20 +788,20 @@ sub display_ipsec_sa_detail
         }
         #print "        Local CA:\t\t$lca\n" if defined($lca);
         #print "        Right CA:\t\t$rca\n" if defined($rca);
-        print "        --------------------------------------------------------\n";
+        print "        \n";
         print "        Local Net:\t\t$srcnet\n";
         print "        Local Protocol:\t\t$lproto\n";
         print "        Local Port: \t\t$lport\n";
-        print "        --------------------------------------------------------\n";
+        print "        \n";
         print "        Remote Net:\t\t$dstnet\n";
         print "        Remote Protocol:\t$rproto\n";
         print "        Remote Port: \t\t$rport\n";
-        print "        --------------------------------------------------------\n";
+        print "        \n";
         print "        Inbound Bytes:\t\t$inbytes\n";
         print "        Outbound Bytes:\t\t$outbytes\n";
         print "        Active Time (s):\t$atime\n";
         print "        Lifetime (s):\t\t$life\n";
-        print "    ------------------------------------------------------------\n";
+        print "    \n";
       }
       print "\n";
     }
@@ -841,14 +832,14 @@ sub display_ipsec_sa_stats
     for my $connid (peerSort(keys %tunhash)){
     print <<EOH;
 Peer ID / IP                            Local ID / IP               
---------------------------------------- ----------------------------------------
+------------                            -------------
 EOH
       (my $peerid, my $myid) = $connid =~ /(.*?)-(.*)/;
       printf "%-39s %-39s\n", $peerid, $myid;
       print <<EOH;
---------------------------------------- ----------------------------------------
+
   Tunnel Dir Source Network               Destination Network          Bytes
-  ------ --- ---------------------------- ---------------------------- ---------
+  ------ --- --------------               -------------------          -----
 EOH
       for my $tunnel (tunSort(@{$tunhash{$connid}})){
         (my $tunnum, my $srcnet, my $dstnet, 
@@ -858,10 +849,7 @@ EOH
         printf "  %-6s %-3s %-28s %-28s %-8s\n",
 	      $tunnum, 'out', $srcnet, $dstnet, $outbytes;
       }
-      print <<EOH;
---------------------------------------------------------------------------------
-
-EOH
+      print "\n";
     }
 }
 
@@ -893,12 +881,12 @@ sub display_ike_sa_brief {
     for my $connid (peerSort(keys %tunhash)){
     print <<EOH;
 Peer ID / IP                            Local ID / IP               
---------------------------------------- ----------------------------------------
+------------                             -------------
 EOH
       (my $peerid, my $myid) = $connid =~ /(.*?)-(.*)/;
       printf "%-39s %-39s\n", $peerid, $myid;
       print <<EOH;
---------------------------------------- ----------------------------------------
+
     State  Encrypt  Hash  NAT-T  A-Time  L-Time
     -----  -------  ----  -----  ------  ------
 EOH
@@ -925,10 +913,7 @@ EOH
         printf "    %-6s %-8s %-5s %-6s %-7s %-7s\n",
                $state, $encp, $hashp, $nattp, $atime, $life;
       }
-      print <<EOH;
---------------------------------------------------------------------------------
-
-EOH
+      print "\n\n";
     }
 }
 1;
