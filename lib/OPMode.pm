@@ -881,7 +881,7 @@ sub display_ike_sa_brief {
     for my $connid (peerSort(keys %tunhash)){
     print <<EOH;
 Peer ID / IP                            Local ID / IP               
-------------                             -------------
+------------                            -------------
 EOH
       (my $peerid, my $myid) = $connid =~ /(.*?)-(.*)/;
       printf "%-39s %-39s\n", $peerid, $myid;
