@@ -1,3 +1,9 @@
+vyatta-op-vpn (0.13.54) unstable; urgency=low
+
+  *  Changed output of ipsec opmode to be cleaner
+
+ -- John Southworth <john.southworth@vyatta.com>  Fri, 11 Feb 2011 16:11:07 -0600
+
 vyatta-op-vpn (0.13.53) unstable; urgency=low
 
   * Faster per peer/tunnel processing for operational mode commands
