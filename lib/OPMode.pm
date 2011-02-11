@@ -567,7 +567,7 @@ EOH
         printf "%-39s %-39s\n", $lip, $pip;
         printf "%-39s %-39s\n\n", substr($lid,0,39), substr($pid,0,39);
         print "    Secret: $secret\n";
-        print "\n";
+        print "\n \n";
       }   
     }   
     exit 0;
@@ -650,7 +650,7 @@ EOH
               $tunnum, $state, $bytesp, $encp, $hashp, $nattp, 
               $atime, $life, $proto;
       }
-    print "\n\n";
+    print "\n \n";
     }
 }
 sub display_ipsec_sa_detail
@@ -849,7 +849,7 @@ EOH
         printf "  %-6s %-3s %-28s %-28s %-8s\n",
 	      $tunnum, 'out', $srcnet, $dstnet, $outbytes;
       }
-      print "\n";
+      print "\n \n";
     }
 }
 
@@ -913,7 +913,7 @@ EOH
         printf "    %-6s %-8s %-5s %-6s %-7s %-7s\n",
                $state, $encp, $hashp, $nattp, $atime, $life;
       }
-      print "\n\n";
+      print "\n \n";
     }
 }
 1;
