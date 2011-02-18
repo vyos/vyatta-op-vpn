@@ -97,6 +97,7 @@ sub nat_detect {
 }
 
 sub get_tunnel_info {
+  #my $cmd = "cat /home/vyatta/test.txt";
   my $cmd = "sudo ipsec statusall";
   open(my $IPSECSTATUS, ,'-|', $cmd);
   my @ipsecstatus = [];
@@ -108,6 +109,7 @@ sub get_tunnel_info {
 
 sub get_tunnel_info_peer {
   my $peer = pop(@_);
+  #my $cmd = "cat /home/vyatta/test.txt | grep peer-$peer";
   my $cmd = "sudo ipsec statusall | grep peer-$peer-";
   open(my $IPSECSTATUS, ,'-|', $cmd);
   my @ipsecstatus = [];
@@ -281,8 +283,20 @@ sub process_tunnels{
         $tunnel_hash{$connectid}->{_ikestate} = "init";
       }
       elsif ($line =~ /newest ISAKMP SA: (.*); newest IPsec SA: (.*);/){
-        $tunnel_hash{$connectid}->{_newestike} = $1;
-        $tunnel_hash{$connectid}->{_newestspi} = $2;
+        if ($tunnel_hash{$connectid}->{_newestike} ne 'n/a'){
+          if ($tunnel_hash{$connectid}->{_newestike} lt $1){
+            $tunnel_hash{$connectid}->{_newestike} = $1;
+          }
+        } else {
+          $tunnel_hash{$connectid}->{_newestike} = $1;
+        } 
+        if ($tunnel_hash{$connectid}->{_newestspi} ne 'n/a'){
+          if ($tunnel_hash{$connectid}->{newestspi} lt $2){
+            $tunnel_hash{$connectid}->{_newestspi} = $2;
+          }
+        } else {
+          $tunnel_hash{$connectid}->{_newestspi} = $2;
+        }
       }
       elsif ($line =~ /ike_life: (.*?)s; ipsec_life: (.*?)s;/){
         $tunnel_hash{$connectid}->{_ikelife} = $1;
@@ -293,8 +307,17 @@ sub process_tunnels{
         $tunnel_hash{$connectid}->{_rca} = $2;
       }
       my $ike = $tunnel_hash{$connectid}->{_newestike};
-      if (defined($ike)){
+      if ($ike ne 'n/a'){
         if ($line =~ /$ike:.*ISAKMP.SA.established.*EVENT_SA_REPLACE.in.(.*?)s;/)
+        {
+          $tunnel_hash{$connectid}->{_ikeexpire} = $1;
+          my $atime = $tunnel_hash{$connectid}->{_ikelife} - 
+                      $tunnel_hash{$connectid}->{_ikeexpire};
+          if ($atime >= 0){
+            $tunnel_hash{$connectid}->{_ikestate} = "up";
+          }
+        }
+        if ($line =~ /$ike:.*ISAKMP.SA.established.*EVENT_SA_EXPIRE.in.(.*?)s;/)
         {
           $tunnel_hash{$connectid}->{_ikeexpire} = $1;
           my $atime = $tunnel_hash{$connectid}->{_ikelife} - 
@@ -305,7 +328,7 @@ sub process_tunnels{
         }
       }
       my $spi = $tunnel_hash{$connectid}->{_newestspi};
-      if (defined($spi)){
+      if ($spi ne 'n/a'){
         if ($line =~ /$spi:.*esp.(.*)\@.*\((.*)bytes.*esp.(.*)\@.*\((.*)bytes/)
         {
           $tunnel_hash{$connectid}->{_outspi} = $1;
@@ -314,6 +337,14 @@ sub process_tunnels{
           $tunnel_hash{$connectid}->{_inbytes} = $4;
         }
         if ($line =~ /$spi:.*?EVENT_SA_REPLACE in (.*?)s;/){
+          $tunnel_hash{$connectid}->{_expire} = $1;
+          my $atime = $tunnel_hash{$connectid}->{_lifetime} - 
+                      $tunnel_hash{$connectid}->{_expire};
+          if ($atime >= 0){
+            $tunnel_hash{$connectid}->{_state} = "up";
+          } 
+        }
+        if ($line =~ /$spi:.*?EVENT_SA_EXPIRE in (.*?)s;/){
           $tunnel_hash{$connectid}->{_expire} = $1;
           my $atime = $tunnel_hash{$connectid}->{_lifetime} - 
                       $tunnel_hash{$connectid}->{_expire};
@@ -581,7 +612,7 @@ sub display_ipsec_sa_brief
     my $myid = undef;
     my $peerid = undef;
     for my $connectid (keys %th){  
-      $peerid = $th{$connectid}->{_peerid};
+      $peerid = $th{$connectid}->{_rip};
       my $lip = $th{$connectid}->{_lip};
       my $tunnel = "$peerid-$lip";
         
@@ -662,7 +693,7 @@ sub display_ipsec_sa_detail
     my $peerid = undef;
     for my $connectid (keys %th){  
       my $lip = $th{$connectid}->{_lip};
-      $peerid = $th{$connectid}->{_peerid};
+      $peerid = $th{$connectid}->{_rip};
       my $tunnel = "$peerid-$lip";
       
       if (not exists $tunhash{$tunnel}) {
@@ -816,7 +847,7 @@ sub display_ipsec_sa_stats
     my $peerid = undef;
     for my $connectid (keys %th){  
       my $lip = $th{$connectid}->{_lip};
-      $peerid = $th{$connectid}->{_peerid};
+      $peerid = $th{$connectid}->{_rip};
       my $tunnel = "$peerid-$lip";
       
       if (not exists $tunhash{$tunnel}) {
@@ -861,7 +892,7 @@ sub display_ike_sa_brief {
     my $peerid = undef;
     for my $connectid (keys %th){  
       my $lip = $th{$connectid}->{_lip};
-      $peerid = $th{$connectid}->{_peerid};
+      $peerid = $th{$connectid}->{_rip};
       my $tunnel = "$peerid-$lip";
       next if ($th{$connectid}->{_ikestate} eq 'down');
       if (not exists $tunhash{$tunnel}) {
