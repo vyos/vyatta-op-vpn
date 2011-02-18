@@ -1,3 +1,9 @@
+vyatta-op-vpn (0.13.57) unstable; urgency=low
+
+  * Fix a special case where the peer is 0.0.0.0 for op-mode commands
+
+ -- John Southworth <john.southworth@vyatta.com>  Fri, 18 Feb 2011 16:51:02 -0600
+
 vyatta-op-vpn (0.13.56) unstable; urgency=low
 
   * Make spacing between peers more noticable
