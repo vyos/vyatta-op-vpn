@@ -40,6 +40,53 @@ sub conv_id {
   }
   return $peer;
 }
+
+sub conv_dh_group {
+  my $dhgrp = pop(@_);
+  my $dh_group = '';
+  if ($dhgrp eq "MODP_768"){
+    $dh_group = 1;
+  } elsif ($dhgrp eq "MODP_1024"){
+    $dh_group = 2;
+  } elsif ($dhgrp eq "MODP_1536"){
+    $dh_group = 5;
+  } elsif ($dhgrp eq "MODP_2048"){
+    $dh_group = 7;
+  } elsif ($dhgrp eq "<N/A>"){
+    $dh_group = "n/a";
+  } else {
+    $dh_group = $dhgrp;
+  }
+  return $dh_group;
+}
+
+sub conv_hash {
+  my $hash = pop(@_);
+  if ($hash =~ /.*_(.*)/){
+    $hash = lc($1);
+  }
+  return $hash;
+}
+
+sub conv_enc {
+  my $enc = pop(@_);
+  if ($enc =~ /(.*?)_.*?_(.*)/){
+    $enc = lc($1).$2;
+    $enc =~ s/^ //g;
+  }
+  return $enc;
+}
+
+sub conv_natt {
+  my $natt = pop(@_);
+  if ($natt == 0){
+    $natt = "no";
+  } else {
+    $natt = "yes";
+  }
+  return $natt;
+}
+
 sub conv_id_rev
 {
   my $peerid = pop(@_);
@@ -654,22 +701,10 @@ EOH
         my $lip = $tunhash{$connid}->{_lip};
         my $peerip = conv_ip($peerid);
         my $natt = $tunhash{$connid}->{_natt};
-        my $encp = "n/a";
-        my $hashp = "n/a";
-        my $nattp = "";
         my $bytesp = 'n/a';
-        if ($enc =~ /(.*?)_.*?_(.*)/){
-          $encp = lc($1).$2;
-          $encp =~ s/^ //g;
-        }
-        if ($hash =~ /.*_(.*)/){
-          $hashp = lc($1);
-        }
-        if ($natt == 0){
-          $nattp = "no";
-        } else {
-          $nattp = "yes";
-        }
+        $enc = conv_enc($enc);
+        $hash = conv_hash($hash);
+        $natt = conv_natt($natt);
         if (!($inbytes eq 'n/a' && $outbytes eq 'n/a')){
           $outbytes = conv_bytes($outbytes);
           $inbytes = conv_bytes($inbytes);
@@ -678,7 +713,7 @@ EOH
         my $atime = $life - $expire;
         $atime = 0 if ($atime == $life);
         printf "    %-7s %-6s %-14s %-8s %-5s %-6s %-7s %-7s %-2s\n",
-              $tunnum, $state, $bytesp, $encp, $hashp, $nattp, 
+              $tunnum, $state, $bytesp, $enc, $hash, $natt, 
               $atime, $life, $proto;
       }
     print "\n \n";
@@ -731,12 +766,7 @@ sub display_ipsec_sa_detail
       push (@{$tunhash{$tunnel}->{_tunnels}}, [ @tmp ]);
     }
     for my $connid (peerSort(keys %tunhash)){
-      my $natt = "";
-      if ($tunhash{$connid}->{_natt} == 0){
-        $natt = "no";
-      } else {
-        $natt = "yes";
-      }
+      my $natt = conv_natt($tunhash{$connid}->{_natt});
       my $peerip = conv_ip($tunhash{$connid}->{_peerip});
       my $localid = $tunhash{$connid}->{_localid};
       if ($localid =~ /CN=(.*?),/){
@@ -760,41 +790,12 @@ sub display_ipsec_sa_detail
          my $hash, my $pfsgrp, my $dhgrp, my $srcnet, my $dstnet,
          my $inbytes, my $outbytes, my $life, my $expire, my $lca, 
          my $rca, my $lproto, my $rproto, my $lport, my $rport) = @{$tunnel};
-        if ($enc =~ /(.*?)_.*?_(.*)/){
-          $enc = lc($1).$2;
-          $enc =~ s/^ //g;
-        }
-        if ($hash =~ /.*_(.*)/){
-          $hash = lc($1);
-        }
-        my $dh_group = "";
-        if ($dhgrp eq "MODP_768"){
-          $dh_group = 1;
-        } elsif ($dhgrp eq "MODP_1024"){
-          $dh_group = 2;
-        } elsif ($dhgrp eq "MODP_1536"){
-          $dh_group = 5;
-        } elsif ($dhgrp eq "MODP_2048"){
-          $dh_group = 7;
-        } elsif ($dhgrp eq "<N/A>"){
-          $dh_group = "n/a";
-        } else {
-          $dh_group = $dhgrp;
-        }
-        my $pfs_group = "";
-        if ($pfsgrp eq "MODP_768"){
-          $pfs_group = 1;
-        } elsif ($pfsgrp eq "MODP_1024"){
-          $pfs_group = 2;
-        } elsif ($pfsgrp eq "MODP_1536"){
-          $pfs_group = 5;
-        } elsif ($pfsgrp eq "MODP_2048"){
-          $pfs_group = 7;
-        } elsif ($pfsgrp eq "<N/A>"){
-          $pfs_group = "n/a";
-        } else {
-          $pfs_group = $pfsgrp;
-        }
+        $enc = conv_enc($enc);
+        $hash = conv_hash($hash);
+        $lport = 'all' if ($lport eq '0');
+        $rport = 'all' if ($rport eq '0');
+        $dhgrp = conv_dh_group($dhgrp);
+        $pfsgrp = conv_dh_group($pfsgrp);
         
         my $atime = $life - $expire;
         $atime = 0 if ($atime == $life);
@@ -807,8 +808,8 @@ sub display_ipsec_sa_detail
         print "        Outbound SPI:\t\t$outspi\n";
         print "        Encryption:\t\t$enc\n";
         print "        Hash:\t\t\t$hash\n";
-        print "        PFS Group:\t\t$pfs_group\n";
-        print "        DH Group:\t\t$dh_group\n";
+        print "        PFS Group:\t\t$pfsgrp\n";
+        print "        DH Group:\t\t$dhgrp\n";
         if (defined $lca){
         print "        \n";
           print "        CA:\n";
@@ -924,25 +925,13 @@ EOH
       for my $tunnel (tunSort(@{$tunhash{$connid}})){
         (my $tunnum, my $state, my $isakmpnum, my $enc, 
          my $hash, my $natt, my $life, my $expire) = @{$tunnel};
-        my $encp = "n/a";
-        my $hashp = "n/a";
-        my $nattp = "";
-        if ($enc =~ /(.*?)_.*?_(.*)/){
-          $encp = lc($1).$2;
-          $encp =~ s/^ //g;
-        }
-        if ($hash =~ /.*_(.*)/){
-          $hashp = lc($1);
-        }
-        if ($natt == 0){
-          $nattp = "no";
-        } else {
-          $nattp = "yes";
-        }
+        $enc = conv_enc($enc);
+        $hash = conv_hash($hash);
+        $natt = conv_natt($natt);
         my $atime = $life - $expire;
         $atime = 0 if ($atime == $life);
         printf "    %-6s %-8s %-5s %-6s %-7s %-7s\n",
-               $state, $encp, $hashp, $nattp, $atime, $life;
+               $state, $enc, $hash, $natt, $atime, $life;
       }
       print "\n \n";
     }
