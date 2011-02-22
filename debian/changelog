@@ -1,3 +1,9 @@
+vyatta-op-vpn (0.13.59) unstable; urgency=low
+
+  * Remove old op mode commands from build
+
+ -- John Southworth <john.southworth@vyatta.com>  Tue, 22 Feb 2011 16:53:19 -0600
+
 vyatta-op-vpn (0.13.58) unstable; urgency=low
 
   * Clean up some duplicate code in OPMode module
