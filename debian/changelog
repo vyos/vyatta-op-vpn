@@ -1,3 +1,9 @@
+vyatta-op-vpn (0.13.58) unstable; urgency=low
+
+  * Clean up some duplicate code in OPMode module
+
+ -- John Southworth <john.southworth@vyatta.com>  Tue, 22 Feb 2011 12:45:45 -0600
+
 vyatta-op-vpn (0.13.57) unstable; urgency=low
 
   * Fix a special case where the peer is 0.0.0.0 for op-mode commands
