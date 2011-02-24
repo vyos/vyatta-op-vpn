@@ -35,6 +35,8 @@ sub conv_id {
     $peer = $peer;
   } elsif ($peer =~ /\d+\:\d+\:\d+\:\d+\:\d+\:\d+\:\d+\:\d+/){
     $peer = $peer;
+  } elsif ($peer =~ /\%any/){
+    $peer = "any";
   } else {
     $peer = "\@$peer";
   }
@@ -219,7 +221,7 @@ sub process_tunnels{
         $tunnel_hash{$connectid}->{_ikehash} = $2;
         $tunnel_hash{$connectid}->{_dhgrp} = $3;
       }
-      elsif ($line =~ /: (.*?)===(.*?)\[(.*?)\]...(.*?)\[(.*?)\]===(.*?);/){
+      elsif ($line =~ /: (.*?)===(.*?)\[(.*?)\].*\.\.\.(.*?)\[(.*?)\]===(.*?);/){
         my $lsnet = $1;
         my $lip = $2;
         my $lid = $3;
@@ -237,7 +239,7 @@ sub process_tunnels{
         $tunnel_hash{$connectid}->{_natsrc} = $natsrc;
         $tunnel_hash{$connectid}->{_natdst} = $natdst;
       }
-      elsif ($line =~ /: (.*?)\[(.*?)\]...(.*?)\[(.*?)\];/){
+      elsif ($line =~ /: (.*?)\[(.*?)\].*\.\.\.(.*?)\[(.*?)\];/){
         my $lip = $1;
         my $lid = $2;
         my $rip = $3;
@@ -257,7 +259,7 @@ sub process_tunnels{
         $tunnel_hash{$connectid}->{_natdst} = $natdst;
         $tunnel_hash{$connectid}->{_lsnet} = $lsnet if (defined($lsnet));
       }
-      elsif ($line =~ /: (.*?)\[(.*?)\]:(\d+)\/(\d+)...(.*?)\[(.*?)\]:(\d+)\/(\d+);/){
+      elsif ($line =~ /: (.*?)\[(.*?)\]:(\d+)\/(\d+).*\.\.\.(.*?)\[(.*?)\]:(\d+)\/(\d+);/){
         my $lip = $1;
         my $lsnet;
         my $lid = $2;
@@ -285,7 +287,7 @@ sub process_tunnels{
         $tunnel_hash{$connectid}->{_lport} = "$lport";
         $tunnel_hash{$connectid}->{_rport} = "$rport";
       } 
-      elsif ($line =~ /: (.*)===(.*?)\[(.*?)\]:(\d+)\/(\d+)...(.*?)\[(.*?)\]:(\d+)\/(\d+)===(.*?);/){
+      elsif ($line =~ /: (.*)===(.*?)\[(.*?)\]:(\d+)\/(\d+).*\.\.\.(.*?)\[(.*?)\]:(\d+)\/(\d+)===(.*?);/){
         my $lsnet = $1;
         my $lip = $2;
         my $lid = $3;
@@ -659,8 +661,8 @@ sub display_ipsec_sa_brief
     my $myid = undef;
     my $peerid = undef;
     for my $connectid (keys %th){  
-      $peerid = $th{$connectid}->{_rip};
-      my $lip = $th{$connectid}->{_lip};
+      $peerid = conv_ip($th{$connectid}->{_rip});
+      my $lip = conv_ip($th{$connectid}->{_lip});
       my $tunnel = "$peerid-$lip";
         
       if (not exists $tunhash{$tunnel}) {
@@ -727,8 +729,8 @@ sub display_ipsec_sa_detail
     my $myid = undef;
     my $peerid = undef;
     for my $connectid (keys %th){  
-      my $lip = $th{$connectid}->{_lip};
-      $peerid = $th{$connectid}->{_rip};
+      my $lip = conv_ip($th{$connectid}->{_lip});
+      $peerid = conv_ip($th{$connectid}->{_rip});
       my $tunnel = "$peerid-$lip";
       
       if (not exists $tunhash{$tunnel}) {
@@ -847,8 +849,8 @@ sub display_ipsec_sa_stats
     my $myid = undef;
     my $peerid = undef;
     for my $connectid (keys %th){  
-      my $lip = $th{$connectid}->{_lip};
-      $peerid = $th{$connectid}->{_rip};
+      my $lip = conv_ip($th{$connectid}->{_lip});
+      $peerid = conv_ip($th{$connectid}->{_rip});
       my $tunnel = "$peerid-$lip";
       
       if (not exists $tunhash{$tunnel}) {
