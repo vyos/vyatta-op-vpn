@@ -32,7 +32,7 @@ use strict;
 my ($get_peers_for_cli, $get_conn_for_cli, $show_ipsec_sa, $show_ipsec_sa_detail,
     $show_ipsec_sa_peer, $show_ipsec_sa_peer_detail, $show_ipsec_sa_natt, 
     $show_ipsec_sa_stats, $show_ipsec_sa_stats_peer, $show_ike_sa, 
-    $show_ike_sa_peer, $show_ike_sa_natt, $show_ike_secrets);
+    $show_ike_sa_peer, $show_ike_sa_natt, $show_ike_secrets, $show_ike_status);
 my @show_ipsec_sa_stats_conn;
 my @show_ipsec_sa_conn_detail;
 my @show_ipsec_sa_conn;
@@ -52,6 +52,7 @@ GetOptions("show-ipsec-sa!"                 => \$show_ipsec_sa,
            "show-ike-sa!"                   => \$show_ike_sa,
            "show-ike-sa-peer=s"             => \$show_ike_sa_peer,
            "show-ike-sa-natt!"              => \$show_ike_sa_natt,
+           "show-ike-status!"               => \$show_ike_status,
            "show-ike-secrets!"              => \$show_ike_secrets);
 
 if (defined $get_peers_for_cli) {
@@ -92,6 +93,9 @@ if (defined @show_ipsec_sa_stats_conn) {
 }
 if (defined $show_ike_sa) {
   Vyatta::VPN::OPMode::show_ike_sa;
+}
+if (defined $show_ike_status) {
+  Vyatta::VPN::OPMode::show_ike_status;
 }
 if (defined $show_ike_sa_peer) {
   Vyatta::VPN::OPMode::show_ike_sa_peer($show_ike_sa_peer);

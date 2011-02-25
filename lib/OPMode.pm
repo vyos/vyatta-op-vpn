@@ -573,6 +573,18 @@ sub show_ipsec_sa_natt
     }
     display_ipsec_sa_brief(\%tmphash);
 }
+sub show_ike_status{
+  my $process_id = `sudo cat /var/run/pluto.pid`;
+  chomp $process_id;
+
+  print <<EOS;
+IKE Process Running 
+
+PID: $process_id
+
+EOS
+  exit 0;
+}
 
 sub show_ike_sa
 {
