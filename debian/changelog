@@ -1,3 +1,9 @@
+vyatta-op-vpn (0.13.61) unstable; urgency=low
+
+  * Make 'show vpn ipsec status' aware of the dhcp-interface option
+
+ -- John Southworth <john.southworth@vyatta.com>  Thu, 24 Feb 2011 19:22:32 -0600
+
 vyatta-op-vpn (0.13.60) unstable; urgency=low
 
   * Fix case where local-ip is 0.0.0.0
