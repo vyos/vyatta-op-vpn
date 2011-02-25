@@ -1,3 +1,9 @@
+vyatta-op-vpn (0.13.62) unstable; urgency=low
+
+  * Fix 'show vpn ike status'
+
+ -- John Southworth <john.southworth@vyatta.com>  Fri, 25 Feb 2011 16:01:54 -0600
+
 vyatta-op-vpn (0.13.61) unstable; urgency=low
 
   * Make 'show vpn ipsec status' aware of the dhcp-interface option
