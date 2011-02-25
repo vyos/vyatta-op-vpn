@@ -49,6 +49,16 @@ sub get_vpn_all_localips {
   @vpn_peers = $config->listOrigNodes('peer');
   foreach my $peer (@vpn_peers) {
     my $local_ip = $config->returnOrigValue("peer $peer local-ip");
+    if (!defined($local_ip)){
+      my $dhcpif =  $config->returnOrigValue("peer $peer dhcp-interface");
+      if (defined($dhcpif)){
+        $local_ip = (Vyatta::Misc::getIP($dhcpif, 4))[0];
+        if (defined($local_ip)){
+          $local_ip = (split(/\//,$local_ip))[0];
+        }
+      }
+      $local_ip = ' ' if !defined($local_ip);
+    }
     push @local_ips, $local_ip;
   }
   return @local_ips;
@@ -75,6 +85,8 @@ sub relate_intfs_with_localips {
           print "(no IP on interface statically configured as local-ip for any VPN peer)";
         }
         print "\n";
+      } else {
+        print "( )";
       }
     }
   }
