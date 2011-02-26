@@ -569,6 +569,9 @@ sub get_peer_ike_status
       if (%{$th{$peer}}->{_ikestate} eq 'up'){
         return 'up';    
       }
+      if (%{$th{$peer}}->{_ikestate} eq 'init'){
+        return 'init';    
+      }
     }
     return 'down';
 }
