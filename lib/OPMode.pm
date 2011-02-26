@@ -561,6 +561,17 @@ sub get_connection_status
       }
     }
 }
+sub get_peer_ike_status
+{
+    my ($peerid) = @_;
+    my %th = get_tunnel_info_peer($peerid);
+    for my $peer ( keys %th ) {
+      if (%{$th{$peer}}->{_ikestate} eq 'up'){
+        return 'up';    
+      }
+    }
+    return 'down';
+}
 
 sub show_ipsec_sa_natt
 {
