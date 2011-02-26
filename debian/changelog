@@ -1,3 +1,10 @@
+vyatta-op-vpn (0.13.63) unstable; urgency=low
+
+  * add a function to get the ike state of a peer
+  * add a function to get the ike state of a peer
+
+ -- John Southworth <john.southworth@vyatta.com>  Fri, 25 Feb 2011 18:38:13 -0600
+
 vyatta-op-vpn (0.13.62) unstable; urgency=low
 
   * Fix 'show vpn ike status'
