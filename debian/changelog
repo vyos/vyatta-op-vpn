@@ -1,3 +1,10 @@
+vyatta-op-vpn (0.13.65) unstable; urgency=low
+
+  * Diffie-Hellman group is an ike parameter, moving it to the peer
+    level of the detailed ipsec output
+
+ -- John Southworth <john.southworth@vyatta.com>  Mon, 28 Feb 2011 17:19:20 -0600
+
 vyatta-op-vpn (0.13.64) unstable; urgency=low
 
   * Print description for a peer from the configuration if it is
