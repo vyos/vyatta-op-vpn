@@ -27,6 +27,7 @@ package Vyatta::VPN::OPMode;
 
 use lib "/opt/vyatta/share/perl5/";
 use Vyatta::VPN::Util;
+use Vyatta::Config;
 use strict;
 
 sub conv_id {
@@ -686,16 +687,19 @@ sub display_ipsec_sa_brief
     my %tunhash = ();
     my $myid = undef;
     my $peerid = undef;
+    my $vpncfg = new Vyatta::Config();
+    $vpncfg->setLevel('vpn ipsec site-to-site');
     for my $connectid (keys %th){  
       $peerid = conv_ip($th{$connectid}->{_rip});
       my $lip = conv_ip($th{$connectid}->{_lip});
       my $tunnel = "$peerid-$lip";
-        
+      my $peer_configured = conv_id_rev($th{$connectid}->{_peerid});
       if (not exists $tunhash{$tunnel}) {
         $tunhash{$tunnel} = {
           _outspi  => $th{$connectid}->{_outspi},
           _natt  => $th{$connectid}->{_natt},
           _lip  => $lip,
+          _peerid => $peer_configured,
           _tunnels => []
         };
       }
@@ -718,6 +722,8 @@ Peer ID / IP                            Local ID / IP
 EOH
       (my $peerid, my $myid) = $connid =~ /(.*?)-(.*)/;
       printf "%-39s %-39s\n", $peerid, $myid;
+      my $desc = $vpncfg->returnEffectiveValue("peer $tunhash{$connid}->{_peerid} description");
+      print "\n    Description: $desc\n" if (defined($desc));
       print <<EOH;
 
     Tunnel  State  Bytes Out/In   Encrypt  Hash  NAT-T  A-Time  L-Time  Proto
@@ -754,6 +760,8 @@ sub display_ipsec_sa_detail
     my %tunhash = ();
     my $myid = undef;
     my $peerid = undef;
+    my $vpncfg = new Vyatta::Config();
+    $vpncfg->setLevel('vpn ipsec site-to-site');
     for my $connectid (keys %th){  
       my $lip = conv_ip($th{$connectid}->{_lip});
       $peerid = conv_ip($th{$connectid}->{_rip});
@@ -763,6 +771,7 @@ sub display_ipsec_sa_detail
         $tunhash{$tunnel} = {
           _peerip      => $th{$connectid}->{_rip},
           _peerid      => $th{$connectid}->{_rid},
+          _configpeer  => conv_id_rev($th{$connectid}->{_peerid}),
           _localip     => $th{$connectid}->{_lip},
           _localid     => $th{$connectid}->{_lid},
           _natt        => $th{$connectid}->{_natt},
@@ -804,6 +813,7 @@ sub display_ipsec_sa_detail
       if ($peerid =~ /CN=(.*?),/){
         $peerid = $1;
       }
+      my $desc = $vpncfg->returnEffectiveValue("peer $tunhash{$connid}->{_configpeer} description");
       print "------------------------------------------------------------------\n";
       print "Peer IP:\t\t$peerip\n";
       print "Peer ID:\t\t$peerid\n";
@@ -812,6 +822,7 @@ sub display_ipsec_sa_detail
       print "NAT Traversal:\t\t$natt\n";
       print "NAT Source Port:\t$tunhash{$connid}->{_natsrc}\n";
       print "NAT Dest Port:\t\t$tunhash{$connid}->{_natdst}\n";
+      print "\nDescription:\t\t$desc\n" if (defined($desc));
       print "\n";
       for my $tunnel (tunSort(@{$tunhash{$connid}->{_tunnels}})){
         (my $tunnum, my $state, my $inspi, my $outspi, my $enc,
@@ -874,20 +885,25 @@ sub display_ipsec_sa_stats
     my %tunhash = ();
     my $myid = undef;
     my $peerid = undef;
+    my $vpncfg = new Vyatta::Config();
+    $vpncfg->setLevel('vpn ipsec site-to-site');
     for my $connectid (keys %th){  
       my $lip = conv_ip($th{$connectid}->{_lip});
       $peerid = conv_ip($th{$connectid}->{_rip});
       my $tunnel = "$peerid-$lip";
       
       if (not exists $tunhash{$tunnel}) {
-        $tunhash{$tunnel}=[];
+        $tunhash{$tunnel}={
+          _configpeer  => conv_id_rev($th{$connectid}->{_peerid}),
+          _tunnels     => []
+        };
       }
         my @tmp = ( $th{$connectid}->{_tunnelnum},
                $th{$connectid}->{_lsnet},
                $th{$connectid}->{_rsnet},
                $th{$connectid}->{_inbytes},
                $th{$connectid}->{_outbytes} );
-        push (@{$tunhash{$tunnel}}, [ @tmp ]);
+        push (@{$tunhash{$tunnel}->{_tunnels}}, [ @tmp ]);
     }
     for my $connid (peerSort(keys %tunhash)){
     print <<EOH;
@@ -896,12 +912,14 @@ Peer ID / IP                            Local ID / IP
 EOH
       (my $peerid, my $myid) = $connid =~ /(.*?)-(.*)/;
       printf "%-39s %-39s\n", $peerid, $myid;
+      my $desc = $vpncfg->returnEffectiveValue("peer $tunhash{$connid}->{_configpeer} description");
+      print "\n  Description: $desc\n" if (defined($desc));
       print <<EOH;
 
   Tunnel Dir Source Network               Destination Network          Bytes
   ------ --- --------------               -------------------          -----
 EOH
-      for my $tunnel (tunSort(@{$tunhash{$connid}})){
+      for my $tunnel (tunSort(@{$tunhash{$connid}->{_tunnels}})){
         (my $tunnum, my $srcnet, my $dstnet, 
          my $inbytes, my $outbytes) = @{$tunnel};
         printf "  %-6s %-3s %-28s %-28s %-8s\n",
@@ -919,13 +937,18 @@ sub display_ike_sa_brief {
     my %tunhash = ();
     my $myid = undef;
     my $peerid = undef;
+    my $vpncfg = new Vyatta::Config();
+    $vpncfg->setLevel('vpn ipsec site-to-site');
     for my $connectid (keys %th){  
       my $lip = $th{$connectid}->{_lip};
       $peerid = $th{$connectid}->{_rip};
       my $tunnel = "$peerid-$lip";
       next if ($th{$connectid}->{_ikestate} eq 'down');
       if (not exists $tunhash{$tunnel}) {
-        $tunhash{$tunnel}=[];
+        $tunhash{$tunnel}={
+          _configpeer => conv_id_rev($th{$connectid}->{_peerid}),
+          _tunnels => []
+        };
       }
         my @tmp = ( $th{$connectid}->{_tunnelnum},
                $th{$connectid}->{_ikestate},
@@ -935,7 +958,7 @@ sub display_ike_sa_brief {
                $th{$connectid}->{_natt},
                $th{$connectid}->{_ikelife},
                $th{$connectid}->{_ikeexpire} );
-        push (@{$tunhash{$tunnel}}, [ @tmp ]);
+        push (@{$tunhash{$tunnel}->{_tunnels}}, [ @tmp ]);
       
     }
     for my $connid (peerSort(keys %tunhash)){
@@ -945,12 +968,14 @@ Peer ID / IP                            Local ID / IP
 EOH
       (my $peerid, my $myid) = $connid =~ /(.*?)-(.*)/;
       printf "%-39s %-39s\n", $peerid, $myid;
+      my $desc = $vpncfg->returnEffectiveValue("peer $tunhash{$connid}->{_configpeer} description");
+      print "\n    Description: $desc\n" if (defined($desc));
       print <<EOH;
 
     State  Encrypt  Hash  NAT-T  A-Time  L-Time
     -----  -------  ----  -----  ------  ------
 EOH
-      for my $tunnel (tunSort(@{$tunhash{$connid}})){
+      for my $tunnel (tunSort(@{$tunhash{$connid}->{_tunnels}})){
         (my $tunnum, my $state, my $isakmpnum, my $enc, 
          my $hash, my $natt, my $life, my $expire) = @{$tunnel};
         $enc = conv_enc($enc);
