@@ -324,10 +324,6 @@ sub process_tunnels{
         $tunnel_hash{$connectid}->{_encryption} = $1;
         $tunnel_hash{$connectid}->{_hash} = $2;
         $tunnel_hash{$connectid}->{_pfsgrp} = $3;
-        if ($tunnel_hash{$connectid}->{_pfsgrp} eq "<Phase1>"){
-          $tunnel_hash{$connectid}->{_pfsgrp} = 
-                            $tunnel_hash{$connectid}->{_dhgrp};
-        }
       }
       elsif ($line =~ /STATE_MAIN_I1/){
         $tunnel_hash{$connectid}->{_ikestate} = "init";
@@ -774,6 +770,7 @@ sub display_ipsec_sa_detail
           _configpeer  => conv_id_rev($th{$connectid}->{_peerid}),
           _localip     => $th{$connectid}->{_lip},
           _localid     => $th{$connectid}->{_lid},
+          _dhgrp       => $th{$connectid}->{_dhgrp},
           _natt        => $th{$connectid}->{_natt},
           _natsrc      => $th{$connectid}->{_natsrc},
           _natdst      => $th{$connectid}->{_natdst},
@@ -787,7 +784,6 @@ sub display_ipsec_sa_detail
                $th{$connectid}->{_encryption},
                $th{$connectid}->{_hash},
                $th{$connectid}->{_pfsgrp},
-               $th{$connectid}->{_dhgrp},
                $th{$connectid}->{_lsnet},
                $th{$connectid}->{_rsnet},
                $th{$connectid}->{_inbytes},
@@ -813,12 +809,21 @@ sub display_ipsec_sa_detail
       if ($peerid =~ /CN=(.*?),/){
         $peerid = $1;
       }
+      my $prevdhgrp = 'n/a';
+      my $dhgrp = 'n/a';
+      for my $tunnel (tunSort(@{$tunhash{$connid}->{_tunnels}})){
+        $dhgrp = $tunhash{$connid}->{_dhgrp};
+        $dhgrp = $prevdhgrp if ($prevdhgrp ne 'n/a' && $dhgrp eq 'n/a');
+        $prevdhgrp = $dhgrp;
+      }
+      $dhgrp = conv_dh_group($dhgrp);
       my $desc = $vpncfg->returnEffectiveValue("peer $tunhash{$connid}->{_configpeer} description");
       print "------------------------------------------------------------------\n";
       print "Peer IP:\t\t$peerip\n";
       print "Peer ID:\t\t$peerid\n";
       print "Local IP:\t\t$tunhash{$connid}->{_localip}\n";
       print "Local ID:\t\t$localid\n";
+      print "DH Group:\t\t$dhgrp\n";
       print "NAT Traversal:\t\t$natt\n";
       print "NAT Source Port:\t$tunhash{$connid}->{_natsrc}\n";
       print "NAT Dest Port:\t\t$tunhash{$connid}->{_natdst}\n";
@@ -826,14 +831,14 @@ sub display_ipsec_sa_detail
       print "\n";
       for my $tunnel (tunSort(@{$tunhash{$connid}->{_tunnels}})){
         (my $tunnum, my $state, my $inspi, my $outspi, my $enc,
-         my $hash, my $pfsgrp, my $dhgrp, my $srcnet, my $dstnet,
+         my $hash, my $pfsgrp, my $srcnet, my $dstnet,
          my $inbytes, my $outbytes, my $life, my $expire, my $lca, 
          my $rca, my $lproto, my $rproto, my $lport, my $rport) = @{$tunnel};
+        $pfsgrp = $dhgrp if ($pfsgrp eq '<Phase1>');
         $enc = conv_enc($enc);
         $hash = conv_hash($hash);
         $lport = 'all' if ($lport eq '0');
         $rport = 'all' if ($rport eq '0');
-        $dhgrp = conv_dh_group($dhgrp);
         $pfsgrp = conv_dh_group($pfsgrp);
         
         my $atime = $life - $expire;
@@ -848,7 +853,6 @@ sub display_ipsec_sa_detail
         print "        Encryption:\t\t$enc\n";
         print "        Hash:\t\t\t$hash\n";
         print "        PFS Group:\t\t$pfsgrp\n";
-        print "        DH Group:\t\t$dhgrp\n";
         if (defined $lca){
         print "        \n";
           print "        CA:\n";
