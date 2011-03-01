@@ -1,3 +1,13 @@
+vyatta-op-vpn (0.13.66) unstable; urgency=low
+
+  * Moved the diffie-hellman group out to the 'show vpn ike sa' command
+    as it is related to phase1 and not phase2. Processing of the value
+    still happens in the 'show vpn ipsec sa detail' code as it may need
+    the value because if now pfs group is defined for phase2 it uses the
+    same group as phase1
+
+ -- John Southworth <john.southworth@vyatta.com>  Mon, 28 Feb 2011 20:14:27 -0600
+
 vyatta-op-vpn (0.13.65) unstable; urgency=low
 
   * Diffie-Hellman group is an ike parameter, moving it to the peer
