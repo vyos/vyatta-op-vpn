@@ -823,7 +823,6 @@ sub display_ipsec_sa_detail
       print "Peer ID:\t\t$peerid\n";
       print "Local IP:\t\t$tunhash{$connid}->{_localip}\n";
       print "Local ID:\t\t$localid\n";
-      print "DH Group:\t\t$dhgrp\n";
       print "NAT Traversal:\t\t$natt\n";
       print "NAT Source Port:\t$tunhash{$connid}->{_natsrc}\n";
       print "NAT Dest Port:\t\t$tunhash{$connid}->{_natdst}\n";
@@ -959,6 +958,7 @@ sub display_ike_sa_brief {
                $th{$connectid}->{_newestike},
                $th{$connectid}->{_ikeencrypt},
                $th{$connectid}->{_ikehash},
+               $th{$connectid}->{_dhgrp},
                $th{$connectid}->{_natt},
                $th{$connectid}->{_ikelife},
                $th{$connectid}->{_ikeexpire} );
@@ -976,19 +976,20 @@ EOH
       print "\n    Description: $desc\n" if (defined($desc));
       print <<EOH;
 
-    State  Encrypt  Hash  NAT-T  A-Time  L-Time
-    -----  -------  ----  -----  ------  ------
+    State  Encrypt  Hash  D-H Grp  NAT-T  A-Time  L-Time
+    -----  -------  ----  -------  -----  ------  ------
 EOH
       for my $tunnel (tunSort(@{$tunhash{$connid}->{_tunnels}})){
         (my $tunnum, my $state, my $isakmpnum, my $enc, 
-         my $hash, my $natt, my $life, my $expire) = @{$tunnel};
+         my $hash, my $dhgrp, my $natt, my $life, my $expire) = @{$tunnel};
         $enc = conv_enc($enc);
         $hash = conv_hash($hash);
         $natt = conv_natt($natt);
+        $dhgrp = conv_dh_group($dhgrp);
         my $atime = $life - $expire;
         $atime = 0 if ($atime == $life);
-        printf "    %-6s %-8s %-5s %-6s %-7s %-7s\n",
-               $state, $enc, $hash, $natt, $atime, $life;
+        printf "    %-6s %-8s %-5s %-8s %-6s %-7s %-7s\n",
+               $state, $enc, $hash, $dhgrp, $natt, $atime, $life;
       }
       print "\n \n";
     }
