@@ -38,7 +38,8 @@ sub get_vpn_intfs {
   $config->setLevel('vpn ipsec');
   my @vpn_intfs = ();
   @vpn_intfs  = $config->returnOrigValues('ipsec-interfaces interface');
-  return sort @vpn_intfs;
+  my @return = sort(@vpn_intfs);
+  return @return;
 }
 
 sub get_vpn_all_localips {
