@@ -1,3 +1,9 @@
+vyatta-op-vpn (0.13.67) unstable; urgency=low
+
+  * Fix perlcritic error
+
+ -- John Southworth <john.southworth@vyatta.com>  Tue, 08 Mar 2011 13:10:33 -0600
+
 vyatta-op-vpn (0.13.66) unstable; urgency=low
 
   * Moved the diffie-hellman group out to the 'show vpn ike sa' command
