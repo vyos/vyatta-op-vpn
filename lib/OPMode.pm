@@ -382,7 +382,7 @@ sub process_tunnels{
           $tunnel_hash{$connectid}->{_inspi} = $3;
           $tunnel_hash{$connectid}->{_inbytes} = $4;
         }
-        if ($line =~ /$spi:.*?EVENT_SA_REPLACE in (.*?)s;/){
+        if ($line =~ /$spi:.*?EVENT_SA_REPLACE.*? in (.*?)s;/){
           $tunnel_hash{$connectid}->{_expire} = $1;
           my $atime = $tunnel_hash{$connectid}->{_lifetime} - 
                       $tunnel_hash{$connectid}->{_expire};
