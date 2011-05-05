@@ -1,3 +1,10 @@
+vyatta-op-vpn (0.13.69) unstable; urgency=low
+
+  * Add ability to generate an x509 key pair (certificate signing
+    request, private key)
+
+ -- John Southworth <john.southworth@vyatta.com>  Thu, 05 May 2011 12:19:43 -0500
+
 vyatta-op-vpn (0.13.68) unstable; urgency=low
 
   * Fix Bug 7010 Update commands to save/retrieve files from /config
