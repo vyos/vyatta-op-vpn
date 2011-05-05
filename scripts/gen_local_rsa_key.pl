@@ -27,7 +27,7 @@ use strict;
 use warnings;
 use lib "/opt/vyatta/share/perl5/";
 use Vyatta::VPN::Util;
-
+use Vyatta::Misc qw(get_short_config_path);
 
 # Defaults
 my $bits = 2192;
@@ -93,7 +93,10 @@ $cmd = "/usr/lib/ipsec/newhostkey --output $local_key_file --bits $bits";
 #
 $cmd .= " --random $device";
 
-print "Generating rsa-key to $local_key_file\n";
+# when presenting to users, show shortened /config path
+my $shortened_cfg_path_file = get_short_config_path($local_key_file);
+print "Generating rsa-key to $shortened_cfg_path_file\n";
+
 vpn_debug $cmd;
 $rc = system($cmd);
 if ($rc != 0) {
