@@ -1,3 +1,9 @@
+vyatta-op-vpn (0.13.68) unstable; urgency=low
+
+  * Fix Bug 7010 Update commands to save/retrieve files from /config
+
+ -- Mohit Mehta <mohit@vyatta.com>  Wed, 04 May 2011 17:44:05 -0700
+
 vyatta-op-vpn (0.13.67) unstable; urgency=low
 
   * Fix perlcritic error
