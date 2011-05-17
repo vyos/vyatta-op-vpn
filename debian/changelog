@@ -1,3 +1,11 @@
+vyatta-op-vpn (0.13.71) unstable; urgency=low
+
+  * fix parsing of esp string when only one side has data. Remove
+    attempt to figure out the dh-group when the pfs-group shows Phase1,
+    since it doesn't work properly
+
+ -- John Southworth <john.southworth@vyatta.com>  Tue, 17 May 2011 18:47:20 -0500
+
 vyatta-op-vpn (0.13.70) unstable; urgency=low
 
   * fix special case for wildcard peer since it uses
