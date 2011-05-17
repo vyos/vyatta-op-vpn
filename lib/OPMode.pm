@@ -375,6 +375,16 @@ sub process_tunnels{
       }
       my $spi = $tunnel_hash{$connectid}->{_newestspi};
       if ($spi ne 'n/a'){
+        if ($line =~ /$spi:.*esp.(.*)\@.*\((.*)bytes.*esp.(.*)\@.*/){
+          $tunnel_hash{$connectid}->{_outspi} = $1;
+          $tunnel_hash{$connectid}->{_outbytes} = $2;
+          $tunnel_hash{$connectid}->{_inspi} = $3;
+        }
+        if ($line =~ /$spi:.*esp.(.*)\@.*esp.(.*)\@.*\((.*)bytes/){
+          $tunnel_hash{$connectid}->{_outspi} = $1;
+          $tunnel_hash{$connectid}->{_inspi} = $2;
+          $tunnel_hash{$connectid}->{_inbytes} = $3;
+        }
         if ($line =~ /$spi:.*esp.(.*)\@.*\((.*)bytes.*esp.(.*)\@.*\((.*)bytes/)
         {
           $tunnel_hash{$connectid}->{_outspi} = $1;
@@ -809,14 +819,6 @@ sub display_ipsec_sa_detail
       if ($peerid =~ /CN=(.*?),/){
         $peerid = $1;
       }
-      my $prevdhgrp = 'n/a';
-      my $dhgrp = 'n/a';
-      for my $tunnel (tunSort(@{$tunhash{$connid}->{_tunnels}})){
-        $dhgrp = $tunhash{$connid}->{_dhgrp};
-        $dhgrp = $prevdhgrp if ($prevdhgrp ne 'n/a' && $dhgrp eq 'n/a');
-        $prevdhgrp = $dhgrp;
-      }
-      $dhgrp = conv_dh_group($dhgrp);
       my $desc = $vpncfg->returnEffectiveValue("peer $tunhash{$connid}->{_configpeer} description");
       print "------------------------------------------------------------------\n";
       print "Peer IP:\t\t$peerip\n";
@@ -833,7 +835,6 @@ sub display_ipsec_sa_detail
          my $hash, my $pfsgrp, my $srcnet, my $dstnet,
          my $inbytes, my $outbytes, my $life, my $expire, my $lca, 
          my $rca, my $lproto, my $rproto, my $lport, my $rport) = @{$tunnel};
-        $pfsgrp = $dhgrp if ($pfsgrp eq '<Phase1>');
         $enc = conv_enc($enc);
         $hash = conv_hash($hash);
         $lport = 'all' if ($lport eq '0');
