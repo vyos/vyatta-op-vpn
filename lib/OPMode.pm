@@ -222,7 +222,8 @@ sub process_tunnels{
         $tunnel_hash{$connectid}->{_ikehash} = $2;
         $tunnel_hash{$connectid}->{_dhgrp} = $3;
       }
-      elsif ($line =~ /: (.*?)===(.*?)\[(.*?)\].*\.\.\.(.*?)\[(.*?)\]===(.*?);/){
+      # both subnets
+      elsif ($line =~ /: (.*?)===(.*?)\[(.*?)\]\.\.\.(.*?)\[(.*?)\]===(.*?);/){
         my $lsnet = $1;
         my $lip = $2;
         my $lid = $3;
@@ -240,7 +241,8 @@ sub process_tunnels{
         $tunnel_hash{$connectid}->{_natsrc} = $natsrc;
         $tunnel_hash{$connectid}->{_natdst} = $natdst;
       }
-      elsif ($line =~ /: (.*?)\[(.*?)\].*\.\.\.(.*?)\[(.*?)\];/){
+      #left subnet
+      elsif ($line =~ /: (.*?)\[(.*?)\]\.\.\.(.*?)\[(.*?)\];/){
         my $lip = $1;
         my $lid = $2;
         my $rip = $3;
@@ -260,7 +262,8 @@ sub process_tunnels{
         $tunnel_hash{$connectid}->{_natdst} = $natdst;
         $tunnel_hash{$connectid}->{_lsnet} = $lsnet if (defined($lsnet));
       }
-      elsif ($line =~ /: (.*?)\[(.*?)\]:(\d+)\/(\d+).*\.\.\.(.*?)\[(.*?)\]:(\d+)\/(\d+);/){
+      #left subnet with protocols
+      elsif ($line =~ /: (.*?)\[(.*?)\]:(\d+)\/(\d+)\.\.\.(.*?)\[(.*?)\]:(\d+)\/(\d+);/){
         my $lip = $1;
         my $lsnet;
         my $lid = $2;
@@ -288,7 +291,8 @@ sub process_tunnels{
         $tunnel_hash{$connectid}->{_lport} = "$lport";
         $tunnel_hash{$connectid}->{_rport} = "$rport";
       } 
-      elsif ($line =~ /: (.*)===(.*?)\[(.*?)\]:(\d+)\/(\d+).*\.\.\.(.*?)\[(.*?)\]:(\d+)\/(\d+)===(.*?);/){
+      # both proto/port and subnets
+      elsif ($line =~ /: (.*)===(.*?)\[(.*?)\]:(\d+)\/(\d+)\.\.\.(.*?)\[(.*?)\]:(\d+)\/(\d+)===(.*?);/){
         my $lsnet = $1;
         my $lip = $2;
         my $lid = $3;
@@ -316,6 +320,61 @@ sub process_tunnels{
         $tunnel_hash{$connectid}->{_rproto} = "$rproto";
         $tunnel_hash{$connectid}->{_lport} = "$lport";
         $tunnel_hash{$connectid}->{_rport} = "$rport";
+        $tunnel_hash{$connectid}->{_natt} = $natt;
+        $tunnel_hash{$connectid}->{_natsrc} = $natsrc;
+        $tunnel_hash{$connectid}->{_natdst} = $natdst;
+      }
+      # right proto/port only with subnet
+      elsif ($line =~ /: (.*)===(.*?)\[(.*?)\]\.\.\.(.*?)\[(.*?)\]:(\d+)\/(\d+)===(.*?);/){
+        my $lsnet = $1;
+        my $lip = $2;
+        my $lid = $3;
+        my $rip = $4;
+        my $rid = $5;
+        my $rproto = conv_protocol($6);
+        my $rport = $7;
+        my $rsnet = $8;
+        my $lprotoport;
+        my $rprotoport;
+        $rprotoport = $rproto if ($rport == 0);
+        $rprotoport = "$rproto/$rport" if ($rport != 0);
+        ($lip, my $natt, my $natsrc, $rip, my $natdst) = nat_detect($lip, $rip);
+        $tunnel_hash{$connectid}->{_lid} = conv_id($lid);
+        $tunnel_hash{$connectid}->{_lip} = $lip;
+        $tunnel_hash{$connectid}->{_lsnet} = $lsnet;
+        $tunnel_hash{$connectid}->{_rid} = conv_id($rid);
+        $tunnel_hash{$connectid}->{_rip} = $rip;
+        $tunnel_hash{$connectid}->{_rsnet} = $rsnet;
+        $tunnel_hash{$connectid}->{_rproto} = "$rproto";
+        $tunnel_hash{$connectid}->{_rport} = "$rport";
+        $tunnel_hash{$connectid}->{_natt} = $natt;
+        $tunnel_hash{$connectid}->{_natsrc} = $natsrc;
+        $tunnel_hash{$connectid}->{_natdst} = $natdst;
+      }
+      # left proto/port only with subnet
+      elsif ($line =~ /: (.*)===(.*?)\[(.*?)\]:(\d+)\/(\d+)\.\.\.(.*?)\[(.*?)\]===(.*?);/){
+        print "in left proto port and subnet\n";
+        my $lsnet = $1;
+        my $lip = $2;
+        my $lid = $3;
+        my $lproto = conv_protocol($4);
+        my $lport = $5;
+        my $rip = $6;
+        my $rid = $7;
+        my $rsnet = $8;
+        my $lprotoport;
+        my $rprotoport;
+        $lprotoport = $lproto if ($lport == 0);
+        $lprotoport = "$lproto/$lport" if ($lport != 0);
+        ($lip, my $natt, my $natsrc, $rip, my $natdst) = nat_detect($lip, $rip);
+        $tunnel_hash{$connectid}->{_lid} = conv_id($lid);
+        $tunnel_hash{$connectid}->{_lip} = $lip;
+        $tunnel_hash{$connectid}->{_lsnet} = $lsnet;
+        $tunnel_hash{$connectid}->{_rid} = conv_id($rid);
+        $tunnel_hash{$connectid}->{_rip} = $rip;
+        $tunnel_hash{$connectid}->{_rsnet} = $rsnet;
+        $tunnel_hash{$connectid}->{_lproto} = "$lproto";
+        $tunnel_hash{$connectid}->{_lport} = "$lport";
         $tunnel_hash{$connectid}->{_natt} = $natt;
         $tunnel_hash{$connectid}->{_natsrc} = $natsrc;
         $tunnel_hash{$connectid}->{_natdst} = $natdst;
