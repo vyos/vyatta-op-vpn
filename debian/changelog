@@ -1,3 +1,9 @@
+vyatta-op-vpn (0.13.73) unstable; urgency=low
+
+  * remove extraneous debug output
+
+ -- John Southworth <john.southworth@vyatta.com>  Thu, 16 Jun 2011 13:06:53 -0500
+
 vyatta-op-vpn (0.13.72) unstable; urgency=low
 
   * Bugfix 7146: parse properly when port is only setup on one endpoint
