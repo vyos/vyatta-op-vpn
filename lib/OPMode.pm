@@ -353,7 +353,6 @@ sub process_tunnels{
       }
       # left proto/port only with subnet
       elsif ($line =~ /: (.*)===(.*?)\[(.*?)\]:(\d+)\/(\d+)\.\.\.(.*?)\[(.*?)\]===(.*?);/){
-        print "in left proto port and subnet\n";
         my $lsnet = $1;
         my $lip = $2;
         my $lid = $3;
