@@ -105,10 +105,10 @@ sub conv_bytes {
    if ($bytes > 1024 && $bytes < 1048576){
      $bytes = $bytes/1024;
      $suffix = "K";
-   } elsif ($bytes > 1048576 && $bytes < 1073741824){
+   } elsif ($bytes >= 1048576 && $bytes < 1073741824){
      $bytes = $bytes/1048576;
      $suffix = "M";
-   } elsif ($bytes > 1073741824){
+   } elsif ($bytes >= 1073741824){
      $bytes = $bytes/1073741824;
      $suffix = "G";
    }
