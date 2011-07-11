@@ -1,3 +1,10 @@
+vyatta-op-vpn (0.13.74+napa2) unstable; urgency=low
+
+  * Bugfix 7316: remove next-hop router from vpn connection line before
+    parsing since we don't display it currently
+
+ -- John Southworth <john.southworth@vyatta.com>  Mon, 11 Jul 2011 12:34:46 -0500
+
 vyatta-op-vpn (0.13.74+napa1) unstable; urgency=low
 
   * new branch
