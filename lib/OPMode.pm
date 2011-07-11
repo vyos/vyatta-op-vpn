@@ -217,6 +217,7 @@ sub process_tunnels{
                   _lifetime    => 'n/a',
                   _expire      => 'n/a' };
       }
+      $line =~ s/---.*\.\.\./.../g; # remove the next hop router for local-ip 0.0.0.0 case
       if ($line =~ /IKE.proposal:(.*?)\/(.*?)\/(.*)/){
         $tunnel_hash{$connectid}->{_ikeencrypt} = $1;
         $tunnel_hash{$connectid}->{_ikehash} = $2;
