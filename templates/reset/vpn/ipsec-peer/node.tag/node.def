@@ -1,4 +1,4 @@
-help: Clear all tunnels for given peer
+help: Reset all tunnels for given peer
 
 allowed: /opt/vyatta/bin/sudo-users/vyatta-vpn-op.pl --op=get-all-peers
 
