@@ -1,4 +1,4 @@
-help: Clear a specific tunnel for given peer
+help: Reset a specific tunnel for given peer
 
 allowed: /opt/vyatta/bin/sudo-users/vyatta-vpn-op.pl \
         --op=get-tunnels-for-peer \
