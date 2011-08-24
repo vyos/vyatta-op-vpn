@@ -76,6 +76,8 @@ sub conv_enc {
   if ($enc =~ /(.*?)_.*?_(.*)/){
     $enc = lc($1).$2;
     $enc =~ s/^ //g;
+  } elsif ($enc =~ /3DES/) {
+    $enc = "3des";
   }
   return $enc;
 }
