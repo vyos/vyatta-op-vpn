@@ -1,3 +1,10 @@
+vyatta-op-vpn (0.13.77) unstable; urgency=low
+
+  * Move 'clear vpn' to 'reset vpn'
+  * Bugfix 7465: fix 3des in show commands
+
+ -- John Southworth <john.southworth@vyatta.com>  Tue, 23 Aug 2011 19:03:49 -0500
+
 vyatta-op-vpn (0.13.76) unstable; urgency=low
 
   * Bugfix 7316: remove next-hop router from vpn connection line before
