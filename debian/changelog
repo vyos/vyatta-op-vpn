@@ -1,3 +1,9 @@
+vyatta-op-vpn (0.13.74+napa3) unstable; urgency=low
+
+  * Bugfix 7465: fix 3des in show commands
+
+ -- John Southworth <john.southworth@vyatta.com>  Tue, 23 Aug 2011 19:02:28 -0500
+
 vyatta-op-vpn (0.13.74+napa2) unstable; urgency=low
 
   * Bugfix 7316: remove next-hop router from vpn connection line before
