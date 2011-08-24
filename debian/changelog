@@ -1,3 +1,10 @@
+vyatta-op-vpn (0.13.78) unstable; urgency=low
+
+  * Bugfix 7465: fix 3des in show commands
+  * 0.13.77
+
+ -- John Southworth <john.southworth@vyatta.com>  Tue, 23 Aug 2011 19:04:36 -0500
+
 vyatta-op-vpn (0.13.77) unstable; urgency=low
 
   * Bugfix 7465: fix 3des in show commands
