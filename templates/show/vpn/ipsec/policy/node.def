@@ -1,0 +1,2 @@
+help: Show the in-kernel crypto policies
+run: ip xfrm policy list
