@@ -32,7 +32,7 @@ sub clear_tunnel {
   my $error = undef;
   my $cmd = undef;
   
-  print "Clearing tunnel $tunnel with peer $peer...\n";
+  print "Resetting tunnel $tunnel with peer $peer...\n";
 
   # back-up ipsec.conf
   `sudo cp /etc/ipsec.conf /etc/ipsec.conf.bak.\$PPID`;
@@ -62,7 +62,7 @@ if ($op eq '') {
 }
 
 if ($op eq 'clear-vpn-ipsec-process') {
-	print "Clearing IPsec process...\n";
+	print "Restarting IPsec process...\n";
   my $update_interval = `cli-shell-api returnActiveValue vpn ipsec auto-update`;
   if ($update_interval eq ''){
 	  system 'sudo /usr/sbin/ipsec restart >&/dev/null';
