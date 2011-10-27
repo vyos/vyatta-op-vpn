@@ -1,3 +1,12 @@
+vyatta-op-vpn (0.13.78) unstable; urgency=low
+
+  * Bugfix 7568: Add ability to get to in-kernel information for ipsec
+    transformations
+  * Bugfix 7574: Fix output to match command structure for restart vpn
+    and reset vpn
+
+ -- John Southworth <john.southworth@vyatta.com>  Thu, 27 Oct 2011 17:49:00 -0500
+
 vyatta-op-vpn (0.13.77) unstable; urgency=low
 
   * Move 'clear vpn' to 'reset vpn'
