@@ -27,6 +27,17 @@ sub get_tunnels {
   return @peer_tunnels;
 }
 
+sub get_vtis {
+  my $s2s_peer = undef;
+  $s2s_peer = shift;
+  my @peer_tunnels = ();
+  if (defined $s2s_peer) {
+    my $config = new Vyatta::Config;
+    @peer_tunnels = $config->listOrigNodes("$s2s_peer_path $s2s_peer vti");
+  }
+  return @peer_tunnels;
+}
+
 sub clear_tunnel {
   my ($peer, $tunnel) = @_;
   my $error = undef;
@@ -98,7 +109,12 @@ if ($op eq 'clear-vpn-ipsec-process') {
       clear_tunnel($peer, $tun);
     }
   } else {
-    die "No tunnel defined for peer $peer\n";
+    my @peer_vtis = get_vtis("$peer");
+    if (scalar(@peer_vtis)>0) {
+        clear_tunnel($peer, 'vti');
+    } else {
+        die "No tunnel defined for peer $peer\n";
+    }
   }
 
 } elsif ($op eq 'clear-specific-tunnel-for-peer') {
@@ -110,6 +126,16 @@ if ($op eq 'clear-vpn-ipsec-process') {
     clear_tunnel($peer, $tunnel);
   } else {
     die "Undefined tunnel $tunnel for peer $peer\n";
+  }
+
+} elsif ($op eq 'clear-vtis-for-peer') {
+  # clear all vti for a given site-to-site peer
+  die 'Undefined peer to clear vti for' if ! defined $peer;
+  my @peer_vtis = get_vtis("$peer");
+  if (scalar(@peer_vtis)>0) {
+      clear_tunnel($peer, 'vti');
+  } else {
+    die "No vti defined for peer $peer\n";
   }
 
 } else { 

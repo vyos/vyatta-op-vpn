@@ -1,0 +1,5 @@
+help: Reset a vti tunnel for given peer
+
+run: /opt/vyatta/bin/sudo-users/vyatta-vpn-op.pl \
+        --op=clear-vtis-for-peer \
+        --peer="$4"
