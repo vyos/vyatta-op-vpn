@@ -1,3 +1,9 @@
+vyatta-op-vpn (0.13.83+daisy3) unstable; urgency=low
+
+  * Dmvpn merge with mirantis jan22-2013
+
+ -- Saurabh Mohan <saurabh@vyatta.com>  Tue, 22 Jan 2013 12:31:08 -0800
+
 vyatta-op-vpn (0.13.83+daisy2) unstable; urgency=low
 
   * Support for dmvpn-ipsec connections in op-vpn.
