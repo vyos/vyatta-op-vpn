@@ -10,6 +10,7 @@ share_perl5_vpnprof_DATA = lib/vpnprof/OPMode.pm
 bin_sudo_users_SCRIPTS = scripts/gen_local_rsa_key.pl
 bin_sudo_users_SCRIPTS += scripts/vyatta-show-vpn.pl
 bin_sudo_users_SCRIPTS += scripts/vyatta-vpn-op.pl
+bin_sudo_users_SCRIPTS += scripts/vyatta-dmvpn-op.pl
 bin_sudo_users_SCRIPTS += scripts/vyatta-op-vpn.pl
 bin_sudo_users_SCRIPTS += scripts/vyatta-op-vpnprof.pl
 bin_sudo_users_SCRIPTS += scripts/vyatta-show-ipsec-status.pl

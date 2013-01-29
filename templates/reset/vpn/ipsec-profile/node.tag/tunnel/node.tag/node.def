@@ -1,0 +1,10 @@
+help: Reset a specific tunnel for given profile
+
+allowed: /opt/vyatta/bin/sudo-users/vyatta-dmvpn-op.pl \
+        --op=get-tunnels-for-profile \
+        --profile="${COMP_WORDS[COMP_CWORD-2]}"
+
+run: /opt/vyatta/bin/sudo-users/vyatta-dmvpn-op.pl \
+        --op=clear-specific-tunnel-for-profile \
+        --profile="$4" \
+        --tunnel="$6"
