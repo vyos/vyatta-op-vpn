@@ -1,3 +1,9 @@
+vyatta-op-vpn (0.13.83+daisy4) unstable; urgency=low
+
+  * Support for reset vpn ipsec-profile
+
+ -- Saurabh Mohan <saurabh@vyatta.com>  Tue, 29 Jan 2013 15:55:16 -0800
+
 vyatta-op-vpn (0.13.83+daisy3) unstable; urgency=low
 
   * Dmvpn merge with mirantis jan22-2013
