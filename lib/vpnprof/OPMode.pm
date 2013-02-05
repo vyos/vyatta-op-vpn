@@ -572,6 +572,12 @@ sub show_ipsec_sa_detail
     display_ipsec_sa_detail(\%tunnel_hash);
 }
 
+sub show_ipsec_sa_stats
+{
+     my %tunnel_hash = get_tunnel_info();
+     display_ipsec_sa_stats(\%tunnel_hash);
+}
+
 sub show_ipsec_sa_profile
 {
     my $profile = pop(@_);
@@ -818,6 +824,55 @@ sub display_ipsec_sa_detail
         print "    \n";
       }
       print "\n";
+    }
+}
+
+sub display_ipsec_sa_stats
+{
+    my %th = %{pop(@_)};
+    my $listref = [];
+    my %tunhash = ();
+    my $myid = undef;
+    my $peerid = undef;
+    for my $connectid (keys %th){
+      my $lip = conv_ip($th{$connectid}->{_lip});
+      $peerid = conv_ip($th{$connectid}->{_rip});
+      my $tunnel = "$peerid-$lip";
+
+      if (not exists $tunhash{$tunnel}) {
+        $tunhash{$tunnel}={
+          _configpeer  => conv_id_rev($th{$connectid}->{_peerid}),
+          _tunnels     => []
+        };
+      }
+        my @tmp = ( $th{$connectid}->{_tunnelnum},
+               $th{$connectid}->{_lsnet},
+               $th{$connectid}->{_rsnet},
+               $th{$connectid}->{_inbytes},
+               $th{$connectid}->{_outbytes} );
+        push (@{$tunhash{$tunnel}->{_tunnels}}, [ @tmp ]);
+    }
+    for my $connid (keys %tunhash){
+    print <<EOH;
+Peer ID / IP                            Local ID / IP
+------------                            -------------
+EOH
+      (my $peerid, my $myid) = $connid =~ /(.*?)-(.*)/;
+      printf "%-39s %-39s\n", $peerid, $myid;
+      print <<EOH;
+
+  Tunnel Dir Source Network               Destination Network          Bytes
+  ------ --- --------------               -------------------          -----
+EOH
+      for my $tunnel (tunSort(@{$tunhash{$connid}->{_tunnels}})){
+        (my $tunnum, my $srcnet, my $dstnet,
+         my $inbytes, my $outbytes) = @{$tunnel};
+        printf "  %-6s %-3s %-28s %-28s %-8s\n",
+              $tunnum, 'in', $dstnet, $srcnet, $inbytes;
+        printf "  %-6s %-3s %-28s %-28s %-8s\n",
+              $tunnum, 'out', $srcnet, $dstnet, $outbytes;
+      }
+      print "\n \n";
     }
 }
 1;

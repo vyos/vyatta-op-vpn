@@ -24,6 +24,7 @@ GetOptions("show-ipsec-sa!"                 => \$show_ipsec_sa,
            "show-ipsec-sa-profile-detail=s" => \$show_ipsec_sa_profile_detail,
            "show-ipsec-sa-stats!"           => \$show_ipsec_sa_stats,
            "show-ipsec-sa-stats-profile=s"  => \$show_ipsec_sa_stats_profile,
+           "show-ipsec-sa-stats-conn=s{2}"  => \@show_ipsec_sa_stats_conn,
            "show-ipsec-sa-conn-detail=s{2}" => \@show_ipsec_sa_conn_detail,
            "show-ipsec-sa-conn=s{2}"        => \@show_ipsec_sa_conn);
 
@@ -57,3 +58,7 @@ if (defined $show_ipsec_sa_stats) {
 if (defined $show_ipsec_sa_stats_profile) {
   Vyatta::vpnprof::OPMode::show_ipsec_sa_stats_profile($show_ipsec_sa_stats_profile);
 }
+if (defined @show_ipsec_sa_stats_conn) {
+  Vyatta::vpnprof::OPMode::show_ipsec_sa_stats_conn(@show_ipsec_sa_stats_conn);
+}
+

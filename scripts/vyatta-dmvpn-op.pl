@@ -33,16 +33,30 @@ sub clear_tunnel {
   print "Resetting tunnel $tunnel with profile $profile...\n";
 
   # turn down the connection
-  `sudo ipsec down dmvpn-$profile-tunnel-$tunnel`;
+  `sudo ipsec down vpnprof-tunnel-$tunnel`;
 
   # sleep for 1/4th of a second for connection to go down
   `sudo sleep 0.25`;
 
-  # turn connection up
-  `sudo ipsec up dmvpn-$profile-tunnel-$tunnel`;
+  # turn connection up. For conns with 'right=%any' it's useless to up, so commented it
+  #`sudo ipsec up vpnprof-tunnel-$tunnel`;
 
   # sleep for 3/4th of a second for connection to come up
-  `sudo sleep 0.75`;
+  #`sudo sleep 0.75`;
+
+  my @addresses = split(' ', `cli-shell-api returnActiveValues interfaces tunnel $tunnel address`);
+  for my $addr (@addresses) {
+    $addr =~ /'(.*)\.(.*)\.(.*)\.(.*)\//;
+    my $pattern = "$1.$2.$3.$4-to-";
+    my $line = `sudo ipsec statusall | grep $pattern | head -n 1`;
+    if ($line =~ /\"(.*-to-.*)\"/) {
+      my $conn = $1;
+      `sudo ipsec down $conn`;
+      #Actually, we don't need timeouts here cause this script will wait child process to be finished.
+      `sudo ipsec up $conn`;
+    }
+  }
+
 }
 
 if ($op eq '') {
