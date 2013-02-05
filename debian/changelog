@@ -1,3 +1,9 @@
+vyatta-op-vpn (0.13.83+daisy5) unstable; urgency=low
+
+  * Merge + support show vpn ipsec sa detail/statistics profile
+
+ -- Saurabh Mohan <saurabh@vyatta.com>  Tue, 05 Feb 2013 15:01:21 -0800
+
 vyatta-op-vpn (0.13.83+daisy4) unstable; urgency=low
 
   * Support for reset vpn ipsec-profile
