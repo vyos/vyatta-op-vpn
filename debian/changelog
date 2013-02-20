@@ -1,3 +1,9 @@
+vyatta-op-vpn (0.13.83+daisy6) unstable; urgency=low
+
+  * perltidy run for vyatta-op-vpn
+
+ -- Saurabh Mohan <saurabh@vyatta.com>  Tue, 19 Feb 2013 16:17:29 -0800
+
 vyatta-op-vpn (0.13.83+daisy5) unstable; urgency=low
 
   * Merge + support show vpn ipsec sa detail/statistics profile
