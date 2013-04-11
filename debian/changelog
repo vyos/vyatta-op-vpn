@@ -1,3 +1,9 @@
+vyatta-op-vpn (0.13.84) unstable; urgency=low
+
+  * Remove dependency on libsalot0
+
+ -- John Southworth <john.southworth@vyatta.com>  Wed, 10 Apr 2013 17:19:57 -0700
+
 vyatta-op-vpn (0.13.83) unstable; urgency=low
 
   * new branch
