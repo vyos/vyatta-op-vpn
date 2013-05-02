@@ -177,6 +177,9 @@ sub process_tunnels{
   foreach my $line (@ipsecstatus) {
     if (($line =~ /\"(peer-.*-tunnel-.*?)\"/)){
       my $connectid = $1;
+      if (($line =~ /\"(peer-.*-tunnel-.*?)\"(\[\d*\])/)){
+        $connectid .= $2;
+      }
       $connectid =~ /peer-(.*)-tunnel-(.*)/;
       my $peer = $1;
       my $tunid = $2;

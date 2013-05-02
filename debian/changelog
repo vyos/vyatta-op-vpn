@@ -4,6 +4,42 @@ vyatta-op-vpn (0.13.84) unstable; urgency=low
 
  -- John Southworth <john.southworth@vyatta.com>  Wed, 10 Apr 2013 17:19:57 -0700
 
+vyatta-op-vpn (0.13.83+daisy6) unstable; urgency=low
+
+  * perltidy run for vyatta-op-vpn
+
+ -- Saurabh Mohan <saurabh@vyatta.com>  Tue, 19 Feb 2013 16:17:29 -0800
+
+vyatta-op-vpn (0.13.83+daisy5) unstable; urgency=low
+
+  * Merge + support show vpn ipsec sa detail/statistics profile
+
+ -- Saurabh Mohan <saurabh@vyatta.com>  Tue, 05 Feb 2013 15:01:21 -0800
+
+vyatta-op-vpn (0.13.83+daisy4) unstable; urgency=low
+
+  * Support for reset vpn ipsec-profile
+
+ -- Saurabh Mohan <saurabh@vyatta.com>  Tue, 29 Jan 2013 15:55:16 -0800
+
+vyatta-op-vpn (0.13.83+daisy3) unstable; urgency=low
+
+  * Dmvpn merge with mirantis jan22-2013
+
+ -- Saurabh Mohan <saurabh@vyatta.com>  Tue, 22 Jan 2013 12:31:08 -0800
+
+vyatta-op-vpn (0.13.83+daisy2) unstable; urgency=low
+
+  * Support for dmvpn-ipsec connections in op-vpn.
+
+ -- Saurabh Mohan <saurabh@vyatta.com>  Wed, 26 Dec 2012 14:16:28 -0800
+
+vyatta-op-vpn (0.13.83+daisy1) unstable; urgency=low
+
+  * create daisy branch
+
+ -- John Southworth <john.southworth@vyatta.com>  Sat, 13 Oct 2012 13:31:30 -0700
+
 vyatta-op-vpn (0.13.83) unstable; urgency=low
 
   * new branch

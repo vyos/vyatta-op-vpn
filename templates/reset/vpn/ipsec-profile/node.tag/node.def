@@ -1,0 +1,6 @@
+help: Reset all tunnels for given profile
+
+allowed: /opt/vyatta/bin/sudo-users/vyatta-dmvpn-op.pl --op=get-all-profiles
+
+run:  /opt/vyatta/bin/sudo-users/vyatta-dmvpn-op.pl \
+      --op=clear-tunnels-for-profile --profile="$4"
