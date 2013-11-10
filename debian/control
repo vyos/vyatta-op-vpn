@@ -1,7 +1,7 @@
 Source: vyatta-op-vpn
 Section: contrib/net
 Priority: extra
-Maintainer: Vyatta Package Maintainers <maintainers@vyatta.com>
+Maintainer: Vyatta Package Maintainers <maintainers@vyos.net>
 Build-Depends: debhelper (>= 5), autotools-dev, libsablot0-dev (>= 1.0.3-1)
 Standards-Version: 3.7.2
 
