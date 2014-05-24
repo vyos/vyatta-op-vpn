@@ -65,8 +65,11 @@ sub conv_dh_group {
 
 sub conv_hash {
   my $hash = pop(@_);
-  if ($hash =~ /.*_(.*)/){
+  if ($hash =~ /[^_]*_(.*)/){
     $hash = lc($1);
+    if ($hash =~ /sha2_(.*)/){
+      $hash = "sha".$1;
+    }
   }
   return $hash;
 }
@@ -796,8 +799,8 @@ EOH
       print "\n    Description: $desc\n" if (defined($desc));
       print <<EOH;
 
-    Tunnel  State  Bytes Out/In   Encrypt  Hash  NAT-T  A-Time  L-Time  Proto
-    ------  -----  -------------  -------  ----  -----  ------  ------  -----
+    Tunnel  State  Bytes Out/In   Encrypt  Hash    NAT-T  A-Time  L-Time  Proto
+    ------  -----  -------------  -------  ----    -----  ------  ------  -----
 EOH
       for my $tunnel (tunSort(@{$tunhash{$connid}->{_tunnels}})){
         (my $tunnum, my $state, my $inbytes, my $outbytes, 
@@ -816,7 +819,7 @@ EOH
         }
         my $atime = $life - $expire;
         $atime = 0 if ($atime == $life);
-        printf "    %-7s %-6s %-14s %-8s %-5s %-6s %-7s %-7s %-2s\n",
+        printf "    %-7s %-6s %-14s %-8s %-7s %-6s %-7s %-7s %-2s\n",
               $tunnum, $state, $bytesp, $enc, $hash, $natt, 
               $atime, $life, $proto;
       }
@@ -1041,8 +1044,8 @@ EOH
       print "\n    Description: $desc\n" if (defined($desc));
       print <<EOH;
 
-    State  Encrypt  Hash  D-H Grp  NAT-T  A-Time  L-Time
-    -----  -------  ----  -------  -----  ------  ------
+    State  Encrypt  Hash    D-H Grp  NAT-T  A-Time  L-Time
+    -----  -------  ----    -------  -----  ------  ------
 EOH
       for my $tunnel (tunSort(@{$tunhash{$connid}->{_tunnels}})){
         (my $tunnum, my $state, my $isakmpnum, my $enc, 
@@ -1053,7 +1056,7 @@ EOH
         $dhgrp = conv_dh_group($dhgrp);
         my $atime = $life - $expire;
         $atime = 0 if ($atime == $life);
-        printf "    %-6s %-8s %-5s %-8s %-6s %-7s %-7s\n",
+        printf "    %-6s %-8s %-7s %-8s %-6s %-7s %-7s\n",
                $state, $enc, $hash, $dhgrp, $natt, $atime, $life;
       }
       print "\n \n";
