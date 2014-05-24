@@ -54,7 +54,31 @@ sub conv_dh_group {
   } elsif ($dhgrp eq "MODP_1536"){
     $dh_group = 5;
   } elsif ($dhgrp eq "MODP_2048"){
-    $dh_group = 7;
+    $dh_group = 14;
+  } elsif ($dhgrp eq "MODP_3072"){
+    $dh_group = 15;
+  } elsif ($dhgrp eq "MODP_4096"){
+    $dh_group = 16;
+  } elsif ($dhgrp eq "MODP_6144"){
+    $dh_group = 17;
+  } elsif ($dhgrp eq "MODP_8192"){
+    $dh_group = 18;
+  } elsif ($dhgrp eq "ECP_256"){
+    $dh_group = 19;
+  } elsif ($dhgrp eq "ECP_384"){
+    $dh_group = 20;
+  } elsif ($dhgrp eq "ECP_521"){
+    $dh_group = 21;
+  } elsif ($dhgrp eq "MODP_1024_160"){
+    $dh_group = 22;
+  } elsif ($dhgrp eq "MODP_2048_224"){
+    $dh_group = 23;
+  } elsif ($dhgrp eq "MODP_2048_256"){
+    $dh_group = 24;
+  } elsif ($dhgrp eq "ECP_192"){
+    $dh_group = 25;
+  } elsif ($dhgrp eq "ECP_224"){
+    $dh_group = 26;
   } elsif ($dhgrp eq "<N/A>"){
     $dh_group = "n/a";
   } else {
