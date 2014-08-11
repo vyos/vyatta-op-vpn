@@ -85,6 +85,21 @@ if (-r $local_key_file) {
     }
 }
 
+# Remove the temporary file used to hold the new key if it already exists
+# as this can cause invalid key generation if a previous run has been
+# aborted.
+
+my $temp_key_file = $local_key_file.".new";
+
+if (-e $temp_key_file) {
+    $cmd = "rm $temp_key_file";
+    vpn_debug $cmd;
+    $rc = system($cmd);
+    if ($rc != 0) {
+        die "Cannot remove temporary key file $!\n";
+    }
+}
+
 $cmd = "/usr/lib/ipsec/newhostkey --output $local_key_file --bits $bits";
 #
 # The default random number generator is /dev/random, but it will block 

@@ -27,6 +27,7 @@ use strict;
 use warnings;
 
 use lib "/opt/vyatta/share/perl5/";
+use Vyatta::Misc qw(get_short_config_path);
 
 my $arg0 = $ARGV[0];
 if (!defined($arg0)) {
@@ -82,10 +83,11 @@ if ($arg0 eq 'rsa-keys') {
         die "No key file $key_file found.\n";
     }
     my $pubkey = rsa_get_local_pubkey($key_file);
+    my $config_key_file = get_short_config_path($key_file);
     if ($pubkey eq 0) {
 	die "No local pubkey found.\n";
     }
-    print "\nLocal public key ($key_file):\n\n$pubkey\n\n";
+    print "\nLocal public key ($config_key_file):\n\n$pubkey\n\n";
 
     use Vyatta::Config;
     my $vc = new Vyatta::Config();
