@@ -49,7 +49,7 @@ sub get_vpn_all_localips {
   my @vpn_peers = ();
   @vpn_peers = $config->listOrigNodes('peer');
   foreach my $peer (@vpn_peers) {
-    my $local_ip = $config->returnOrigValue("peer $peer local-ip");
+    my $local_ip = $config->returnOrigValue("peer $peer local-address");
     if (!defined($local_ip)){
       my $dhcpif =  $config->returnOrigValue("peer $peer dhcp-interface");
       if (defined($dhcpif)){
