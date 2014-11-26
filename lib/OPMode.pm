@@ -500,10 +500,141 @@ sub process_tunnels{
           } 
         }
       }
+    } elsif ($line =~ /^(peer-.*-tunnel-.*?)[{\[].*:\s+/) {
+      my $connectid = $1;
+      $connectid .= $2 if ($line =~ /(peer-.*-tunnel-.*?):(\[\d*\])/);
+      $connectid =~ /peer-(.*)-tunnel-(.*)/;
+      
+      my ($peer, $tunid) = ($1, $2);
+      $peer = conv_id($peer);
+
+      if (not exists $tunnel_hash{$connectid}){
+        $tunnel_hash{$connectid} = {
+                  _peerid      => $peer,
+                  _tunnelnum   => $tunid,
+                  _lip         => 'n/a',
+                  _rip         => 'n/a',
+                  _lid         => 'n/a',
+                  _rid         => 'n/a',
+                  _lsnet       => 'n/a',
+                  _rsnet       => 'n/a',
+                  _lproto      => 'all',
+                  _rproto      => 'all',
+                  _lport       => 'all',
+                  _rport       => 'all',
+                  _lca         => undef,
+                  _rca         => undef,
+                  _newestspi   => 'n/a',
+                  _newestike   => 'n/a',
+                  _encryption  => 'n/a',
+                  _hash        => 'n/a',
+                  _inspi       => 'n/a',
+                  _outspi      => 'n/a',
+                  _pfsgrp      => 'n/a',
+                  _ikeencrypt  => 'n/a',
+                  _ikehash     => 'n/a',
+                  _natt        => 'n/a',
+                  _natsrc      => 'n/a',
+                  _natdst      => 'n/a',
+                  _ikestate    => "down",
+                  _dhgrp       => 'n/a',
+                  _state       => "down",
+                  _inbytes     => 'n/a',
+                  _outbytes    => 'n/a',
+                  _ikelife     => 'n/a',
+                  _ikeexpire   => 'n/a',
+                  _lifetime    => 'n/a',
+                  _expire      => 'n/a' };
+      }
+
+      $line =~ s/---.*\.\.\./.../g; # remove the next hop router for local-ip 0.0.0.0 case
+      if ($line =~ /IKE.proposal:(.*?)\/(.*?)\/(.*)/){
+        $tunnel_hash{$connectid}->{_ikeencrypt} = $1;
+        $tunnel_hash{$connectid}->{_ikehash} = $2;
+        $tunnel_hash{$connectid}->{_dhgrp} = $3;
+      }
+      
+      if ($line =~ /: ESTABLISHED (.*), (.*?)\[(.*?)\]\.\.\.(.*?)\[(.*?)\]/) {
+        my $lip = $2;
+        my $lid = $3;
+        my $rip = $4;
+        my $rid = $5;
+        ($lip, my $natt, my $natsrc, $rip, my $natdst) = nat_detect($lip, $rip);
+        
+        $tunnel_hash{$connectid}->{_lid} = conv_id($lid);
+        $tunnel_hash{$connectid}->{_lip} = $lip;
+        $tunnel_hash{$connectid}->{_rid} = conv_id($rid);
+        $tunnel_hash{$connectid}->{_rip} = $rip;
+        $tunnel_hash{$connectid}->{_natt} = $natt;
+        $tunnel_hash{$connectid}->{_natsrc} = $natsrc;
+        $tunnel_hash{$connectid}->{_natdst} = $natdst;
+
+        # Pull stuff from running config (IKE/ESP lifetime, PFS group)
+        my $vpncfg = new Vyatta::Config();
+        $vpncfg->setLevel('vpn ipsec');
+        my $esp_path = "default-esp-group";
+        my $peer_path = "site-to-site peer $tunnel_hash{$connectid}->{_peerid}";
+        if ($vpncfg->existsOrig("$peer_path tunnel $tunid esp-group")) {
+          $esp_path = "tunnel $tunid esp-group";
+        }
+        my $esp_group = $vpncfg->returnEffectiveValue("$peer_path $esp_path");
+        my $ike_group = $vpncfg->returnEffectiveValue("site-to-site peer $tunnel_hash{$connectid}->{_peerid} ike-group");
+        my $pfs_group = $vpncfg->returnEffectiveValue("esp-group $esp_group pfs");
+        $pfs_group = "default" if ($pfs_group eq 'enable');
+        my $lifetime = $vpncfg->returnEffectiveValue("esp-group $esp_group lifetime");
+        my $ikelife = $vpncfg->returnEffectiveValue("ike-group $ike_group lifetime");
+
+        $tunnel_hash{$connectid}->{_lifetime} = $lifetime;
+        $tunnel_hash{$connectid}->{_ikelife} = $ikelife;
+        $tunnel_hash{$connectid}->{_pfsgrp} = $pfs_group;
+
+      } elsif ($line =~ /\]:IKE SPIs: .* reauthentication in (.*)/) {
+        $tunnel_hash{$connectid}->{_ikeexpire} = conv_time($1);
+        my $atime = $tunnel_hash{$connectid}->{_ikelife} - $tunnel_hash{$connectid}->{_ikeexpire};
+
+        $tunnel_hash{$connectid}->{_ikestate} = "up" if ($atime >= 0);
+
+      } elsif ($line =~ /}:\s+INSTALLED.*ESP.*SPIs: (.*)_i (.*)_o/) {
+        $tunnel_hash{$connectid}->{_inspi} = $1;
+        $tunnel_hash{$connectid}->{_outspi} = $2;
+
+      } elsif ($line =~ /}:\s+(.*?)\/(.*?), (\d+) bytes_i \((.*?)\), (\d+) bytes_o .* rekeying in (.*)/) {
+        $tunnel_hash{$connectid}->{_encryption} = $1;
+        $tunnel_hash{$connectid}->{_hash} = $2;
+        $tunnel_hash{$connectid}->{_inbytes} = $3;
+        $tunnel_hash{$connectid}->{_outbytes} = $5;
+        $tunnel_hash{$connectid}->{_expire} = conv_time($6);
+
+        my $atime = $tunnel_hash{$connectid}->{_lifetime} - $tunnel_hash{$connectid}->{_expire};
+        $tunnel_hash{$connectid}->{_state} = "up" if ($atime >= 0);
+
+      } elsif ($line =~ /}:\s+(.*?)\[(.*?)\] === (.*)\[(.*)\]/) {
+        $tunnel_hash{$connectid}->{_lsnet} = $1;
+        $tunnel_hash{$connectid}->{_lproto} = $2;
+        $tunnel_hash{$connectid}->{_rsnet} = $3;
+        $tunnel_hash{$connectid}->{_rproto} = $4;
+      }
+      
     }
   }
   return %tunnel_hash;
 }
+
+sub conv_time {
+  my @time = split(/\s+/, $_[0]);
+  my $multiply = 1;
+
+  if ($time[1] =~ /minute/i) {
+    $multiply = 60;
+  } elsif ($time[1] =~ /hour/i) {
+    $multiply = 3600;
+  } elsif ($time[1] =~ /day/i) {
+    $multiply = 86400;
+  }
+
+  return $time[0] * $multiply;
+}
+
 sub get_conns
 {
   my $cmd = "sudo cat /etc/ipsec.conf";
