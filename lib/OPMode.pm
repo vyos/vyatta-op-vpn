@@ -548,13 +548,13 @@ sub process_tunnels{
       }
 
       $line =~ s/---.*\.\.\./.../g; # remove the next hop router for local-ip 0.0.0.0 case
-      if ($line =~ /IKE.proposal:(.*?)\/(.*?)\/(.*)/){
+      if ($line =~ /\]:\s+IKE.proposal:(.*?)\/(.*?)\/(.*)/){
         $tunnel_hash{$connectid}->{_ikeencrypt} = $1;
         $tunnel_hash{$connectid}->{_ikehash} = $2;
         $tunnel_hash{$connectid}->{_dhgrp} = $3;
       }
       
-      if ($line =~ /: ESTABLISHED (.*), (.*?)\[(.*?)\]\.\.\.(.*?)\[(.*?)\]/) {
+      if ($line =~ /:\s+ESTABLISHED (.*), (.*?)\[(.*?)\]\.\.\.(.*?)\[(.*?)\]/) {
         my $lip = $2;
         my $lid = $3;
         my $rip = $4;
@@ -588,7 +588,7 @@ sub process_tunnels{
         $tunnel_hash{$connectid}->{_ikelife} = $ikelife;
         $tunnel_hash{$connectid}->{_pfsgrp} = $pfs_group;
 
-      } elsif ($line =~ /\]:IKE SPIs: .* reauthentication in (.*)/) {
+      } elsif ($line =~ /\]:\s+IKE SPIs: .* reauthentication in (.*)/) {
         $tunnel_hash{$connectid}->{_ikeexpire} = conv_time($1);
         my $atime = $tunnel_hash{$connectid}->{_ikelife} - $tunnel_hash{$connectid}->{_ikeexpire};
 
