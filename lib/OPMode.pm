@@ -201,6 +201,7 @@ sub get_tunnel_info_peer {
 sub process_tunnels{
   my @ipsecstatus = @{pop(@_)};
   my %tunnel_hash = ();
+  my %ike_hash = ();
   foreach my $line (@ipsecstatus) {
     if (($line =~ /\"(peer-.*-tunnel-.*?)\"/)){
       my $connectid = $1;
@@ -548,12 +549,7 @@ sub process_tunnels{
       }
 
       $line =~ s/---.*\.\.\./.../g; # remove the next hop router for local-ip 0.0.0.0 case
-      if ($line =~ /\]:\s+IKE.proposal:(.*?)\/(.*?)\/(.*)/){
-        $tunnel_hash{$connectid}->{_ikeencrypt} = $1;
-        $tunnel_hash{$connectid}->{_ikehash} = $2;
-        $tunnel_hash{$connectid}->{_dhgrp} = $3;
-      }
-      
+
       if ($line =~ /:\s+ESTABLISHED (.*), (.*?)\[(.*?)\]\.\.\.(.*?)\[(.*?)\]/) {
         my $lip = $2;
         my $lid = $3;
@@ -594,29 +590,48 @@ sub process_tunnels{
 
         $tunnel_hash{$connectid}->{_ikestate} = "up" if ($atime >= 0);
 
-      } elsif ($line =~ /}:\s+INSTALLED.*ESP.*SPIs: (.*)_i (.*)_o/) {
-        $tunnel_hash{$connectid}->{_inspi} = $1;
-        $tunnel_hash{$connectid}->{_outspi} = $2;
-
-      } elsif ($line =~ /}:\s+(.*?)\/(.*?), (\d+) bytes_i \((.*?)\), (\d+) bytes_o .* rekeying in (.*)/) {
-        $tunnel_hash{$connectid}->{_encryption} = $1;
-        $tunnel_hash{$connectid}->{_hash} = $2;
-        $tunnel_hash{$connectid}->{_inbytes} = $3;
-        $tunnel_hash{$connectid}->{_outbytes} = $5;
-        $tunnel_hash{$connectid}->{_expire} = conv_time($6);
-
-        my $atime = $tunnel_hash{$connectid}->{_lifetime} - $tunnel_hash{$connectid}->{_expire};
-        $tunnel_hash{$connectid}->{_state} = "up" if ($atime >= 0);
-
-      } elsif ($line =~ /}:\s+(.*?)\[(.*?)\] === (.*)\[(.*)\]/) {
-        $tunnel_hash{$connectid}->{_lsnet} = $1;
-        $tunnel_hash{$connectid}->{_lproto} = $2;
-        $tunnel_hash{$connectid}->{_rsnet} = $3;
-        $tunnel_hash{$connectid}->{_rproto} = $4;
-      }
+      } elsif ($line =~ /\]:\s+IKE.proposal:(.*?)\/(.*?)\/(.*)/) {
+        $tunnel_hash{$connectid}->{_ikeencrypt} = $1;
+        $tunnel_hash{$connectid}->{_ikehash} = $2;
+        $tunnel_hash{$connectid}->{_dhgrp} = $3;
       
+      } elsif ($line =~ /{(\d+)}:\s+INSTALLED.*ESP.*SPIs: (.*)_i (.*)_o/) {
+        $ike_hash{$connectid}{$1}->{_inspi} = $2;
+        $ike_hash{$connectid}{$1}->{_outspi} = $3;
+
+      } elsif ($line =~ /{(\d+)}:\s+(.*?)\/(.*?), (\d+) bytes_i.* (\d+) bytes_o.*rekeying in (.*)/) {
+        my $esp_id = $1;
+        $ike_hash{$connectid}{$esp_id}->{_encryption} = $2;
+        $ike_hash{$connectid}{$esp_id}->{_hash} = $3;
+        $ike_hash{$connectid}{$esp_id}->{_inbytes} = $4;
+        $ike_hash{$connectid}{$esp_id}->{_outbytes} = $5;
+        $ike_hash{$connectid}{$esp_id}->{_expire} = conv_time($6);
+
+        my $last_used = 1000;
+        $last_used = $1 if ($line =~ /\((\d+)s ago\)/);
+        $ike_hash{$connectid}{$esp_id}->{last_used} = $last_used;
+
+      } elsif ($line =~ /{(\d+)}:\s+(.*?)\[(.*?)\] === (.*)\[(.*)\]/) {
+        $ike_hash{$connectid}{$1}->{_lsnet} = $2;
+        $ike_hash{$connectid}{$1}->{_lproto} = $3;
+        $ike_hash{$connectid}{$1}->{_rsnet} = $4;
+        $ike_hash{$connectid}{$1}->{_rproto} = $5;
+      }
     }
   }
+
+  # For each tunnel, loop through all ESP SA's and extract data from one most recently used
+  foreach my $connectid (keys %ike_hash) {
+    foreach my $ike_sa (reverse sort {$ike_hash{$a}{last_used} <=> $ike_hash{$b}{last_used}} keys %{$ike_hash{$connectid}}) {
+      foreach my $data (keys %{$ike_hash{$connectid}{$ike_sa}}) {
+        $tunnel_hash{$connectid}->{$data} = $ike_hash{$connectid}{$ike_sa}{$data} if ($data =~ /^_/);
+      }
+      my $atime = $tunnel_hash{$connectid}->{_lifetime} - $tunnel_hash{$connectid}->{_expire};
+      $tunnel_hash{$connectid}->{_state} = "up" if ($atime >= 0);
+      last;
+    }
+  }
+
   return %tunnel_hash;
 }
 
