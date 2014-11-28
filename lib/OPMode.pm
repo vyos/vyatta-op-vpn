@@ -201,7 +201,7 @@ sub get_tunnel_info_peer {
 sub process_tunnels{
   my @ipsecstatus = @{pop(@_)};
   my %tunnel_hash = ();
-  my %ike_hash = ();
+  my %esp_hash = ();
   foreach my $line (@ipsecstatus) {
     if (($line =~ /\"(peer-.*-tunnel-.*?)\"/)){
       my $connectid = $1;
@@ -596,35 +596,35 @@ sub process_tunnels{
         $tunnel_hash{$connectid}->{_dhgrp} = $3;
       
       } elsif ($line =~ /{(\d+)}:\s+INSTALLED.*ESP.*SPIs: (.*)_i (.*)_o/) {
-        $ike_hash{$connectid}{$1}->{_inspi} = $2;
-        $ike_hash{$connectid}{$1}->{_outspi} = $3;
+        $esp_hash{$connectid}{$1}->{_inspi} = $2;
+        $esp_hash{$connectid}{$1}->{_outspi} = $3;
 
       } elsif ($line =~ /{(\d+)}:\s+(.*?)\/(.*?), (\d+) bytes_i.* (\d+) bytes_o.*rekeying in (.*)/) {
         my $esp_id = $1;
-        $ike_hash{$connectid}{$esp_id}->{_encryption} = $2;
-        $ike_hash{$connectid}{$esp_id}->{_hash} = $3;
-        $ike_hash{$connectid}{$esp_id}->{_inbytes} = $4;
-        $ike_hash{$connectid}{$esp_id}->{_outbytes} = $5;
-        $ike_hash{$connectid}{$esp_id}->{_expire} = conv_time($6);
+        $esp_hash{$connectid}{$esp_id}->{_encryption} = $2;
+        $esp_hash{$connectid}{$esp_id}->{_hash} = $3;
+        $esp_hash{$connectid}{$esp_id}->{_inbytes} = $4;
+        $esp_hash{$connectid}{$esp_id}->{_outbytes} = $5;
+        $esp_hash{$connectid}{$esp_id}->{_expire} = conv_time($6);
 
         my $last_used = 1000;
         $last_used = $1 if ($line =~ /\((\d+)s ago\)/);
-        $ike_hash{$connectid}{$esp_id}->{last_used} = $last_used;
+        $esp_hash{$connectid}{$esp_id}->{last_used} = $last_used;
 
       } elsif ($line =~ /{(\d+)}:\s+(.*?)\[(.*?)\] === (.*)\[(.*)\]/) {
-        $ike_hash{$connectid}{$1}->{_lsnet} = $2;
-        $ike_hash{$connectid}{$1}->{_lproto} = $3;
-        $ike_hash{$connectid}{$1}->{_rsnet} = $4;
-        $ike_hash{$connectid}{$1}->{_rproto} = $5;
+        $esp_hash{$connectid}{$1}->{_lsnet} = $2;
+        $esp_hash{$connectid}{$1}->{_lproto} = $3;
+        $esp_hash{$connectid}{$1}->{_rsnet} = $4;
+        $esp_hash{$connectid}{$1}->{_rproto} = $5;
       }
     }
   }
 
   # For each tunnel, loop through all ESP SA's and extract data from one most recently used
-  foreach my $connectid (keys %ike_hash) {
-    foreach my $ike_sa (reverse sort {$ike_hash{$a}{last_used} <=> $ike_hash{$b}{last_used}} keys %{$ike_hash{$connectid}}) {
-      foreach my $data (keys %{$ike_hash{$connectid}{$ike_sa}}) {
-        $tunnel_hash{$connectid}->{$data} = $ike_hash{$connectid}{$ike_sa}{$data} if ($data =~ /^_/);
+  foreach my $connectid (keys %esp_hash) {
+    foreach my $ike_sa (reverse sort {$esp_hash{$a}{last_used} <=> $esp_hash{$b}{last_used}} keys %{$esp_hash{$connectid}}) {
+      foreach my $data (keys %{$esp_hash{$connectid}{$ike_sa}}) {
+        $tunnel_hash{$connectid}->{$data} = $esp_hash{$connectid}{$ike_sa}{$data} if ($data =~ /^_/);
       }
       my $atime = $tunnel_hash{$connectid}->{_lifetime} - $tunnel_hash{$connectid}->{_expire};
       $tunnel_hash{$connectid}->{_state} = "up" if ($atime >= 0);
