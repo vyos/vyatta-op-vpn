@@ -584,8 +584,8 @@ sub process_tunnels{
         $tunnel_hash{$connectid}->{_ikelife} = $ikelife;
         $tunnel_hash{$connectid}->{_pfsgrp} = $pfs_group;
 
-      } elsif ($line =~ /\]:\s+IKE SPIs: .* reauthentication in (.*)/) {
-        $tunnel_hash{$connectid}->{_ikeexpire} = conv_time($1);
+      } elsif ($line =~ /\]:\s+IKE SPIs: .* (reauthentication|rekeying) in (.*)/) {
+        $tunnel_hash{$connectid}->{_ikeexpire} = conv_time($2);
         my $atime = $tunnel_hash{$connectid}->{_ikelife} - $tunnel_hash{$connectid}->{_ikeexpire};
 
         $tunnel_hash{$connectid}->{_ikestate} = "up" if ($atime >= 0);
