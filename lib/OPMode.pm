@@ -611,11 +611,27 @@ sub process_tunnels{
         $last_used = $1 if ($line =~ /\((\d+)s ago\)/);
         $esp_hash{$connectid}{$esp_id}->{last_used} = $last_used;
 
-      } elsif ($line =~ /{(\d+)}:\s+(.*?)\[(.*?)\] === (.*)\[(.*)\]/) {
-        $esp_hash{$connectid}{$1}->{_lsnet} = $2;
-        $esp_hash{$connectid}{$1}->{_lproto} = $3;
-        $esp_hash{$connectid}{$1}->{_rsnet} = $4;
-        $esp_hash{$connectid}{$1}->{_rproto} = $5;
+      } elsif ($line =~ /{(\d+)}:\s+(\d+\.\d+\.\d+\.\d+\/\d+(\[.*?\]){0,1}) === (\d+\.\d+\.\d+\.\d+\/\d+(\[.*?\]){0,1})/) {
+        my ($esp_id, $_lsnet, $_lsproto, $_rsnet, $_rsproto) = ($1, $2, $3, $4, $5);
+
+        if (defined($_lsproto)) {
+          $_lsnet =~ s/\Q$_lsproto\E//g if ($_lsnet =~ /\Q$_lsproto\E/);
+          $_lsproto =~ s/\[|\]//g;
+        } else {
+          $_lsproto = "all";
+        }
+
+        if (defined($_rsproto)) {
+          $_rsnet =~ s/\Q$_rsproto\E//g if ($_rsnet =~ /\Q$_rsproto\E/);
+          $_rsproto =~ s/\[|\]//g;
+        } else {
+          $_rsproto = "all";
+        }
+
+        $esp_hash{$connectid}{$esp_id}->{_lsnet} = $_lsnet;
+        $esp_hash{$connectid}{$esp_id}->{_lproto} = $_lsproto;
+        $esp_hash{$connectid}{$esp_id}->{_rsnet} = $_rsnet;
+        $esp_hash{$connectid}{$esp_id}->{_rproto} = $_rsproto;
       }
     }
   }
