@@ -584,7 +584,7 @@ sub process_tunnels{
         $tunnel_hash{$connectid}->{_ikelife} = $ikelife;
         $tunnel_hash{$connectid}->{_pfsgrp} = $pfs_group;
 
-      } elsif ($line =~ /\]:\s+IKE SPIs: .* (reauthentication|rekeying) in (.*)/) {
+      } elsif ($line =~ /\]:\s+IKE SPIs: .* (reauthentication|rekeying) (disabled|in .*)/) {
         $tunnel_hash{$connectid}->{_ikeexpire} = conv_time($2);
         my $atime = $tunnel_hash{$connectid}->{_ikelife} - $tunnel_hash{$connectid}->{_ikeexpire};
 
@@ -599,7 +599,7 @@ sub process_tunnels{
         $esp_hash{$connectid}{$1}->{_inspi} = $2;
         $esp_hash{$connectid}{$1}->{_outspi} = $3;
 
-      } elsif ($line =~ /{(\d+)}:\s+(.*?)\/(.*?), (\d+) bytes_i.* (\d+) bytes_o.*rekeying in (.*)/) {
+      } elsif ($line =~ /{(\d+)}:\s+(.*?)\/(.*?), (\d+) bytes_i.* (\d+) bytes_o.*rekeying (disabled|in .*)/) {
         my $esp_id = $1;
         $esp_hash{$connectid}{$esp_id}->{_encryption} = $2;
         $esp_hash{$connectid}{$esp_id}->{_hash} = $3;
@@ -653,17 +653,24 @@ sub process_tunnels{
 
 sub conv_time {
   my @time = split(/\s+/, $_[0]);
-  my $multiply = 1;
+  my ($rc, $multiply) = ("", 1);
 
-  if ($time[1] =~ /minute/i) {
-    $multiply = 60;
-  } elsif ($time[1] =~ /hour/i) {
-    $multiply = 3600;
-  } elsif ($time[1] =~ /day/i) {
-    $multiply = 86400;
+  if ($time[0] eq 'disabled') {
+    $rc = 0;
+  } else {
+    
+    if ($time[2] =~ /minute/i) {
+      $multiply = 60;
+    } elsif ($time[2] =~ /hour/i) {
+      $multiply = 3600;
+    } elsif ($time[2] =~ /day/i) {
+      $multiply = 86400;
+    }
+
+    $rc = $time[1] * $multiply;
   }
-
-  return $time[0] * $multiply;
+  
+  return $rc;
 }
 
 sub get_conns
