@@ -1,3 +1,17 @@
+vyatta-op-vpn (0.15.0+vyos2+lithium3) unstable; urgency=low
+
+  [ Jason Hendry ]
+  * Add IKEv2 SA info to "show vpn ipsec *" options
+  * Fixing detection of IKE SA info with IKEv2
+  * Print ESP info from most recently used SPI. Fixed bug where tunnel 
+    with 0 bytes of traffic gets reported as down
+  * Fixing typo in variable name, %ike_hash is now %esp_hash
+  * Updating another typo, $ike_sa is now $esp_sa
+
+  [ Alex Harpin ]
+
+ -- Alex Harpin <development@landsofshadow.co.uk>  Sat, 13 Dec 2014 11:58:01 +0000
+ 
 vyatta-op-vpn (0.15.0+vyos2+lithium2) unstable; urgency=low
 
   [ Ryan Riske ]
