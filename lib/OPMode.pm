@@ -590,10 +590,10 @@ sub process_tunnels{
 
         $tunnel_hash{$connectid}->{_ikestate} = "up" if ($atime >= 0);
 
-      } elsif ($line =~ /\]:\s+IKE.proposal:(.*?)\/(.*?)\/(.*)/) {
+      } elsif ($line =~ /\]:\s+IKE.proposal:(.*?)\/(.*?)\/(.*?)\/(.*)/) {
         $tunnel_hash{$connectid}->{_ikeencrypt} = $1;
         $tunnel_hash{$connectid}->{_ikehash} = $2;
-        $tunnel_hash{$connectid}->{_dhgrp} = $3;
+        $tunnel_hash{$connectid}->{_dhgrp} = $4;
       
       } elsif ($line =~ /{(\d+)}:\s+INSTALLED.*ESP.*SPIs: (.*)_i (.*)_o/) {
         $esp_hash{$connectid}{$1}->{_inspi} = $2;
