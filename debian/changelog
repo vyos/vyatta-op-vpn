@@ -1,3 +1,12 @@
+vyatta-op-vpn (0.15.0+vyos2+lithium4) unstable; urgency=low
+
+  [ Jason Hendry ]
+  * Fix detection of IKEv2 IKE DH Group (Bug #402)
+
+  [ Alex Harpin ]
+
+ -- Alex Harpin <development@landsofshadow.co.uk>  Sat, 20 Dec 2014 20:18:40 +0000
+ 
 vyatta-op-vpn (0.15.0+vyos2+lithium3) unstable; urgency=low
 
   [ Jason Hendry ]
