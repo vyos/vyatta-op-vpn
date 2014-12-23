@@ -1,3 +1,31 @@
+vyatta-op-vpn (0.14.0+vyos1+helium2) unstable; urgency=low
+
+  [ Ryan Riske ]
+  * Add support for DH groups 14-26
+  * Bug 220: Add support for SHA2 hashes
+
+  [ Alex Harpin ]
+  * vyatta-op-vpn: prevent invalid rsa key file from being generated
+  * vyatta-op-vpn: display the config path location for the rsa key file
+
+  [ Patrick van Staveren ]
+  * Fix 'show vpn ipsec status'
+
+  [ Jason Hendry ]
+  * Add IKEv2 SA info to "show vpn ipsec *" options
+  * Fixing detection of IKE SA info with IKEv2
+  * Print ESP info from most recently used SPI. Fixed bug where tunnel
+    with 0 bytes of traffic gets reported as down
+  * Fixing typo in variable name, %ike_hash is now %esp_hash
+  * Updating another typo, $ike_sa is now $esp_sa
+  * Fixing output of "show vpn ike sa" when reauth=no
+  * Fix "show vpn ipsec sa" for IKEv2 when rekeying is disabled
+  * Fix detection of IKEv2 IKE DH Group
+
+  [ Daniil Baturin ]
+
+ -- Daniil Baturin <daniil@baturin.org>  Tue, 23 Dec 2014 01:42:18 +0100
+
 vyatta-op-vpn (0.14.0+vyos1+helium1) unstable; urgency=low
 
   * New branch
