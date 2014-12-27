@@ -1,3 +1,9 @@
+vyatta-op-vpn (0.15.0+vyos2+lithium5) unstable; urgency=low
+
+  * Update maintainer address
+
+ -- Alex Harpin <development@landsofshadow.co.uk>  Sat, 27 Dec 2014 11:54:48 +0000
+ 
 vyatta-op-vpn (0.15.0+vyos2+lithium4) unstable; urgency=low
 
   [ Jason Hendry ]
