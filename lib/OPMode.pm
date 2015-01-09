@@ -642,7 +642,8 @@ sub process_tunnels{
       foreach my $data (keys %{$esp_hash{$connectid}{$esp_sa}}) {
         $tunnel_hash{$connectid}->{$data} = $esp_hash{$connectid}{$esp_sa}{$data} if ($data =~ /^_/);
       }
-      my $atime = $tunnel_hash{$connectid}->{_lifetime} - $tunnel_hash{$connectid}->{_expire};
+      my ($atime, $esp_lifetime, $esp_expire) = (-1, $tunnel_hash{$connectid}->{_lifetime}, $tunnel_hash{$connectid}->{_expire});
+      $atime = $esp_lifetime - $esp_expire if (($esp_lifetime ne 'n/a') && ($esp_expire ne 'n/a'));
       $tunnel_hash{$connectid}->{_state} = "up" if ($atime >= 0);
       last;
     }
