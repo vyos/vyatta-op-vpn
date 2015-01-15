@@ -1,3 +1,15 @@
+vyatta-op-vpn (0.15.0+vyos2+lithium6) unstable; urgency=low
+
+  [ Jason Hendry ]
+  * Removing ESP SA's in esp_hash which do not have a last_used key
+  * Improving detection of dead tunnels for IKEv2
+  * Improving dead IKE detection for IKEv2
+  * Improving dead IKE + ESP detection for IKEv1
+  
+  [ Alex Harpin ]
+
+ -- Alex Harpin <development@landsofshadow.co.uk>  Thu, 15 Jan 2015 19:48:52 +0000
+ 
 vyatta-op-vpn (0.15.0+vyos2+lithium5) unstable; urgency=low
 
   * Update maintainer address
