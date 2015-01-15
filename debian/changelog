@@ -22,6 +22,10 @@ vyatta-op-vpn (0.15.0+vyos2+lithium3) unstable; urgency=low
     with 0 bytes of traffic gets reported as down
   * Fixing typo in variable name, %ike_hash is now %esp_hash
   * Updating another typo, $ike_sa is now $esp_sa
+  * Fixing output of "show vpn ike sa" when reauth=no
+  * Fixing "show vpn ipsec sa" left/rgiht subnet info when you do not
+    specify a protocol in the IPSec tunnel config
+  * Fix "show vpn ipsec sa" for IKEv2 when rekeying is disabled 
 
   [ Alex Harpin ]
 
