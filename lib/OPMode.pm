@@ -642,6 +642,13 @@ sub process_tunnels{
     }
   }
 
+  # Cleanse esp_hash
+  foreach my $connectid (keys %esp_hash) {
+    foreach my $esp_sa (keys %{$esp_hash{$connectid}}) {
+      delete $esp_hash{$connectid}{$esp_sa} if (not defined($esp_hash{$connectid}{$esp_sa}{last_used}));
+    }
+  }
+
   # For each tunnel, loop through all ESP SA's and extract data from one most recently used
   foreach my $connectid (keys %esp_hash) {
     foreach my $esp_sa (reverse sort {$esp_hash{$a}{last_used} <=> $esp_hash{$b}{last_used}} keys %{$esp_hash{$connectid}}) {
