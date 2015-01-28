@@ -1,5 +1,5 @@
 help: Show status of IPsec process
-run: if pgrep pluto >&/dev/null; then
+run: if pgrep charon >&/dev/null; then
         /opt/vyatta/bin/sudo-users/vyatta-show-ipsec-status.pl
      else
         echo -e "IPSec Process NOT Running\n"
