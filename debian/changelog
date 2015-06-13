@@ -1,3 +1,13 @@
+vyatta-op-vpn (0.15.0+vyos2+lithium7) unstable; urgency=low
+
+  [ Jason Hendry ]
+  *  Bug:540 correct the order of ESP SA array by removing the reverse
+     directive
+     
+  [ Alex Harpin ]
+
+ -- Alex Harpin <development@landsofshadow.co.uk>  Sat, 13 Jun 2015 11:08:07 +0100
+
 vyatta-op-vpn (0.15.0+vyos2+lithium6) unstable; urgency=low
 
   [ Jason Hendry ]
