@@ -1,8 +1,14 @@
+vyatta-op-vpn (0.15.0+vyos2+lithium8) unstable; urgency=low
+
+  * vyatta-op-vpn: update dh_gencontrol with new development build flag
+ 
+ -- Alex Harpin <development@landsofshadow.co.uk>  Sat, 20 Jun 2015 07:07:39 +0100
+ 
 vyatta-op-vpn (0.15.0+vyos2+lithium7) unstable; urgency=low
 
   [ Jason Hendry ]
-  *  Bug:540 correct the order of ESP SA array by removing the reverse
-     directive
+  * Bug:540 correct the order of ESP SA array by removing the reverse
+    directive
      
   [ Alex Harpin ]
 
