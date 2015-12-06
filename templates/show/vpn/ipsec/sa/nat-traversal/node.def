@@ -1,2 +1,0 @@
-help: Show all active IPsec Security Associations (SA) that are using NAT Traversal
-run: sudo /opt/vyatta/bin/sudo-users/vyatta-op-vpn.pl --show-ipsec-sa-natt
