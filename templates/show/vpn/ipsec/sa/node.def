@@ -1,3 +1,8 @@
 help: Show all active IPsec Security Associations (SA)
-run: sudo /opt/vyatta/bin/sudo-users/vyatta-op-vpn.pl --show-ipsec-sa
-     sudo /opt/vyatta/bin/sudo-users/vyatta-op-vpnprof.pl --show-ipsec-sa
+
+run: if pgrep charon >&/dev/null; then
+        sudo /usr/sbin/swanctl --list-sas
+     else
+        echo -e "IPSec Process NOT Running\n"
+     fi
+
