@@ -3,19 +3,19 @@ Section: contrib/net
 Priority: extra
 Maintainer: VyOS Package Maintainers <maintainers@vyos.net>
 Build-Depends: debhelper (>= 5), autotools-dev, automake, autoconf, cpio, libtool
-Standards-Version: 3.7.2
+Standards-Version: 3.9.1
 
 Package: vyatta-op-vpn
 Architecture: all
 Depends: vyatta-op,
  vyatta-bash | bash (>= 3.1),
  vyatta-cfg-vpn,
- vyatta-ipsec,
+ strongswan (>= 5.2),
  ${shlibs:Depends}
 Suggests: util-linux (>= 2.13-5),
  net-tools,
  ethtool,
  ncurses-bin (>= 5.5-5),
  ntpdate
-Description: VyOS operational commands for VPN
- VyOS commands to operate openswan VPN.
+Description: VyOS operational commands for IPsec VPN
+ VyOS commands fpr IPsec VPN operations.
