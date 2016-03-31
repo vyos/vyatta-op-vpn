@@ -695,6 +695,7 @@ sub get_conns
   while(<$IPSECCONF>){
     push (@ipsecconf, $_);
   }
+  close($IPSECCONF);
   my %th = ();
   for my $line (@ipsecconf){
     next if ($line =~/^\#/);
