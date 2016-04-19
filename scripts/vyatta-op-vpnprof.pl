@@ -52,11 +52,11 @@ if ( defined $show_ipsec_sa_profile_detail ) {
     Vyatta::vpnprof::OPMode::show_ipsec_sa_profile_detail(
         $show_ipsec_sa_profile_detail);
 }
-if ( defined @show_ipsec_sa_conn_detail ) {
+if ( @show_ipsec_sa_conn_detail ) {
     Vyatta::vpnprof::OPMode::show_ipsec_sa_conn_detail(
         @show_ipsec_sa_conn_detail);
 }
-if ( defined @show_ipsec_sa_conn ) {
+if ( @show_ipsec_sa_conn ) {
     Vyatta::vpnprof::OPMode::show_ipsec_sa_conn(@show_ipsec_sa_conn);
 }
 if ( defined $show_ipsec_sa_stats ) {
@@ -66,7 +66,7 @@ if ( defined $show_ipsec_sa_stats_profile ) {
     Vyatta::vpnprof::OPMode::show_ipsec_sa_stats_profile(
         $show_ipsec_sa_stats_profile);
 }
-if ( defined @show_ipsec_sa_stats_conn ) {
+if ( @show_ipsec_sa_stats_conn ) {
     Vyatta::vpnprof::OPMode::show_ipsec_sa_stats_conn(
         @show_ipsec_sa_stats_conn);
 }

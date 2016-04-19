@@ -73,10 +73,10 @@ if (defined $show_ipsec_sa_peer) {
 if (defined $show_ipsec_sa_peer_detail) {
   Vyatta::VPN::OPMode::show_ipsec_sa_peer_detail($show_ipsec_sa_peer_detail);
 }
-if (defined @show_ipsec_sa_conn_detail) {
+if (@show_ipsec_sa_conn_detail) {
   Vyatta::VPN::OPMode::show_ipsec_sa_conn_detail(@show_ipsec_sa_conn_detail);
 }
-if (defined @show_ipsec_sa_conn) {
+if (@show_ipsec_sa_conn) {
   Vyatta::VPN::OPMode::show_ipsec_sa_conn(@show_ipsec_sa_conn);
 }
 if (defined $show_ipsec_sa_natt) {
@@ -88,7 +88,7 @@ if (defined $show_ipsec_sa_stats) {
 if (defined $show_ipsec_sa_stats_peer) {
   Vyatta::VPN::OPMode::show_ipsec_sa_stats_peer($show_ipsec_sa_stats_peer);
 }
-if (defined @show_ipsec_sa_stats_conn) {
+if (@show_ipsec_sa_stats_conn) {
   Vyatta::VPN::OPMode::show_ipsec_sa_stats_conn(@show_ipsec_sa_stats_conn);
 }
 if (defined $show_ike_sa) {
