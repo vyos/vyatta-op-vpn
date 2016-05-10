@@ -1,9 +1,10 @@
 #!/bin/sh
 
 
-rm -rf config
+rm -rf config m4
 rm -f aclocal.m4 config.guess config.statusconfig.sub configure INSTALL
 
+mkdir -p m4
 autoreconf --force --install
 
 rm -f config.sub config.guess

@@ -11,6 +11,7 @@ AC_INIT([vyatta-op-vpn], VERSION_ID, [maintainers@vyos.net])
 
 test -n "$VYATTA_VERSION" || VYATTA_VERSION=$PACKAGE_VERSION
 
+AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([config])
 AM_INIT_AUTOMAKE([gnu no-dist-gzip dist-bzip2 subdir-objects])
 AC_PREFIX_DEFAULT([/opt/vyatta])
