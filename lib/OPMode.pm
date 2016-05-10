@@ -203,9 +203,9 @@ sub process_tunnels{
   my %tunnel_hash = ();
   my %esp_hash = ();
   foreach my $line (@ipsecstatus) {
-    if (($line =~ /\"(peer-.*-tunnel-.*?)\"/)){
+    if (($line =~ /(peer-.*-tunnel-.*?):/)){
       my $connectid = $1;
-      if (($line =~ /\"(peer-.*-tunnel-.*?)\"(\[\d*\])/)){
+      if (($line =~ /(peer-.*-tunnel-.*?):(\[\d*\])/)){
         $connectid .= $2;
       }
       $connectid =~ /peer-(.*)-tunnel-(.*)/;
