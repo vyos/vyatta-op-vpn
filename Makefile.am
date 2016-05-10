@@ -1,3 +1,5 @@
+ACLOCAL_AMFLAGS = -I m4
+
 opdir		 = $(datadir)/vyatta-op/templates
 
 bin_sudo_usersdir = $(bindir)/sudo-users
