@@ -1,2 +1,0 @@
-help: Show summary of IKE process information
-run: sudo /opt/vyatta/bin/sudo-users/vyatta-op-vpn.pl --show-ike-status

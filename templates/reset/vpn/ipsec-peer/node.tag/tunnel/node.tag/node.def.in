@@ -1,0 +1,10 @@
+help: Reset a specific tunnel for given peer
+
+allowed: @SUDOUSRDIR@/vyatta-vpn-op.pl \
+        --op=get-tunnels-for-peer \
+        --peer="${COMP_WORDS[COMP_CWORD-2]}"
+
+run: @SUDOUSRDIR@/vyatta-vpn-op.pl \
+        --op=clear-specific-tunnel-for-peer \
+        --peer="$4" \
+        --tunnel="$6"
