@@ -1,4 +1,3 @@
-#!/usr/bin/perl
 #
 # Module Vyatta::vpnprof::OpMode.pm
 #

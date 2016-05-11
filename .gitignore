@@ -27,3 +27,4 @@ libtool
 /Makefile
 
 /command_proc_show_vpn
+/scripts/vyatta-gen-x509-keypair.sh
