@@ -1,2 +1,2 @@
-vyatta-op-vpn: file-in-unusual-dir
-vyatta-op-vpn: dir-or-file-in-opt
+# It's a hassle to move it out of /opt.  I'll get to it later
+#vyatta-op-vpn binary: dir-or-file-in-opt
