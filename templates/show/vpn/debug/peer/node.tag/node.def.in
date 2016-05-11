@@ -2,7 +2,7 @@ help: Show debugging information for a peer
 allowed: @SUDOUSRDIR@/vyatta-op-vpn.pl --get-peers-for-cli
 run: if [ -n "$(cli-shell-api returnActiveValues \
                   vpn ipsec ipsec-interfaces interface)" ]; then
-       if pgrep pluto > /dev/null
+       if pgrep charon > /dev/null
        then
         @SUDOUSRDIR@/vyatta-vpn-op.pl --op=show-vpn-debug | grep peer-$5
        else

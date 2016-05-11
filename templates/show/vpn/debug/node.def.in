@@ -1,7 +1,7 @@
 help: Show VPN debugging information
 run: if [ -n "$(cli-shell-api returnActiveValues \
                   vpn ipsec ipsec-interfaces interface)" ]; then
-       if pgrep pluto > /dev/null
+       if pgrep charon > /dev/null
        then
         @SUDOUSRDIR@/vyatta-vpn-op.pl --op=show-vpn-debug
        else
