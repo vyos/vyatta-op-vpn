@@ -14,7 +14,7 @@ vyatta-op-vpn (0.15.0+vyos2+current2+nmu1) UNRELEASED; urgency=low
   - unknown substitution variable ${shlibs:Depends} - removed
   * address dpkg-source issue:
   - debian/source/format set to "3.0 (native)"
-
+  * removed all references to /opt/vyatta but one from source
 
  -- C.J. Collier <cjcollier@linuxfoundation.org>  Wed, 11 May 2016 02:33:38 +0000
 
