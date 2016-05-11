@@ -1,8 +1,0 @@
-help: Show all active IPsec Security Associations (SA)
-
-run: if pgrep charon >&/dev/null; then
-        sudo /usr/sbin/swanctl --list-sas
-     else
-        echo -e "IPSec Process NOT Running\n"
-     fi
-

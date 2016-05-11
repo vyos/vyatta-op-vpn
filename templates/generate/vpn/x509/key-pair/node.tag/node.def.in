@@ -1,0 +1,4 @@
+help: Generate x509 key-pair
+run:
+  sudo @SBINDIR@/vyatta-gen-x509-keypair $5
+allowed: echo -n '<common-name>'

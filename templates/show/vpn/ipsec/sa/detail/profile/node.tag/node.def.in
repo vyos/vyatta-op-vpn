@@ -1,0 +1,3 @@
+help: Show details for all active IPsec Security Associations (SA) for a profile
+allowed: @SUDOUSRDIR@/vyatta-op-vpnprof.pl --get-profiles-for-cli
+run: sudo @SUDOUSRDIR@/vyatta-op-vpnprof.pl --show-ipsec-sa-profile-detail="$7"

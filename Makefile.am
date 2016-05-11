@@ -21,11 +21,9 @@ cpiop = find  . ! -regex '\(.*~\|.*\.bak\|.*\.swp\|.*\#.*\#\)' -print0 | \
 	cpio -0pd
 
 install-exec-hook:
-	mkdir -p $(DESTDIR)${sysconfdir}
-	mkdir -p $(DESTDIR)${sbindir}
-	cp scripts/vyatta-gen-x509-keypair.sh $(DESTDIR)${sbindir}/vyatta-gen-x509-keypair
+	mkdir -p $(DESTDIR)${sysconfdir} $(DESTDIR)${sbindir} $(DESTDIR)$(opdir)
+	cp scripts/vyatta-gen-x509-keypair $(DESTDIR)${sbindir}/
 	cp scripts/key-pair.template $(DESTDIR)${sysconfdir}
-	mkdir -p $(DESTDIR)$(opdir)
 	cd templates; $(cpiop) $(DESTDIR)$(opdir)
 
 
