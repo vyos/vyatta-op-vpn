@@ -869,7 +869,7 @@ sub show_ipsec_sa_natt
     display_ipsec_sa_brief(\%tmphash);
 }
 sub show_ike_status{
-  my $process_id = `sudo cat /var/run/pluto.pid`;
+  my $process_id = `sudo cat /var/run/charon.pid`;
   chomp $process_id;
 
   print <<EOS;
