@@ -54,22 +54,6 @@ AC_OUTPUT([
 	templates/generate/vpn/rsa-key/bits/node.tag/node.def
 	templates/generate/vpn/rsa-key/bits/node.tag/random/node.tag/node.def
 	templates/show/vpn/ipsec/status/node.def
-	templates/show/vpn/ipsec/sa/node.def
-	templates/show/vpn/ipsec/sa/nat-traversal/node.def
-	templates/show/vpn/ipsec/sa/statistics/node.def
-	templates/show/vpn/ipsec/sa/statistics/profile/node.tag/node.def
-	templates/show/vpn/ipsec/sa/statistics/profile/node.tag/tunnel/node.tag/node.def
-	templates/show/vpn/ipsec/sa/statistics/peer/node.tag/node.def
-	templates/show/vpn/ipsec/sa/statistics/peer/node.tag/tunnel/node.tag/node.def
-	templates/show/vpn/ipsec/sa/detail/node.def
-	templates/show/vpn/ipsec/sa/detail/profile/node.tag/node.def
-	templates/show/vpn/ipsec/sa/detail/profile/node.tag/tunnel/node.tag/node.def
-	templates/show/vpn/ipsec/sa/detail/peer/node.tag/node.def
-	templates/show/vpn/ipsec/sa/detail/peer/node.tag/tunnel/node.tag/node.def
-	templates/show/vpn/ipsec/sa/profile/node.tag/node.def
-	templates/show/vpn/ipsec/sa/profile/node.tag/tunnel/node.tag/node.def
-	templates/show/vpn/ipsec/sa/peer/node.tag/node.def
-	templates/show/vpn/ipsec/sa/peer/node.tag/tunnel/node.tag/node.def
 	templates/show/vpn/debug/node.def
 	templates/show/vpn/debug/detail/node.def
 	templates/show/vpn/debug/peer/node.tag/node.def

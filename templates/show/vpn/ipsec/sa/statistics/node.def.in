@@ -1,3 +1,0 @@
-help: Show statistics of all active tunnels that have IPsec Security Associations (SA)
-run: sudo @SUDOUSRDIR@/vyatta-op-vpn.pl --show-ipsec-sa-stats
-     sudo @SUDOUSRDIR@/vyatta-op-vpnprof.pl --show-ipsec-sa-stats

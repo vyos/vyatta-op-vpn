@@ -1,3 +1,0 @@
-help: Show details for the active IPsec Security Associations (SA) for a peer's tunnel
-allowed: @SUDOUSRDIR@/vyatta-op-vpn.pl --get-conn-for-cli=${COMP_WORDS[6]}
-run: sudo @SUDOUSRDIR@/vyatta-op-vpn.pl --show-ipsec-sa-conn-detail $7 $9

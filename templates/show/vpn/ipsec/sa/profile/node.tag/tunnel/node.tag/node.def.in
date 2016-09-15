@@ -1,3 +1,0 @@
-help: Show the active IPsec Security Association (SA) for a profile's tunnel
-allowed: @SUDOUSRDIR@/vyatta-op-vpnprof.pl --get-conn-for-cli=${COMP_WORDS[5]}
-run: sudo @SUDOUSRDIR@/vyatta-op-vpnprof.pl --show-ipsec-sa-conn $6 $8
