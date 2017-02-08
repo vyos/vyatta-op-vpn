@@ -1,3 +1,0 @@
-help: Generate local RSA key with specified number of bits and random device
-run: sudo @SUDOUSRDIR@/gen_local_rsa_key.pl "$5" "$7"
-allowed: echo -n '/dev/random /dev/urandom'

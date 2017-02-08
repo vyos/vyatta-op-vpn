@@ -31,20 +31,12 @@ use Vyatta::Misc qw(get_short_config_path);
 
 # Defaults
 my $bits = 2192;
-my $device = "/dev/random";
 
 if ($#ARGV > 1) {
     die "Usage: gen_local_rsa_key.pl <bits> <device>\n";
 }
 $bits = $ARGV[0] if $#ARGV >= 0;
 
-#
-# The ipsec newhostkey command seems to support up to 
-# 20000 bits for key generation, but xorp currently
-# can't handle a line that long when entered in the 
-# config.  Xorp seems to be able to handle keys generated
-# with up to 5840 bits.
-#
 my ($bits_min, $bits_max) = (16, 4096);
 
 if ($bits > $bits_max) {
@@ -55,10 +47,6 @@ if ($bits < $bits_min) {
 }
 if ($bits % 16 != 0) {
     die "bits=$bits is not a multiple of 16\n";
-}
-$device = $ARGV[1] if $#ARGV >= 1;
-unless (-r $device) {
-    die "invalid random number device $device\n";
 }
 
 my $local_key_file = rsa_get_local_key_file();
@@ -100,13 +88,7 @@ if (-e $temp_key_file) {
     }
 }
 
-$cmd = "/usr/lib/ipsec/newhostkey --output $local_key_file --bits $bits";
-#
-# The default random number generator is /dev/random, but it will block 
-# if there isn't enough system activity to provide enough "good" random
-# bits.  Try /dev/urandom if it's taking too long.
-#
-$cmd .= " --random $device";
+$cmd = "/usr/bin/openssl genrsa -out $local_key_file $bits";
 
 # when presenting to users, show shortened /config path
 my $shortened_cfg_path_file = get_short_config_path($local_key_file);

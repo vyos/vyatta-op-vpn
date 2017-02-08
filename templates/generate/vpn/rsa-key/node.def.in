@@ -1,2 +1,2 @@
-help: Generate local RSA key (default: bits=2192 device=/dev/random)
-run: sudo @SUDOUSRDIR@/gen_local_rsa_key.pl 2192 /dev/random
+help: Generate local RSA key (default: bits=2192)
+run: sudo @SUDOUSRDIR@/gen_local_rsa_key.pl 2192
