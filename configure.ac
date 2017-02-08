@@ -52,7 +52,6 @@ AC_OUTPUT([
 	templates/generate/vpn/x509/key-pair/node.tag/node.def
 	templates/generate/vpn/rsa-key/node.def
 	templates/generate/vpn/rsa-key/bits/node.tag/node.def
-	templates/generate/vpn/rsa-key/bits/node.tag/random/node.tag/node.def
 	templates/show/vpn/ipsec/status/node.def
 	templates/show/vpn/debug/node.def
 	templates/show/vpn/debug/detail/node.def
