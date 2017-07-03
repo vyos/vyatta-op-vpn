@@ -837,8 +837,8 @@ sub get_connection_status
     (my $peerid, my $tun) = @_;
     my %th = get_tunnel_info_peer($peerid);
     for my $peer ( keys %th ) {
-      if (%{$th{$peer}}->{_tunnelnum} eq $tun){
-        return %{$th{$peer}}->{_state};
+      if (${$th{$peer}}{_tunnelnum} eq $tun){
+        return ${$th{$peer}}{_state};
       }
     }
 }
@@ -847,10 +847,10 @@ sub get_peer_ike_status
     my ($peerid) = @_;
     my %th = get_tunnel_info_peer($peerid);
     for my $peer ( keys %th ) {
-      if (%{$th{$peer}}->{_ikestate} eq 'up'){
+      if (${$th{$peer}}{_ikestate} eq 'up'){
         return 'up';    
       }
-      if (%{$th{$peer}}->{_ikestate} eq 'init'){
+      if (${$th{$peer}}{_ikestate} eq 'init'){
         return 'init';    
       }
     }
@@ -862,7 +862,7 @@ sub show_ipsec_sa_natt
     my %tunnel_hash = get_tunnel_info();
     my %tmphash = ();
     for my $peer ( keys %tunnel_hash ) {
-       if (%{$tunnel_hash{$peer}}->{_natt} == 1 ){
+       if (${$tunnel_hash{$peer}>{_natt} == 1 ){
          $tmphash{$peer} = \%{$tunnel_hash{$peer}};
        }
     }
@@ -905,7 +905,7 @@ sub show_ike_sa_natt
     my %tunnel_hash = get_tunnel_info();
     my %tmphash = ();
     for my $peer ( keys %tunnel_hash ) {
-      if (%{$tunnel_hash{$peer}}->{_natt} == 1 ){
+      if (${$tunnel_hash{$peer}}{_natt} == 1 ){
         $tmphash{$peer} = \%{$tunnel_hash{$peer}};
       }
     }
