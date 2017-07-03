@@ -98,7 +98,10 @@ sub relate_intfs_with_localips {
 #
 
 my $process_id = `sudo cat /var/run/charon.pid`;
-my $active_tunnels = `sudo ipsec status 2>/dev/null | grep 'newest IPsec SA: #' | grep -v 'newest IPsec SA: #0' | wc -l`;
+# Update to deal with new strongswan syntax for ipsec status command.
+my $sa_summary = `sudo ipsec status 2>/dev/null | grep "Security Associations" `;
+my $active_tunnels;
+($active_tunnels) = $sa_summary =~ /\((.*?) up/;
 chomp $process_id;
 chomp $active_tunnels;
 my @vpn_interfaces = get_vpn_intfs();
