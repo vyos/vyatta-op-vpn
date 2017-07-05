@@ -862,7 +862,7 @@ sub show_ipsec_sa_natt
     my %tunnel_hash = get_tunnel_info();
     my %tmphash = ();
     for my $peer ( keys %tunnel_hash ) {
-       if (${$tunnel_hash{$peer}>{_natt} == 1 ){
+       if (${$tunnel_hash{$peer}}{_natt} == 1 ){
          $tmphash{$peer} = \%{$tunnel_hash{$peer}};
        }
     }
