@@ -1292,8 +1292,8 @@ EOH
       print "\n    Description: $desc\n" if (defined($desc));
       print <<EOH;
 
-    State  Ver  Encrypt  Hash    D-H Grp  NAT-T  A-Time  L-Time
-    -----  ---  -------  ----    -------  -----  ------  ------
+    State  IKEVer  Encrypt  Hash    D-H Group      NAT-T  A-Time  L-Time
+    -----  ------  -------  ----    ---------      -----  ------  ------
 EOH
       for my $tunnel (tunSort(@{$tunhash{$connid}->{_tunnels}})){
         (my $tunnum, my $state, my $ver, my $isakmpnum, my $enc, 
@@ -1301,11 +1301,11 @@ EOH
         $enc = conv_enc($enc);
         $hash = conv_hash($hash);
         $natt = conv_natt($natt);
-        $dhgrp = conv_dh_group($dhgrp);
+        $dhgrp = conv_dh_group($dhgrp)."(".$dhgrp.")";
         my $atime = $life - $expire;
         $atime = 0 if ($atime == $life);
-        printf "    %-6s %-4s %-8s %-7s %-8s %-6s %-7s %-7s\n",
-               $state, $ver, $enc, $hash, $dhgrp, $natt, $atime, $life;
+        printf "    %-6s %-6s  %-8s %-7s %-14s %-6s %-7s %-7s\n",
+               $state, "IKEv".$ver, $enc, $hash, $dhgrp, $natt, $atime, $life;
       }
       print "\n \n";
     }
