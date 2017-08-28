@@ -201,12 +201,10 @@ sub process_tunnels{
   my @ipsecstatus = @{pop(@_)};
   my %tunnel_hash = ();
   my %esp_hash = ();
+  my %lip_lookup = ();
   foreach my $line (@ipsecstatus) {
-    if (($line =~ /(peer-.*-tunnel-.*?):/)){
+    if (($line =~ /(peer-.*-tunnel-.*?):/ && !($line =~ /[\[\{]/))){
       my $connectid = $1;
-      if (($line =~ /(peer-.*-tunnel-.*?):(\[\d*\])/)){
-        $connectid .= $2;
-      }
       $connectid =~ /peer-(.*)-tunnel-(.*)/;
       my $peer = $1;
       my $tunid = $2;
@@ -234,6 +232,7 @@ sub process_tunnels{
                   _inspi       => 'n/a',
                   _outspi      => 'n/a',
                   _pfsgrp      => 'n/a',
+                  _ikever      => 'n/a',
                   _ikeencrypt  => 'n/a',
                   _ikehash     => 'n/a',
                   _natt        => 'n/a',
@@ -249,6 +248,35 @@ sub process_tunnels{
                   _lifetime    => 'n/a',
                   _expire      => 'n/a' };
       }
+	# Disgusting hack - rip not mentioned on any line on a second tunnel to a peer - so borrow it from the first one
+	if($tunid >1)
+	{
+		$tunnel_hash{$connectid}->{_lip} = conv_ip($lip_lookup{$peer});
+	}
+		# A line like: 'peer-192.168.3.21-tunnel-1:  %any...192.168.3.21  IKEv2'
+	  if ($line =~ /\s+(.*?)\.\.\.(.*?)  IKEv(.*?)/ )
+	  {
+		my $lip = $1;
+		my $rip = $2;
+		my $ikever = $3;
+		$tunnel_hash{$connectid}->{_lip} = conv_ip($lip);
+		$tunnel_hash{$connectid}->{_rip} = conv_ip($rip);
+		$tunnel_hash{$connectid}->{_ikever} = $ikever;
+		if($tunid == 1)
+		{
+			$lip_lookup{$peer} = conv_ip($lip);
+		}	
+	  }
+	  # A line like: 'peer-192.168.3.21-tunnel-1:   child:  192.168.1.0/24 === 192.168.0.0/24 TUNNEL'
+	  elsif ($line =~ /child:\s+(.*?) === (.*?) TUNNEL/)
+	  {
+		my $lsnet = $1;
+		my $rsnet = $2;
+		$tunnel_hash{$connectid}->{_lsnet} = $lsnet;
+		$tunnel_hash{$connectid}->{_rsnet} = $rsnet;
+	  }
+	  
+	  # OLD CODE!
       $line =~ s/---.*\.\.\./.../g; # remove the next hop router for local-ip 0.0.0.0 case
       if ($line =~ /IKE.proposal:(.*?)\/(.*?)\/(.*)/){
         $tunnel_hash{$connectid}->{_ikeencrypt} = $1;
@@ -587,11 +615,16 @@ sub process_tunnels{
         $tunnel_hash{$connectid}->{_ikelife} = $ikelife;
         $tunnel_hash{$connectid}->{_pfsgrp} = $pfs_group;
 
-      } elsif ($line =~ /\]:\s+IKE SPIs: .* (reauthentication|rekeying) (disabled|in .*)/) {
-        $tunnel_hash{$connectid}->{_ikeexpire} = conv_time($2);
+      } elsif ($line =~ /\]:\s+IKE.* SPIs: .* (reauthentication|rekeying) (disabled|in .*)/) {
+	my $ikever;
+	($ikever) = $line =~ /IKEv(.*?) SPI/;
+	$tunnel_hash{$connectid}->{_ikever} = $ikever;
+	my $expiry_time;
+	(undef,$expiry_time) = $line =~ /(reauthentication|rekeying) (.*)/;
+        $tunnel_hash{$connectid}->{_ikeexpire} = conv_time($expiry_time);
 
-        my ($atime, $ike_lifetime, $ike_expire) = (-1, $tunnel_hash{$connectid}->{_ikelife}, $tunnel_hash{$connectid}->{_ikeexpire});
-        $atime = $ike_lifetime - $ike_expire if (($ike_lifetime ne 'n/a') && ($ike_expire ne 'n/a'));
+        my $atime = $tunnel_hash{$connectid}->{_ikelife} - $tunnel_hash{$connectid}->{_ikeexpire};
+#        $atime = $ike_lifetime - $ike_expire if (($ike_lifetime ne 'n/a') && ($ike_expire ne 'n/a'));
 
         $tunnel_hash{$connectid}->{_ikestate} = "up" if ($atime >= 0);
 
@@ -862,14 +895,19 @@ sub show_ipsec_sa_natt
     my %tunnel_hash = get_tunnel_info();
     my %tmphash = ();
     for my $peer ( keys %tunnel_hash ) {
-       if (${$tunnel_hash{$peer}>{_natt} == 1 ){
+       if (${$tunnel_hash{$peer}}{_natt} == 1 ){
          $tmphash{$peer} = \%{$tunnel_hash{$peer}};
        }
     }
     display_ipsec_sa_brief(\%tmphash);
 }
 sub show_ike_status{
-  my $process_id = `sudo cat /var/run/charon.pid`;
+  my $pidfile = '/var/run/charon.pid';
+  if (! -e $pidfile) {
+      print "IKE process is not running\n";
+      exit(1);
+  }
+  my $process_id = `sudo cat $pidfile`;
   chomp $process_id;
 
   print <<EOS;
@@ -970,7 +1008,7 @@ sub display_ipsec_sa_brief
     my $vpncfg = new Vyatta::Config();
     $vpncfg->setLevel('vpn ipsec site-to-site');
     for my $connectid (keys %th){  
-      $peerid = conv_ip($th{$connectid}->{_rip});
+      $peerid = conv_ip($th{$connectid}->{_peerid});
       my $lip = conv_ip($th{$connectid}->{_lip});
       my $tunnel = "$peerid-$lip";
       my $peer_configured = conv_id_rev($th{$connectid}->{_peerid});
@@ -1027,6 +1065,7 @@ EOH
         my $atime = $life - $expire;
         $atime = 0 if ($atime == $life);
         printf "    %-7s %-6s %-14s %-8s %-7s %-6s %-7s %-7s %-2s\n",
+
               $tunnum, $state, $bytesp, $enc, $hash, $natt, 
               $atime, $life, $proto;
       }
@@ -1225,11 +1264,13 @@ sub display_ike_sa_brief {
       if (not exists $tunhash{$tunnel}) {
         $tunhash{$tunnel}={
           _configpeer => conv_id_rev($th{$connectid}->{_peerid}),
+          _configpeer => conv_id_rev($th{$connectid}->{_peerid}),
           _tunnels => []
         };
       }
         my @tmp = ( $th{$connectid}->{_tunnelnum},
                $th{$connectid}->{_ikestate},
+               $th{$connectid}->{_ikever},
                $th{$connectid}->{_newestike},
                $th{$connectid}->{_ikeencrypt},
                $th{$connectid}->{_ikehash},
@@ -1251,20 +1292,20 @@ EOH
       print "\n    Description: $desc\n" if (defined($desc));
       print <<EOH;
 
-    State  Encrypt  Hash    D-H Grp  NAT-T  A-Time  L-Time
-    -----  -------  ----    -------  -----  ------  ------
+    State  IKEVer  Encrypt  Hash    D-H Group      NAT-T  A-Time  L-Time
+    -----  ------  -------  ----    ---------      -----  ------  ------
 EOH
       for my $tunnel (tunSort(@{$tunhash{$connid}->{_tunnels}})){
-        (my $tunnum, my $state, my $isakmpnum, my $enc, 
+        (my $tunnum, my $state, my $ver, my $isakmpnum, my $enc, 
          my $hash, my $dhgrp, my $natt, my $life, my $expire) = @{$tunnel};
         $enc = conv_enc($enc);
         $hash = conv_hash($hash);
         $natt = conv_natt($natt);
-        $dhgrp = conv_dh_group($dhgrp);
+        $dhgrp = conv_dh_group($dhgrp)."(".$dhgrp.")";
         my $atime = $life - $expire;
         $atime = 0 if ($atime == $life);
-        printf "    %-6s %-8s %-7s %-8s %-6s %-7s %-7s\n",
-               $state, $enc, $hash, $dhgrp, $natt, $atime, $life;
+        printf "    %-6s %-6s  %-8s %-7s %-14s %-6s %-7s %-7s\n",
+               $state, "IKEv".$ver, $enc, $hash, $dhgrp, $natt, $atime, $life;
       }
       print "\n \n";
     }
