@@ -615,19 +615,21 @@ sub process_tunnels{
         $tunnel_hash{$connectid}->{_ikelife} = $ikelife;
         $tunnel_hash{$connectid}->{_pfsgrp} = $pfs_group;
 
-      } elsif ($line =~ /\]:\s+IKE.* SPIs: .* (reauthentication|rekeying) (disabled|in .*)/) {
+      } elsif ($line =~ /\]:\s+IKE.* SPIs:/) {
 	my $ikever;
 	($ikever) = $line =~ /IKEv(.*?) SPI/;
 	$tunnel_hash{$connectid}->{_ikever} = $ikever;
 	my $expiry_time;
-	(undef,$expiry_time) = $line =~ /(reauthentication|rekeying) (.*)/;
-        $tunnel_hash{$connectid}->{_ikeexpire} = conv_time($expiry_time);
+	if($line =~ /(reauthentication|rekeying)/)
+		{(undef,$expiry_time) = $line =~ /(reauthentication|rekeying) (.*)/;
+        	$tunnel_hash{$connectid}->{_ikeexpire} = conv_time($expiry_time);
+	
 
         my $atime = $tunnel_hash{$connectid}->{_ikelife} - $tunnel_hash{$connectid}->{_ikeexpire};
 #        $atime = $ike_lifetime - $ike_expire if (($ike_lifetime ne 'n/a') && ($ike_expire ne 'n/a'));
 
         $tunnel_hash{$connectid}->{_ikestate} = "up" if ($atime >= 0);
-
+	}
       } elsif ($line =~ /\]:\s+IKE.proposal:(.*?)\/(.*?)\/(.*?)\/(.*)/) {
         $tunnel_hash{$connectid}->{_ikeencrypt} = $1;
         $tunnel_hash{$connectid}->{_ikehash} = $2;
@@ -1260,7 +1262,7 @@ sub display_ike_sa_brief {
       my $lip = $th{$connectid}->{_lip};
       $peerid = $th{$connectid}->{_rip};
       my $tunnel = "$peerid-$lip";
-      next if ($th{$connectid}->{_ikestate} eq 'down');
+      #next if ($th{$connectid}->{_ikestate} eq 'down');
       if (not exists $tunhash{$tunnel}) {
         $tunhash{$tunnel}={
           _configpeer => conv_id_rev($th{$connectid}->{_peerid}),
@@ -1304,8 +1306,10 @@ EOH
         $dhgrp = conv_dh_group($dhgrp)."(".$dhgrp.")";
         my $atime = $life - $expire;
         $atime = 0 if ($atime == $life);
+	my $ike_out = "N/A";
+	$ike_out = "IKEv".$ver if( $ver > 0 );
         printf "    %-6s %-6s  %-8s %-7s %-14s %-6s %-7s %-7s\n",
-               $state, "IKEv".$ver, $enc, $hash, $dhgrp, $natt, $atime, $life;
+               $state, $ike_out, $enc, $hash, $dhgrp, $natt, $atime, $life;
       }
       print "\n \n";
     }
