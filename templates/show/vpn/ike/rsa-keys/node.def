@@ -1,2 +1,0 @@
-help: Show VPN RSA keys
-run: sudo /opt/vyatta/bin/sudo-users/vyatta-show-vpn.pl rsa-keys

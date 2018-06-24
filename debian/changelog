@@ -1,3 +1,38 @@
+vyatta-op-vpn (0.15.0+vyos2+current2+nmu1) UNRELEASED; urgency=low
+
+  * Non-maintainer upload.
+  * address lintian issues
+  - script-not-executable: removed #!/usr/bin/perl from .pm files
+  - debhelper-but-no-misc-depends: added ${misc:Depends} to Depends: field
+  - debian-rules-missing-recommended-target: added build-arch build-indep
+  - out-of-date-standards-version: updated standards version to 3.9.4
+  - package-contains-linda-override: removed linda override
+  - file-in-unusual-dir: not triggering, removed from override
+  - script-with-language-extension: renamed vyatta-gen-x509-keypair.sh
+    vyatta-gen-x509-keypair
+  * address dpkg-gencontrol issue:
+  - unknown substitution variable ${shlibs:Depends} - removed
+  * address dpkg-source issue:
+  - debian/source/format set to "3.0 (native)"
+  * removed all references to /opt/vyatta but one from source
+
+ -- C.J. Collier <cjcollier@linuxfoundation.org>  Wed, 11 May 2016 02:33:38 +0000
+
+vyatta-op-vpn (0.15.0+vyos2+current2) unstable; urgency=low
+
+  * Remove vyatta-ipsec dependency for migration to upstream strongswan.
+
+ -- Daniil Baturin <daniil@baturin.org>  Mon, 25 Jan 2016 14:23:46 +0100
+
+vyatta-op-vpn (0.15.0+vyos2+current1) unstable; urgency=medium
+
+  [ Thomas Jepp ]
+  * Fix build depends.
+
+  [ Kim Hagen ]
+
+ -- Kim Hagen <kim.sidney@gmail.com>  Sun, 24 Jan 2016 15:22:51 -0500
+
 vyatta-op-vpn (0.15.0+vyos2+lithium8) unstable; urgency=low
 
   * vyatta-op-vpn: update dh_gencontrol with new development build flag

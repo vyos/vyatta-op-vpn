@@ -1,4 +1,6 @@
 *~
+m4/lt*.m4
+m4/libtool.m4
 .*.swp
 *.[oa]
 *.l[oa]
@@ -26,3 +28,25 @@ libtool
 /Makefile
 
 /command_proc_show_vpn
+templates/generate/vpn/rsa-key/bits/node.tag/node.def
+templates/generate/vpn/rsa-key/bits/node.tag/random/node.tag/node.def
+templates/generate/vpn/rsa-key/node.def
+templates/generate/vpn/x509/key-pair/node.tag/node.def
+templates/reset/vpn/ipsec-peer/node.tag/node.def
+templates/reset/vpn/ipsec-peer/node.tag/tunnel/node.tag/node.def
+templates/reset/vpn/ipsec-peer/node.tag/vti/node.def
+templates/reset/vpn/ipsec-profile/node.tag/node.def
+templates/reset/vpn/ipsec-profile/node.tag/tunnel/node.tag/node.def
+templates/restart/vpn/node.def
+templates/show/vpn/debug/detail/node.def
+templates/show/vpn/debug/node.def
+templates/show/vpn/debug/peer/node.tag/node.def
+templates/show/vpn/debug/peer/node.tag/tunnel/node.tag/node.def
+templates/show/vpn/ike/rsa-keys/node.def
+templates/show/vpn/ike/sa/nat-traversal/node.def
+templates/show/vpn/ike/sa/node.def
+templates/show/vpn/ike/sa/peer/node.tag/node.def
+templates/show/vpn/ike/secrets/node.def
+templates/show/vpn/ike/status/node.def
+templates/show/vpn/ipsec/status/node.def
+/scripts/vyatta-gen-x509-keypair

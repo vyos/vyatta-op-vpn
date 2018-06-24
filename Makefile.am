@@ -1,3 +1,5 @@
+ACLOCAL_AMFLAGS = -I m4
+
 opdir		 = $(datadir)/vyatta-op/templates
 
 bin_sudo_usersdir = $(bindir)/sudo-users
@@ -19,11 +21,9 @@ cpiop = find  . ! -regex '\(.*~\|.*\.bak\|.*\.swp\|.*\#.*\#\)' -print0 | \
 	cpio -0pd
 
 install-exec-hook:
-	mkdir -p $(DESTDIR)/opt/vyatta/etc/
-	mkdir -p $(DESTDIR)/opt/vyatta/sbin/
-	cp scripts/vyatta-gen-x509-keypair.sh $(DESTDIR)/opt/vyatta/sbin
-	cp scripts/key-pair.template $(DESTDIR)/opt/vyatta/etc
-	mkdir -p $(DESTDIR)$(opdir)
+	mkdir -p $(DESTDIR)${sysconfdir} $(DESTDIR)${sbindir} $(DESTDIR)$(opdir)
+	cp scripts/vyatta-gen-x509-keypair $(DESTDIR)${sbindir}/
+	cp scripts/key-pair.template $(DESTDIR)${sysconfdir}
 	cd templates; $(cpiop) $(DESTDIR)$(opdir)
 
 

@@ -22,7 +22,6 @@ CFLAGS = -Wall -g
 configure	 = ./configure
 configure	+= --host=$(DEB_HOST_GNU_TYPE)
 configure	+= --build=$(DEB_BUILD_GNU_TYPE)
-configure	+= --prefix=/opt/vyatta
 configure	+= --mandir=\$${prefix}/share/man
 configure	+= --infodir=\$${prefix}/share/info
 configure	+= CFLAGS="$(CFLAGS)"
@@ -43,9 +42,10 @@ config.status: configure
 	rm -f config.cache
 	$(configure)
 
-build: build-stamp
-
-build-stamp:  config.status
+build: build-arch build-indep
+build-arch: build-stamp
+build-indep: build-stamp
+build-stamp: config.status
 	dh_testdir
 	$(MAKE)
 	touch $@
@@ -68,13 +68,12 @@ clean-patched:
 install: build
 	dh_testdir
 	dh_testroot
-	dh_clean -k 
+	dh_prep
 	dh_installdirs
 
 	$(MAKE) DESTDIR=$(PKGDIR) install
 
 	install -D --mode=0644 debian/lintian $(PKGDIR)/usr/share/lintian/overrides/$(PACKAGE)
-	install -D --mode=0644 debian/linda $(PKGDIR)/usr/share/linda/overrides/$(PACKAGE)
 
 # Build architecture-independent files here.
 binary-indep: build install

@@ -1,0 +1,2 @@
+help: Show all currently active IKE Security Associations (SA)
+run: sudo @SUDOUSRDIR@/vyatta-op-vpn.pl --show-ike-sa

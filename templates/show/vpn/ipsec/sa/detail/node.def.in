@@ -1,0 +1,6 @@
+help: Show Detail on all active IPsec Security Associations (SA)
+run: if pgrep charon >&/dev/null; then
+       @SUDOUSRDIR@/vyatta-op-vpn.pl --show-ipsec-sa
+     else
+        echo -e "IPSec Process NOT Running\n"
+     fi

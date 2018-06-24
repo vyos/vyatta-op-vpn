@@ -1,0 +1,2 @@
+help: Generate local RSA key (default: bits=2192)
+run: sudo @SUDOUSRDIR@/gen_local_rsa_key.pl 2192

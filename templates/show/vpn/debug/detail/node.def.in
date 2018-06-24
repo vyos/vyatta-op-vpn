@@ -1,0 +1,12 @@
+help: Show detailed VPN debugging information
+run: if [ -n "$(cli-shell-api returnActiveValues \
+                  vpn ipsec ipsec-interfaces interface)" ]; then
+       if pgrep charon > /dev/null
+       then
+        @SUDOUSRDIR@/vyatta-vpn-op.pl --op=show-vpn-debug-detail
+       else
+         echo IPsec process not running
+       fi
+     else
+        echo VPN ipsec not configured
+     fi
