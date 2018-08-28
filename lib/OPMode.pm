@@ -648,8 +648,10 @@ sub process_tunnels{
         $esp_hash{$connectid}{$esp_id}->{_expire} = conv_time($6);
 
         my $last_used = 1000;
-        $last_used = $1 if ($line =~ /\((\d+)s ago\)/);
-        $esp_hash{$connectid}{$esp_id}->{last_used} = $last_used;
+	# Correct for format change, 2018/08/16 JG
+        #$last_used = $1 if ($line =~ /\((\d+)s ago\)/);
+        $last_used = $2 if ($line =~ /\((\d+ pkts,\s*)?(\d+)s ago\)/);
+	$esp_hash{$connectid}{$esp_id}->{last_used} = $last_used;
 
       } elsif ($line =~ /{(\d+)}:\s+(\d+\.\d+\.\d+\.\d+\/\d+(\[.*?\]){0,1}) === (\d+\.\d+\.\d+\.\d+\/\d+(\[.*?\]){0,1})/) {
         my ($esp_id, $_lsnet, $_lsproto, $_rsnet, $_rsproto) = ($1, $2, $3, $4, $5);
@@ -684,14 +686,20 @@ sub process_tunnels{
   }
 
   # For each tunnel, loop through all ESP SA's and extract data from one most recently used
-  foreach my $connectid (keys %esp_hash) {
+  foreach my $connectid (sort keys %esp_hash) {
     foreach my $esp_sa (sort {$esp_hash{$a}{last_used} <=> $esp_hash{$b}{last_used}} keys %{$esp_hash{$connectid}}) {
+# Disgusting  hack - some details only recorded against FIRST tunnel on any given peer.
+      my( $sourcecid ) = $connectid =~ /^(.*)-/;
+      $sourcecid .= "-1";
       foreach my $data (keys %{$esp_hash{$connectid}{$esp_sa}}) {
         $tunnel_hash{$connectid}->{$data} = $esp_hash{$connectid}{$esp_sa}{$data} if ($data =~ /^_/);
       }
-      my ($atime, $esp_lifetime, $esp_expire) = (-1, $tunnel_hash{$connectid}->{_lifetime}, $tunnel_hash{$connectid}->{_expire});
+      #my ($atime, $esp_lifetime, $esp_expire) = (-1, $tunnel_hash{$connectid}->{_lifetime}, $tunnel_hash{$connectid}->{_expire});
+      my ($atime, $esp_lifetime, $esp_expire) = (-1, $tunnel_hash{$sourcecid}->{_lifetime}, $tunnel_hash{$sourcecid}->{_expire});
       $atime = $esp_lifetime - $esp_expire if (($esp_lifetime ne 'n/a') && ($esp_expire ne 'n/a'));
+      #print "SourceCID = $sourcecid - ($atime, $esp_expire, $esp_lifetime)\n";
       $tunnel_hash{$connectid}->{_state} = "up" if ($atime >= 0);
+      $tunnel_hash{$connectid}->{_lifetime} = $tunnel_hash{$sourcecid}->{_lifetime} if($tunnel_hash{$connectid}->{_lifetime} eq 'n/a');
       last;
     }
   }
