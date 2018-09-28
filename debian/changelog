@@ -1,4 +1,4 @@
-vyatta-op-vpn (0.15.0+vyos2+current2+nmu1) UNRELEASED; urgency=low
+vyatta-op-vpn (1.2.0-1) stable; urgency=low
 
   * Non-maintainer upload.
   * address lintian issues
@@ -15,6 +15,7 @@ vyatta-op-vpn (0.15.0+vyos2+current2+nmu1) UNRELEASED; urgency=low
   * address dpkg-source issue:
   - debian/source/format set to "3.0 (native)"
   * removed all references to /opt/vyatta but one from source
+  * New branch.
 
  -- C.J. Collier <cjcollier@linuxfoundation.org>  Wed, 11 May 2016 02:33:38 +0000
 
