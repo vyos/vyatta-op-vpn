@@ -97,6 +97,17 @@ sub conv_hash {
   return $hash;
 }
 
+sub is_it_hash_algo {
+    my $hash = pop(@_);
+    my $hash = conv_hash($hash);
+    if ($hash =~ /sha(.*)/ || $hash =~ /md5(.*)/){
+        return 'true';
+    }
+    else {
+        return 'false';
+    }
+}
+
 sub conv_enc {
   my $enc = pop(@_);
   if ($enc =~ /(.*?)_.*?_(.*)/){
@@ -635,17 +646,25 @@ sub process_tunnels{
         $tunnel_hash{$connectid}->{_ikehash} = $2;
         $tunnel_hash{$connectid}->{_dhgrp} = $4;
       
+      } elsif ($line =~ /\]:\s+IKE.proposal:(.*?)\/(.*?)\/(.*)/) { # gcm encryption algo case where hash algo not present
+        $tunnel_hash{$connectid}->{_ikeencrypt} = $1;
+        $tunnel_hash{$connectid}->{_ikehash} = 'n/a';
+        $tunnel_hash{$connectid}->{_dhgrp} = $3;
+
       } elsif ($line =~ /{(\d+)}:\s+INSTALLED.*ESP.*SPIs: (.*)_i (.*)_o/) {
         $esp_hash{$connectid}{$1}->{_inspi} = $2;
         $esp_hash{$connectid}{$1}->{_outspi} = $3;
 
-      } elsif ($line =~ /{(\d+)}:\s+(.*?)\/(.*?), (\d+) bytes_i.* (\d+) bytes_o.*rekeying (disabled|in .*)/) {
+      } elsif ($line =~ /{(\d+)}:\s+(.*?), (\d+) bytes_i.* (\d+) bytes_o.*rekeying (disabled|in .*)/) {
         my $esp_id = $1;
-        $esp_hash{$connectid}{$esp_id}->{_encryption} = $2;
-        $esp_hash{$connectid}{$esp_id}->{_hash} = $3;
-        $esp_hash{$connectid}{$esp_id}->{_inbytes} = $4;
-        $esp_hash{$connectid}{$esp_id}->{_outbytes} = $5;
-        $esp_hash{$connectid}{$esp_id}->{_expire} = conv_time($6);
+        my @proposal = split('/', $2);
+        my $encryption = $proposal[0];
+        my $is_hash = is_it_hash_algo($proposal[1]);
+        $esp_hash{$connectid}{$esp_id}->{_encryption} = $encryption;
+        $esp_hash{$connectid}{$esp_id}->{_hash} = $is_hash eq 'true' ? $proposal[1] : 'n/a';
+        $esp_hash{$connectid}{$esp_id}->{_inbytes} = $3;
+        $esp_hash{$connectid}{$esp_id}->{_outbytes} = $4;
+        $esp_hash{$connectid}{$esp_id}->{_expire} = conv_time($5);
 
         my $last_used = 1000;
         $last_used = $1 if ($line =~ /\((\d+)s ago\)/);
