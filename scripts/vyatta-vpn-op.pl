@@ -42,6 +42,8 @@ sub clear_tunnel {
   my ($peer, $tunnel) = @_;
   my $error = undef;
   my $cmd = undef;
+
+  $peer =~ s/@//;
   
   print "Resetting tunnel $tunnel with peer $peer...\n";
   
