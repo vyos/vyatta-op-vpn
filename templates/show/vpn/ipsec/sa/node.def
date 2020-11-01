@@ -1,6 +1,6 @@
 help: Show all active IPsec Security Associations (SA)
 run: if pgrep charon >&/dev/null; then
-        sudo /usr/libexec/vyos/op_mode/show_ipsec_sa.py
+        sudo /usr/libexec/vyos/op_mode/show_ipsec_sa.py | sort
      else
         echo -e "IPSec Process NOT Running\n"
      fi
