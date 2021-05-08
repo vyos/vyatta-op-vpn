@@ -1,0 +1,26 @@
+#!/bin/sh
+
+set -e
+
+case "$1" in
+    configure)
+	if [ -d /opt/vyatta ]
+	then
+	    for file in $(dpkg -L vyatta-op-vpn)
+	    do
+		DFSG_PATH=${file}
+		OPT_PATH=$(echo ${file} | sed -e 's:/usr:/opt/vyatta:')
+		test -d ${DFSG_PATH} && mkdir -p ${OPT_PATH}
+		test -f ${DFSG_PATH} && ln -sf ${DFSG_PATH} ${OPT_PATH}
+	    done
+	fi
+    ;;
+    abort-upgrade|abort-remove|abort-deconfigure)
+    ;;
+    *)
+        echo "postinst called with unknown argument \`$1'" >&2
+        exit 1
+    ;;
+esac
+
+#DEBHELPER#
