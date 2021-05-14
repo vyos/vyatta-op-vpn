@@ -1262,7 +1262,7 @@ sub display_ike_sa_brief {
       my $lip = $th{$connectid}->{_lip};
       $peerid = $th{$connectid}->{_rip};
       my $tunnel = "$peerid-$lip";
-      #next if ($th{$connectid}->{_ikestate} eq 'down');
+      next if ($th{$connectid}->{_ikestate} eq 'down' && $th{$connectid}->{_ikever} eq 'n/a');
       if (not exists $tunhash{$tunnel}) {
         $tunhash{$tunnel}={
           _configpeer => conv_id_rev($th{$connectid}->{_peerid}),
