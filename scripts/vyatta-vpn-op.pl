@@ -62,6 +62,11 @@ if ($op eq 'clear-vpn-ipsec-process') {
   my $update_interval = `cli-shell-api returnActiveValue vpn ipsec auto-update`;
   if ($update_interval eq ''){
 	  system 'sudo /usr/sbin/ipsec restart >&/dev/null';
+          # Check if nhrp configuration exists, exit code
+          # As 'restart vpn' doesn't load nhrp configuration T3846
+          if (system('cli-shell-api existsActive protocols nhrp') == 0) {
+              system 'sudo swanctl --load-all';
+          }
   } else {
     system 'sudo /usr/sbin/ipsec restart --auto-update '.$update_interval.' >&/dev/null';
   }
