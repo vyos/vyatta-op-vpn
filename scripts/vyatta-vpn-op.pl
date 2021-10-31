@@ -48,7 +48,7 @@ sub clear_tunnel {
   print "Resetting tunnel $tunnel with peer $peer...\n";
   
   # bring down the tunnel
-  `sudo /usr/sbin/ipsec down peer-$peer-tunnel-$tunnel`;
+  `sudo /usr/sbin/ipsec down peer-$peer-tunnel-$tunnel\{\*\}`;
   # bring up the tunnel
   `sudo /usr/sbin/ipsec up peer-$peer-tunnel-$tunnel`;
 }
