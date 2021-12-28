@@ -33,7 +33,7 @@ sub conv_id {
   my $peer = pop(@_);
   if ( $peer =~ /\d+\.\d+\.\d+\.\d+/ ){
     $peer = $peer;
-  } elsif ($peer =~ /\d+\:\d+\:\d+\:\d+\:\d+\:\d+\:\d+\:\d+/){
+  } elsif ($peer =~ /([a-f0-9\:]+\:+)+[a-f0-9]+/){
     $peer = $peer;
   } elsif ($peer =~ /\%any/){
     $peer = "any";
