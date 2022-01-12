@@ -65,6 +65,18 @@ if ($op eq 'clear-vpn-ipsec-process') {
           # Check if nhrp configuration exists, exit code
           # As 'restart vpn' doesn't load nhrp configuration T3846
           if (system('cli-shell-api existsActive protocols nhrp') == 0) {
+              # Set a small timeout for waiting for charon will be loaded
+              # 0 => process not found, 1 => process found
+              my $timeout = 7;
+              if (system("pgrep charon | wc -l" eq 0)) {
+                  while ($timeout >= 1){
+                    sleep(1);
+                    if (system("pgrep charon | wc -l" eq 1)){
+                      last;
+                    }
+                    $timeout--;
+                  }
+              }
               system 'sudo swanctl --load-all';
           }
   } else {
