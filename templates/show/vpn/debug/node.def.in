@@ -3,7 +3,7 @@ run: if [ -n "$(cli-shell-api returnActiveValues \
                   vpn ipsec ipsec-interfaces interface)" ]; then
        if pgrep charon > /dev/null
        then
-        @SUDOUSRDIR@/vyatta-vpn-op.pl --op=show-vpn-debug
+        sudo ${vyos_op_scripts_dir}/vpn_ipsec.py --action="vpn-debug"
        else
          echo IPsec process not running
        fi
