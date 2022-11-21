@@ -1,0 +1,6 @@
+help: Show VPN connections
+run: if pgrep charon >&/dev/null; then
+        sudo ${vyos_op_scripts_dir}/show_ipsec_connections.py
+     else
+        echo -e "IPSec Process NOT Running\n"
+     fi
